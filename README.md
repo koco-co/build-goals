@@ -32,8 +32,9 @@
 | ---------------------------------------------- | ------------------------------------------- | ---------------------------------------- | ------------------- |
 | [`building-skills`](skills/building-skills/)   | 从零构建或系统升级高质量 Agent Skill        | `/awesome-agent-skills:building-skills`  | `$building-skills`  |
 | [`building-plugins`](skills/building-plugins/) | 构建、升级或迁移 Claude Code / Codex Plugin | `/awesome-agent-skills:building-plugins` | `$building-plugins` |
+| [`grill-me`](skills/grill-me/)                 | 通过逐项访谈完善计划、设计或决策            | `/awesome-agent-skills:grill-me`         | `$grill-me`         |
 
-两个 Skill 都采用**仅限用户显式调用**的策略。普通提示词润色、一般编码或文档任务不会自动进入这些工作流。
+三个 Skill 都采用**仅限用户显式调用**的策略。普通提示词润色、一般编码或文档任务不会自动进入这些工作流。
 
 ## 核心原则
 
@@ -63,7 +64,8 @@ awesome-agent-skills/
 │   └── install_skill.py
 ├── skills/
 │   ├── building-skills/
-│   └── building-plugins/
+│   ├── building-plugins/
+│   └── grill-me/
 └── tests/
 ```
 
@@ -84,6 +86,7 @@ claude --plugin-dir .
 ```text
 /awesome-agent-skills:building-skills
 /awesome-agent-skills:building-plugins
+/awesome-agent-skills:grill-me
 ```
 
 修改 Plugin 后执行：
@@ -110,6 +113,7 @@ codex plugin marketplace list
 ```text
 $building-skills
 $building-plugins
+$grill-me
 ```
 
 仓库内的 `.agents/plugins/marketplace.json` 指向仓库根目录的 Plugin。
@@ -134,7 +138,7 @@ python3 scripts/install_skill.py building-skills \
   --scope user
 ```
 
-将 `building-skills` 替换为 `building-plugins` 即可安装另一个 Skill。目标目录已存在时默认拒绝覆盖；明确确认后添加 `--force`。
+将 `building-skills` 替换为 `building-plugins` 或 `grill-me` 即可安装另一个 Skill。目标目录已存在时默认拒绝覆盖；明确确认后添加 `--force`。
 
 ## 验证
 

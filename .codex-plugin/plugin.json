@@ -1,6 +1,6 @@
 {
   "name": "awesome-agent-skills",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "A curated, verifiable collection of skills for building Agent Skills and plugins.",
   "author": {
     "name": "koco-co",
@@ -20,7 +20,8 @@
     "websiteURL": "https://github.com/koco-co/awesome-agent-skills",
     "defaultPrompt": [
       "Use building-skills to create or improve an Agent Skill.",
-      "Use building-plugins to create or improve a Claude Code and Codex plugin."
+      "Use building-plugins to create or improve a Claude Code and Codex plugin.",
+      "Use grill-me to stress-test a plan or decision one question at a time."
     ],
     "brandColor": "#111827"
   }

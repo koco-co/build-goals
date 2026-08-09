@@ -1,4 +1,3 @@
-
 ---
 name: building-plugins
 description: 由用户显式调用的 Agent Plugin 构建、升级与迁移工作流。用于创建、改造 Claude Code、Codex 等Agent Plugin，组织 Skills、Agents、Hooks、MCP、UI 与发布配置；Plugin 中的新建或升级 Skill 必须遵循 building-skills 的同一规范。
