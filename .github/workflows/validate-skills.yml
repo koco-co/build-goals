@@ -1,4 +1,4 @@
-name: Validate Skills
+name: Validate Plugin
 
 on:
   push:
@@ -19,11 +19,11 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Validate building-skills
+      - name: Validate dual-platform plugin
         run: |
-          python3 skills/building-skills/scripts/validate_skill.py \
-            skills/building-skills \
-            --profile portable \
+          python3 skills/building-plugins/scripts/validate_plugin.py \
+            . \
+            --platform dual \
             --strict
 
       - name: Run tests
