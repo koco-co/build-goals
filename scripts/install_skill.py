@@ -22,6 +22,7 @@ from typing import Optional
 
 NAME_PATTERN = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 CLAUDE_ONLY_FIELDS = {
+    "argument-hint",
     "disable-model-invocation",
 }
 

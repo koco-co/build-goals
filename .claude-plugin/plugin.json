@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "awesome-agent-skills",
   "displayName": "Awesome Agent Skills",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Build and maintain high-quality Agent Skills and Claude Code or Codex plugins.",
   "author": {
     "name": "koco-co",

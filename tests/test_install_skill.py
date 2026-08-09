@@ -92,6 +92,17 @@ class InstallSkillTests(unittest.TestCase):
                 destination.joinpath("scripts", "validate_skill.py").is_file()
             )
 
+    def test_handoff_codex_install_strips_claude_only_fields(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            home = Path(temp)
+            result = self.run_installer(home, "codex", "handoff")
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+            destination = home / ".agents" / "skills" / "handoff"
+            skill_md = destination.joinpath("SKILL.md").read_text(encoding="utf-8")
+            self.assertNotIn("argument-hint:", skill_md)
+            self.assertNotIn("disable-model-invocation:", skill_md)
+
     def test_dry_run_does_not_create_target_directories(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
             home = Path(temp) / "new-home"

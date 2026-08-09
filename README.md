@@ -33,8 +33,9 @@
 | [`building-skills`](skills/building-skills/)   | 从零构建或系统升级高质量 Agent Skill        | `/awesome-agent-skills:building-skills`  | `$building-skills`  |
 | [`building-plugins`](skills/building-plugins/) | 构建、升级或迁移 Claude Code / Codex Plugin | `/awesome-agent-skills:building-plugins` | `$building-plugins` |
 | [`grill-me`](skills/grill-me/)                 | 通过逐项访谈完善计划、设计或决策            | `/awesome-agent-skills:grill-me`         | `$grill-me`         |
+| [`handoff`](skills/handoff/)                   | 将当前会话整理为供下一位 Agent 接续的文档   | `/awesome-agent-skills:handoff`          | `$handoff`          |
 
-三个 Skill 都采用**仅限用户显式调用**的策略。普通提示词润色、一般编码或文档任务不会自动进入这些工作流。
+四个 Skill 都采用**仅限用户显式调用**的策略。普通提示词润色、一般编码或文档任务不会自动进入这些工作流。
 
 ## 核心原则
 
@@ -65,7 +66,8 @@ awesome-agent-skills/
 ├── skills/
 │   ├── building-skills/
 │   ├── building-plugins/
-│   └── grill-me/
+│   ├── grill-me/
+│   └── handoff/
 └── tests/
 ```
 
@@ -87,6 +89,7 @@ claude --plugin-dir .
 /awesome-agent-skills:building-skills
 /awesome-agent-skills:building-plugins
 /awesome-agent-skills:grill-me
+/awesome-agent-skills:handoff
 ```
 
 修改 Plugin 后执行：
@@ -114,6 +117,7 @@ codex plugin marketplace list
 $building-skills
 $building-plugins
 $grill-me
+$handoff
 ```
 
 仓库内的 `.agents/plugins/marketplace.json` 指向仓库根目录的 Plugin。
@@ -138,7 +142,7 @@ python3 scripts/install_skill.py building-skills \
   --scope user
 ```
 
-将 `building-skills` 替换为 `building-plugins` 或 `grill-me` 即可安装另一个 Skill。目标目录已存在时默认拒绝覆盖；明确确认后添加 `--force`。
+将 `building-skills` 替换为 `building-plugins`、`grill-me` 或 `handoff` 即可安装另一个 Skill。目标目录已存在时默认拒绝覆盖；明确确认后添加 `--force`。
 
 ## 验证
 

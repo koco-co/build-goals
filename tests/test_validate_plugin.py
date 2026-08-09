@@ -101,6 +101,7 @@ class ValidatePluginTests(unittest.TestCase):
         self.assertIn("skills/building-skills", result.stdout)
         self.assertIn("skills/building-plugins", result.stdout)
         self.assertIn("skills/grill-me", result.stdout)
+        self.assertIn("skills/handoff", result.stdout)
 
     def test_dual_version_mismatch_fails(self) -> None:
         with tempfile.TemporaryDirectory() as temp:

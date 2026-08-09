@@ -1,6 +1,6 @@
 {
   "name": "awesome-agent-skills",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "A curated, verifiable collection of skills for building Agent Skills and plugins.",
   "author": {
     "name": "koco-co",
@@ -21,7 +21,8 @@
     "defaultPrompt": [
       "Use building-skills to create or improve an Agent Skill.",
       "Use building-plugins to create or improve a Claude Code and Codex plugin.",
-      "Use grill-me to stress-test a plan or decision one question at a time."
+      "Use grill-me to stress-test a plan or decision one question at a time.",
+      "Use handoff to turn the current conversation into a handoff document for the next agent."
     ],
     "brandColor": "#111827"
   }
