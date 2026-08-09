@@ -1,6 +1,6 @@
 ---
 name: building-skills
-description: 由用户显式调用的 Agent Skill 构建与升级工作流。用于从零设计、实现和验证通用 Skill 或项目级定制 Skill，也用于审查并重构已有低质量 Skill；当前适配 Claude Code 与 Codex。不要因普通提示词润色、文档编写或一般编码请求自动进入本 Skill。
+description: 从零设计、实现和验证通用 Skill 或项目级定制 Skill，也用于审查并重构已有低质量 Skill。
 compatibility: 当前适配 Claude Code 与 Codex；运行内置机械校验需要 Python 3.9 或更高版本。
 disable-model-invocation: true
 metadata:

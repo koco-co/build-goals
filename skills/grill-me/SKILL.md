@@ -1,15 +1,16 @@
 ---
 name: grill-me
-description: 由用户显式调用的需求澄清工作流。用于逐项质询并完善计划、设计、决策或想法，沿决策树一次解决一个问题，直到与用户达成共同理解。
+description: 逐项拷问并完善计划、设计、决策或想法，沿决策树一次解决一个问题，直到与用户达成共同理解。
 compatibility: 当前适配 Claude Code 与 Codex。
 disable-model-invocation: true
 metadata:
   author: koco-co
   version: "1.0.0"
 ---
+
 # Outcome
 
-通过不留情面的逐项拷问，全量检验并完善用户的计划、设计、决策或想法，直到双达成共同理解。
+通过不留情面的逐项拷问，全量检验并完善用户的计划、设计、决策或想法，直到达成共同理解。
 
 ## Routing
 

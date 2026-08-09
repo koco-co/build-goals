@@ -1,6 +1,6 @@
 ---
 name: handoff
-description: 由用户显式调用的会话交接工作流。用于将当前对话压缩为供下一位 agent 交接的精简文档。
+description: 将当前对话压缩为供新 agent 交接的精简文档。
 argument-hint: "下一次会话将用于什么？"
 compatibility: 当前适配 Claude Code 与 Codex。
 disable-model-invocation: true
