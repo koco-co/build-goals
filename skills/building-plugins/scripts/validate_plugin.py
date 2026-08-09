@@ -87,9 +87,13 @@ def add_issue(
     issues.append(Issue(severity, code, display_path(path, root), message))
 
 
-def load_json(path: Path, plugin_root: Path, issues: List[Issue]) -> Optional[Mapping[str, object]]:
+def load_json(
+    path: Path, plugin_root: Path, issues: List[Issue]
+) -> Optional[Mapping[str, object]]:
     if not path.is_file():
-        add_issue(issues, "error", "MANIFEST_REQUIRED", path, "缺少 Manifest。", plugin_root)
+        add_issue(
+            issues, "error", "MANIFEST_REQUIRED", path, "缺少 Manifest。", plugin_root
+        )
         return None
 
     try:
@@ -701,7 +705,9 @@ def validate_plugin(plugin_dir: Path, platform: str = "dual") -> Report:
 
 def print_human(report: Report) -> None:
     for issue in report.issues:
-        print(f"{issue.severity.upper():7} {issue.code:32} {issue.path}: {issue.message}")
+        print(
+            f"{issue.severity.upper():7} {issue.code:32} {issue.path}: {issue.message}"
+        )
 
     if report.skills_checked:
         print("SKILLS: " + ", ".join(report.skills_checked))

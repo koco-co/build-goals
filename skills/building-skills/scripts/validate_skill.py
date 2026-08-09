@@ -108,7 +108,9 @@ def parse_frontmatter(text: str) -> Tuple[Mapping[str, Scalar], int, Optional[st
         return {}, 0, "缺少起始 Frontmatter 分隔符。"
 
     try:
-        closing = next(index for index in range(1, len(lines)) if lines[index].strip() == "---")
+        closing = next(
+            index for index in range(1, len(lines)) if lines[index].strip() == "---"
+        )
     except StopIteration:
         return {}, 0, "缺少结束 Frontmatter 分隔符。"
 
@@ -176,10 +178,9 @@ def discover_plugin_root(skill_dir: Path) -> Path:
     """Return the nearest ancestor containing a Claude or Codex plugin manifest."""
     current = skill_dir.resolve()
     for candidate in (current, *current.parents):
-        if (
-            (candidate / ".claude-plugin" / "plugin.json").is_file()
-            or (candidate / ".codex-plugin" / "plugin.json").is_file()
-        ):
+        if (candidate / ".claude-plugin" / "plugin.json").is_file() or (
+            candidate / ".codex-plugin" / "plugin.json"
+        ).is_file():
             return candidate
     return current
 
@@ -227,7 +228,9 @@ def validate_frontmatter(
 
     name = data.get("name")
     if not isinstance(name, str) or not name.strip():
-        add_issue(issues, "error", "NAME_REQUIRED", skill_md, "缺少非空 name。", skill_dir)
+        add_issue(
+            issues, "error", "NAME_REQUIRED", skill_md, "缺少非空 name。", skill_dir
+        )
     else:
         if len(name) > 64 or not NAME_RE.fullmatch(name):
             add_issue(
@@ -292,10 +295,15 @@ def validate_frontmatter(
             )
 
 
-def validate_headings(text: str, skill_dir: Path, skill_md: Path, issues: List[Issue]) -> None:
+def validate_headings(
+    text: str, skill_dir: Path, skill_md: Path, issues: List[Issue]
+) -> None:
     positions: List[int] = []
     for heading in REQUIRED_HEADINGS:
-        matches = [match.start() for match in re.finditer(rf"(?m)^{re.escape(heading)}\s*$", text)]
+        matches = [
+            match.start()
+            for match in re.finditer(rf"(?m)^{re.escape(heading)}\s*$", text)
+        ]
         if not matches:
             add_issue(
                 issues,
@@ -407,7 +415,9 @@ def validate_references(
             )
 
 
-def validate_workflows(skill_dir: Path, skill_md_text: str, issues: List[Issue]) -> None:
+def validate_workflows(
+    skill_dir: Path, skill_md_text: str, issues: List[Issue]
+) -> None:
     workflow_dir = skill_dir / "workflows"
     if not workflow_dir.exists():
         return
@@ -462,7 +472,9 @@ def validate_workflows(skill_dir: Path, skill_md_text: str, issues: List[Issue])
         )
 
 
-def validate_symlink(path: Path, skill_dir: Path, plugin_root: Path, issues: List[Issue]) -> None:
+def validate_symlink(
+    path: Path, skill_dir: Path, plugin_root: Path, issues: List[Issue]
+) -> None:
     try:
         target = os.readlink(path)
     except OSError as exc:
@@ -688,11 +700,15 @@ def validate_skill(
     issues: List[Issue] = []
 
     if not skill_dir.is_dir():
-        issues.append(Issue("error", "SKILL_DIR", str(skill_dir), "Skill 目录不存在或不是目录。"))
+        issues.append(
+            Issue("error", "SKILL_DIR", str(skill_dir), "Skill 目录不存在或不是目录。")
+        )
         return Report(str(skill_dir), profile, issues)
 
     effective_plugin_root = (
-        plugin_root.expanduser().resolve() if plugin_root else discover_plugin_root(skill_dir)
+        plugin_root.expanduser().resolve()
+        if plugin_root
+        else discover_plugin_root(skill_dir)
     )
     if not is_within(skill_dir, effective_plugin_root):
         issues.append(
@@ -736,7 +752,9 @@ def validate_skill(
 
     frontmatter, _closing, parse_error = parse_frontmatter(text)
     if parse_error:
-        add_issue(issues, "error", "FRONTMATTER_PARSE", skill_md, parse_error, skill_dir)
+        add_issue(
+            issues, "error", "FRONTMATTER_PARSE", skill_md, parse_error, skill_dir
+        )
         frontmatter = {}
     else:
         validate_frontmatter(
@@ -758,7 +776,9 @@ def validate_skill(
 
 def print_human(report: Report) -> None:
     for issue in report.issues:
-        print(f"{issue.severity.upper():7} {issue.code:28} {issue.path}: {issue.message}")
+        print(
+            f"{issue.severity.upper():7} {issue.code:28} {issue.path}: {issue.message}"
+        )
 
     if report.errors:
         print(
@@ -766,7 +786,9 @@ def print_human(report: Report) -> None:
             f"{len(report.warnings)} warning(s) — {report.skill_dir}"
         )
     else:
-        print(f"PASS: 0 error(s), {len(report.warnings)} warning(s) — {report.skill_dir}")
+        print(
+            f"PASS: 0 error(s), {len(report.warnings)} warning(s) — {report.skill_dir}"
+        )
 
 
 def build_parser() -> argparse.ArgumentParser:

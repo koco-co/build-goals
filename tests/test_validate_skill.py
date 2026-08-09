@@ -87,10 +87,10 @@ class ValidateSkillTests(unittest.TestCase):
         adapter.parent.mkdir(parents=True)
         adapter.write_text(
             (
-                'interface:\n'
+                "interface:\n"
                 '  display_name: "Fixture"\n'
-                'policy:\n'
-                f'  allow_implicit_invocation: {implicit}\n'
+                "policy:\n"
+                f"  allow_implicit_invocation: {implicit}\n"
             ),
             encoding="utf-8",
         )
@@ -180,7 +180,9 @@ class ValidateSkillTests(unittest.TestCase):
             skill_dir = self.write_skill(Path(temp), "prompt-skill")
             prompts = skill_dir / "prompts"
             prompts.mkdir()
-            prompts.joinpath("reviewer.prompt.md").write_text("review", encoding="utf-8")
+            prompts.joinpath("reviewer.prompt.md").write_text(
+                "review", encoding="utf-8"
+            )
             result = self.run_validator(skill_dir)
             self.assertEqual(result.returncode, 1)
             self.assertIn("AGENT_PROMPT_NAME", result.stdout)
@@ -223,9 +225,7 @@ class ValidateSkillTests(unittest.TestCase):
             skill_dir = self.write_skill(plugin_root / "skills", "linked-skill")
             rules = skill_dir / "rules"
             rules.mkdir()
-            (rules / "outside.md").symlink_to(
-                os.path.relpath(outside, rules)
-            )
+            (rules / "outside.md").symlink_to(os.path.relpath(outside, rules))
 
             result = self.run_validator(skill_dir, "portable", plugin_root)
             self.assertEqual(result.returncode, 1)

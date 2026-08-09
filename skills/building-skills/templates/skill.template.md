@@ -1,9 +1,9 @@
 ---
-name: {{skill-name}}
-description: {{核心能力、适用场景、独立触发分支，以及不应触发的相邻任务}}
-compatibility: {{可选；仅描述必要环境、目标平台或依赖，不填写空值}}
+name: { { skill-name } }
+description: { { 核心能力、适用场景、独立触发分支，以及不应触发的相邻任务 } }
+compatibility: { { 可选；仅描述必要环境、目标平台或依赖，不填写空值 } }
 metadata:
-  author: {{author}}
+  author: { { author } }
   version: "{{version}}"
 ---
 

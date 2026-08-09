@@ -36,4 +36,4 @@ my-plugin/
 python3 skills/building-plugins/scripts/validate_plugin.py . --platform dual --strict
 ```
 
-真实客户端验证分别记录，不用一端结果替代另一端。
+真实客户端验证分别记录，不得用一端结果替代另一端。

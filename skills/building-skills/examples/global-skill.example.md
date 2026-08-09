@@ -49,12 +49,12 @@ api-contract-review/
 
 ## 按需读取
 
-| 条件 | 读取或执行 |
-| --- | --- |
-| 收到契约文件 | `workflows/§01-inventory.md` |
-| 开始审查 | `rules/contract-rules.md`、`scripts/validate_contract.py` |
-| 生成报告 | `templates/review.template.md`、`examples/review.example.md` |
-| 完成交付前 | `checklists/semantic-review.md` |
+| 条件         | 读取或执行                                                   |
+| ------------ | ------------------------------------------------------------ |
+| 收到契约文件 | `workflows/§01-inventory.md`                                 |
+| 开始审查     | `rules/contract-rules.md`、`scripts/validate_contract.py`    |
+| 生成报告     | `templates/review.template.md`、`examples/review.example.md` |
+| 完成交付前   | `checklists/semantic-review.md`                              |
 
 ## 验收场景
 

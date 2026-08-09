@@ -34,7 +34,9 @@ def _frontmatter_bounds(lines: list[str]) -> tuple[int, int]:
     if not lines or lines[0].strip() != "---":
         raise InstallError("SKILL.md 缺少起始 Frontmatter 分隔符。")
     try:
-        closing = next(index for index in range(1, len(lines)) if lines[index].strip() == "---")
+        closing = next(
+            index for index in range(1, len(lines)) if lines[index].strip() == "---"
+        )
     except StopIteration as exc:
         raise InstallError("SKILL.md 缺少结束 Frontmatter 分隔符。") from exc
     return 0, closing
@@ -145,7 +147,9 @@ def install_skill(
 
     repo_root = repo_root.expanduser().resolve()
     source = repo_root / "skills" / skill_name
-    validator = repo_root / "skills" / "building-skills" / "scripts" / "validate_skill.py"
+    validator = (
+        repo_root / "skills" / "building-skills" / "scripts" / "validate_skill.py"
+    )
 
     if scope == "project":
         project_root = (project_dir or Path.cwd()).expanduser().resolve()
@@ -215,9 +219,7 @@ def install_skill(
 
         backup: Optional[Path] = None
         if destination.exists():
-            backup = destination.with_name(
-                f".{destination.name}.backup-{os.getpid()}"
-            )
+            backup = destination.with_name(f".{destination.name}.backup-{os.getpid()}")
             if backup.exists():
                 shutil.rmtree(backup)
             destination.replace(backup)
