@@ -1,0 +1,1 @@
+../../building-skills/templates/skill.template.md

@@ -1,101 +1,129 @@
+<div align="center">
+
 # Awesome Agent Skills
 
-这是一个个人维护的通用 Agent Skills 仓库，用于沉淀可复用、可验证，并能同时适配 Claude Code 与 Codex 的 Skills。
+**面向 Claude Code 与 Codex 的高质量 Agent Skills / Plugin 构建仓库**
 
-当前已收录：
+[![Claude Code](https://img.shields.io/badge/Claude_Code-Plugin-D97757?logo=anthropic&logoColor=white)](https://code.claude.com/docs/en/plugins)
+[![Codex](https://img.shields.io/badge/Codex-Plugin-000000?logo=openai&logoColor=white)](https://developers.openai.com/plugins/)
+[![Agent Skills](https://img.shields.io/badge/Agent_Skills-Compatible-2563EB)](https://agentskills.io/)
+[![Validate Plugin](https://github.com/koco-co/awesome-agent-skills/actions/workflows/validate-skills.yml/badge.svg)](https://github.com/koco-co/awesome-agent-skills/actions/workflows/validate-skills.yml)
+[![Python](https://img.shields.io/badge/Python-3.9%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![License](https://img.shields.io/badge/License-Not_declared-lightgrey)](#license)
 
-| Skill | 用途 | 调用方式 |
-| --- | --- | --- |
-| `building-skills` | 从零构建或系统升级高质量 Agent Skill | 仅限用户显式调用 |
+</div>
 
-## 设计原则
+---
 
-- **单一规范源**：核心工作流只维护一份，不复制 Claude Code 与 Codex 两套正文。
-- **先设计，后实施**：调研、澄清和目录设计完成，并经用户确认后，才能修改目标文件。
-- **确定性优先**：优先复用 CLI 和脚本，其次使用模板、Few-shot 示例、规则与提示词。
-- **渐进式读取**：`SKILL.md` 只保留路由和主流程，复杂细节按条件读取。
-- **可验证交付**：机械检查、语义验收和真实场景验证彼此分离。
-- **平台差异隔离**：开放规范保留在源文件中，平台专属配置由适配文件或安装过程处理。
+## 简介
+
+`awesome-agent-skills` 是一个个人维护、持续演进的 Agent 能力仓库。它既是一个可以直接加载的双平台 Plugin，也保留了单个 Skill 的独立安装方式。
+
+当前只适配：
+
+- **Claude Code**
+- **Codex**
+
+其他 Coding Agent 尚未声明兼容，后续根据平台能力和实际需求逐步接入。
+
+## 已收录能力
+
+| Skill | 作用 | Claude Code | Codex |
+| --- | --- | --- | --- |
+| [`building-skills`](skills/building-skills/) | 从零构建或系统升级高质量 Agent Skill | `/awesome-agent-skills:building-skills` | `$building-skills` |
+| [`building-plugins`](skills/building-plugins/) | 构建、升级或迁移 Claude Code / Codex Plugin | `/awesome-agent-skills:building-plugins` | `$building-plugins` |
+
+两个 Skill 都采用**仅限用户显式调用**的策略。普通提示词润色、一般编码或文档任务不会自动进入这些工作流。
+
+## 核心原则
+
+- **先查明，再设计**：先读取需求、仓库与平台约定，再提出方案。
+- **确认后实施**：用户确认目录、边界和验收标准前，不修改目标文件。
+- **单一规范源**：共享能力使用仓库内相对软链接，不复制多份相同文件。
+- **确定性优先**：已有 CLI → 脚本 → 模板 → Few-shot → 规则 → 提示词。
+- **渐进式读取**：主 `SKILL.md` 只保留路由和主流程，复杂内容按需读取。
+- **验证可复现**：机械检查、语义验收与真实平台测试分别记录。
+- **平台差异隔离**：Claude Code 与 Codex 的 Manifest、调用策略和平台扩展分别配置。
 
 ## 仓库结构
 
 ```text
 awesome-agent-skills/
-├── .github/workflows/validate-skills.yml
-├── scripts/install_skill.py
+├── .agents/
+│   └── plugins/
+│       └── marketplace.json
+├── .claude-plugin/
+│   └── plugin.json
+├── .codex-plugin/
+│   └── plugin.json
+├── .github/
+│   └── workflows/
+│       └── validate-skills.yml
+├── scripts/
+│   └── install_skill.py
 ├── skills/
-│   └── building-skills/
-│       ├── SKILL.md
-│       ├── agents/openai.yaml
-│       ├── workflows/
-│       ├── templates/
-│       ├── examples/
-│       ├── rules/
-│       ├── scripts/
-│       ├── checklists/
-│       └── prompts/
+│   ├── building-skills/
+│   └── building-plugins/
 └── tests/
 ```
 
-## 安装 `building-skills`
+`building-plugins` 中复用的 Skill 模板、质量规则、校验器、检查清单和 Reviewer Agent 均通过相对软链接指向 `building-skills`。所有链接必须解析在当前 Plugin 根目录内；CI 会拒绝绝对链接、失效链接和越界链接。
 
-安装脚本只使用 Python 标准库，建议使用 Python 3.9 或更高版本。
+## 快速开始
 
-### Codex：用户级安装
+### Claude Code：本地加载整个 Plugin
 
 ```bash
-python3 scripts/install_skill.py building-skills \
-  --platform codex \
-  --scope user
+git clone https://github.com/koco-co/awesome-agent-skills.git
+cd awesome-agent-skills
+claude --plugin-dir .
 ```
 
-安装位置：
+进入 Claude Code 后显式调用：
 
 ```text
-~/.agents/skills/building-skills
+/awesome-agent-skills:building-skills
+/awesome-agent-skills:building-plugins
 ```
 
-Codex 适配文件 `agents/openai.yaml` 已关闭隐式调用。安装后通过以下方式显式调用：
+修改 Plugin 后执行：
+
+```text
+/reload-plugins
+```
+
+可使用 Claude Code 官方命令补充平台侧检查：
+
+```bash
+claude plugin validate . --strict
+```
+
+### Codex：添加仓库 Marketplace
+
+```bash
+codex plugin marketplace add koco-co/awesome-agent-skills --ref main
+codex plugin marketplace list
+```
+
+随后在支持 Plugin 的 Codex / ChatGPT 界面中安装 `awesome-agent-skills`，并显式调用：
 
 ```text
 $building-skills
+$building-plugins
 ```
 
-### Claude Code：用户级安装
+仓库内的 `.agents/plugins/marketplace.json` 指向仓库根目录的 Plugin。
 
-```bash
-python3 scripts/install_skill.py building-skills \
-  --platform claude \
-  --scope user
-```
+## 独立安装单个 Skill
 
-安装位置：
-
-```text
-~/.claude/skills/building-skills
-```
-
-安装脚本会在安装副本的 Frontmatter 中注入：
-
-```yaml
-disable-model-invocation: true
-```
-
-安装后通过以下方式显式调用：
-
-```text
-/building-skills
-```
-
-### 项目级安装
+Plugin 是推荐分发方式。确实只需要一个 Skill 时，仍可使用兼容安装器。
 
 Codex：
 
 ```bash
 python3 scripts/install_skill.py building-skills \
   --platform codex \
-  --scope project \
-  --project-dir /path/to/project
+  --scope user
 ```
 
 Claude Code：
@@ -103,31 +131,58 @@ Claude Code：
 ```bash
 python3 scripts/install_skill.py building-skills \
   --platform claude \
-  --scope project \
-  --project-dir /path/to/project
+  --scope user
 ```
 
-目标目录已存在时，安装脚本默认拒绝覆盖。确认覆盖后显式添加 `--force`。
+将 `building-skills` 替换为 `building-plugins` 即可安装另一个 Skill。目标目录已存在时默认拒绝覆盖；明确确认后添加 `--force`。
 
 ## 验证
+
+验证整个双平台 Plugin：
+
+```bash
+python3 skills/building-plugins/scripts/validate_plugin.py \
+  . \
+  --platform dual \
+  --strict
+```
 
 验证单个 Skill：
 
 ```bash
 python3 skills/building-skills/scripts/validate_skill.py \
   skills/building-skills \
-  --profile portable \
+  --profile dual \
   --strict
 ```
 
 运行全部测试：
 
 ```bash
-python3 -m unittest discover -s tests -p 'test_*.py'
+python3 -m unittest discover -s tests -p 'test_*.py' -v
 ```
 
-持续集成会在每次 Push 和 Pull Request 中执行相同检查。
+GitHub Actions 会在 Push 和 Pull Request 中执行相同检查。
 
-## 当前范围
+## 文件命名约定
 
-本次只完成 `building-skills`。仓库尚未提前创建第二个 Skill 的目录或占位文件。
+| 目录 | 命名格式 |
+| --- | --- |
+| `workflows/` | `§NN-name.md` |
+| `templates/` | `<name>.template.<ext>` |
+| `examples/` | `<name>.example.<ext>` |
+| `prompts/` | `<name>.agent.md` |
+
+`prompts/` 存放发送给独立 Agent 或 Subagent 的角色提示；旧的 `*.prompt.md` 命名不再接受。
+
+## 平台支持状态
+
+| 平台 | Manifest | 静态校验 | 真实客户端验证 |
+| --- | --- | --- | --- |
+| Claude Code | `.claude-plugin/plugin.json` | 已接入 CI | 需在本地 Claude Code 完成 |
+| Codex | `.codex-plugin/plugin.json` | 已接入 CI | 需在支持 Plugin 的 Codex 客户端完成 |
+| 其他 Coding Agent | 暂无 | 暂无 | 暂无 |
+
+## License
+
+当前仓库尚未声明开源许可证。在许可证明确前，保留全部权利。

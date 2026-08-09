@@ -1,0 +1,20 @@
+{
+  "name": "awesome-agent-skills",
+  "interface": {
+    "displayName": "Awesome Agent Skills"
+  },
+  "plugins": [
+    {
+      "name": "awesome-agent-skills",
+      "source": {
+        "source": "local",
+        "path": "./"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

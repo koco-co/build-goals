@@ -12,14 +12,20 @@ INSTALLER = REPO_ROOT / "scripts" / "install_skill.py"
 
 
 class InstallSkillTests(unittest.TestCase):
-    def run_installer(self, home: Path, platform: str, *extra: str) -> subprocess.CompletedProcess[str]:
+    def run_installer(
+        self,
+        home: Path,
+        platform: str,
+        skill: str = "building-skills",
+        *extra: str,
+    ) -> subprocess.CompletedProcess[str]:
         env = os.environ.copy()
         env["HOME"] = str(home)
         return subprocess.run(
             [
                 sys.executable,
                 str(INSTALLER),
-                "building-skills",
+                skill,
                 "--platform",
                 platform,
                 "--scope",
@@ -33,7 +39,7 @@ class InstallSkillTests(unittest.TestCase):
             capture_output=True,
         )
 
-    def test_codex_install_preserves_portable_frontmatter_and_adapter(self) -> None:
+    def test_codex_install_strips_claude_field_and_keeps_adapter(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
             home = Path(temp)
             result = self.run_installer(home, "codex")
@@ -45,10 +51,12 @@ class InstallSkillTests(unittest.TestCase):
             self.assertTrue(destination.joinpath("agents", "openai.yaml").is_file())
             self.assertIn(
                 "allow_implicit_invocation: false",
-                destination.joinpath("agents", "openai.yaml").read_text(encoding="utf-8"),
+                destination.joinpath("agents", "openai.yaml").read_text(
+                    encoding="utf-8"
+                ),
             )
 
-    def test_claude_install_injects_manual_only_field(self) -> None:
+    def test_claude_install_keeps_manual_only_field(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
             home = Path(temp)
             result = self.run_installer(home, "claude")
@@ -63,13 +71,36 @@ class InstallSkillTests(unittest.TestCase):
             self.assertEqual(second.returncode, 1)
             self.assertIn("--force", second.stderr)
 
-            forced = self.run_installer(home, "claude", "--force")
+            forced = self.run_installer(home, "claude", "building-skills", "--force")
             self.assertEqual(forced.returncode, 0, forced.stdout + forced.stderr)
+
+    def test_building_plugins_install_materializes_shared_files(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            home = Path(temp)
+            result = self.run_installer(
+                home,
+                "codex",
+                "building-plugins",
+            )
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+            destination = home / ".agents" / "skills" / "building-plugins"
+            shared = destination / "prompts" / "reviewer.agent.md"
+            self.assertTrue(shared.is_file())
+            self.assertFalse(shared.is_symlink())
+            self.assertTrue(
+                destination.joinpath("scripts", "validate_skill.py").is_file()
+            )
 
     def test_dry_run_does_not_create_target_directories(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
             home = Path(temp) / "new-home"
-            result = self.run_installer(home, "codex", "--dry-run")
+            result = self.run_installer(
+                home,
+                "codex",
+                "building-skills",
+                "--dry-run",
+            )
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
             self.assertFalse(home.exists())
 

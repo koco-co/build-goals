@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
-"""Deterministic structural validator for Agent Skills.
+"""Dependency-free structural validator for Agent Skills.
 
-This validator intentionally implements a conservative subset of YAML parsing so
-it can run with Python's standard library only. It validates the portable Agent
-Skills fields and a small, explicit set of Claude Code extensions.
+The validator supports portable, Claude Code, Codex, and dual-platform source
+profiles. Relative symlinks are allowed only when their resolved targets remain
+inside the containing Plugin root.
 """
 
 from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import sys
 from dataclasses import asdict, dataclass
@@ -56,7 +57,7 @@ LOCAL_REFERENCE_RE = re.compile(
 )
 MARKDOWN_LINK_RE = re.compile(r"\[[^\]]*\]\(([^)]+)\)")
 WORKFLOW_RE = re.compile(r"^§(\d{2})-[^/]+\.md$")
-
+AGENT_PROMPT_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*\.agent\.md$")
 Scalar = Union[str, Dict[str, str]]
 
 
@@ -101,7 +102,7 @@ def unquote(value: str) -> str:
 
 
 def parse_frontmatter(text: str) -> Tuple[Mapping[str, Scalar], int, Optional[str]]:
-    """Parse simple top-level scalars, nested maps, and block scalars."""
+    """Parse top-level scalars, nested maps, and block scalars without PyYAML."""
     lines = text.splitlines()
     if not lines or lines[0].strip() != "---":
         return {}, 0, "缺少起始 Frontmatter 分隔符。"
@@ -130,10 +131,13 @@ def parse_frontmatter(text: str) -> Tuple[Mapping[str, Scalar], int, Optional[st
             if value in {"|", ">", "|-", ">-", "|+", ">+"}:
                 block_lines: List[str] = []
                 index += 1
-                while index < closing and (not lines[index].strip() or lines[index].startswith((" ", "\t"))):
+                while index < closing and (
+                    not lines[index].strip() or lines[index].startswith((" ", "\t"))
+                ):
                     block_lines.append(lines[index].strip())
                     index += 1
-                data[key] = ("\n" if value.startswith("|") else " ").join(block_lines).strip()
+                separator = "\n" if value.startswith("|") else " "
+                data[key] = separator.join(block_lines).strip()
                 continue
 
             if value == "":
@@ -150,9 +154,6 @@ def parse_frontmatter(text: str) -> Tuple[Mapping[str, Scalar], int, Optional[st
                 nested_key, nested_value = nested_match.groups()
                 nested_map = data[current_parent]
                 assert isinstance(nested_map, dict)
-                # Preserve simple nested metadata while tolerating deeper YAML
-                # structures (lists/maps) that this dependency-free parser does
-                # not need to interpret.
                 if nested_value and nested_value.strip():
                     nested_map[nested_key] = unquote(nested_value.strip())
             index += 1
@@ -163,12 +164,42 @@ def parse_frontmatter(text: str) -> Tuple[Mapping[str, Scalar], int, Optional[st
     return data, closing, None
 
 
-def add_issue(issues: List[Issue], severity: str, code: str, path: Path, message: str, root: Path) -> None:
+def is_within(path: Path, root: Path) -> bool:
     try:
-        display_path = str(path.relative_to(root)) or "."
+        path.relative_to(root)
+        return True
     except ValueError:
-        display_path = str(path)
-    issues.append(Issue(severity, code, display_path, message))
+        return False
+
+
+def discover_plugin_root(skill_dir: Path) -> Path:
+    """Return the nearest ancestor containing a Claude or Codex plugin manifest."""
+    current = skill_dir.resolve()
+    for candidate in (current, *current.parents):
+        if (
+            (candidate / ".claude-plugin" / "plugin.json").is_file()
+            or (candidate / ".codex-plugin" / "plugin.json").is_file()
+        ):
+            return candidate
+    return current
+
+
+def display_path(path: Path, root: Path) -> str:
+    try:
+        return str(path.relative_to(root)) or "."
+    except ValueError:
+        return str(path)
+
+
+def add_issue(
+    issues: List[Issue],
+    severity: str,
+    code: str,
+    path: Path,
+    message: str,
+    root: Path,
+) -> None:
+    issues.append(Issue(severity, code, display_path(path, root), message))
 
 
 def validate_frontmatter(
@@ -180,7 +211,7 @@ def validate_frontmatter(
     issues: List[Issue],
 ) -> None:
     allowed = set(STANDARD_KEYS)
-    if profile == "claude":
+    if profile in {"claude", "dual"}:
         allowed.update(CLAUDE_EXTENSION_KEYS)
 
     for key in data:
@@ -219,7 +250,14 @@ def validate_frontmatter(
 
     description = data.get("description")
     if not isinstance(description, str) or not description.strip():
-        add_issue(issues, "error", "DESCRIPTION_REQUIRED", skill_md, "缺少非空 description。", skill_dir)
+        add_issue(
+            issues,
+            "error",
+            "DESCRIPTION_REQUIRED",
+            skill_md,
+            "缺少非空 description。",
+            skill_dir,
+        )
     elif len(description) > 1024:
         add_issue(
             issues,
@@ -241,7 +279,7 @@ def validate_frontmatter(
             skill_dir,
         )
 
-    if profile == "claude":
+    if profile in {"claude", "dual"}:
         manual = data.get("disable-model-invocation")
         if manual is not None and str(manual).lower() not in {"true", "false"}:
             add_issue(
@@ -307,26 +345,58 @@ def iter_local_references(text: str) -> Iterable[str]:
             yield reference
 
 
-def validate_references(text: str, skill_dir: Path, skill_md: Path, issues: List[Issue]) -> None:
-    root = skill_dir.resolve()
+def validate_references(
+    text: str,
+    skill_dir: Path,
+    skill_md: Path,
+    plugin_root: Path,
+    issues: List[Issue],
+) -> None:
+    lexical_root = skill_dir.absolute()
+    resolved_plugin_root = plugin_root.resolve()
+
     for reference in iter_local_references(text):
         normalized = reference.split("#", 1)[0]
         if not normalized:
             continue
-        candidate = (skill_dir / normalized).resolve()
-        try:
-            candidate.relative_to(root)
-        except ValueError:
+
+        lexical_candidate = Path(os.path.abspath(skill_dir / normalized))
+        if not is_within(lexical_candidate, lexical_root):
             add_issue(
                 issues,
                 "error",
                 "REF_OUTSIDE_SKILL",
                 skill_md,
-                f"引用越过 Skill 根目录：{reference}",
+                f"引用路径越过 Skill 根目录：{reference}",
                 skill_dir,
             )
             continue
-        if not candidate.exists():
+
+        try:
+            resolved = (skill_dir / normalized).resolve(strict=False)
+        except (OSError, RuntimeError) as exc:
+            add_issue(
+                issues,
+                "error",
+                "REF_RESOLVE",
+                skill_md,
+                f"无法解析引用 {reference}：{exc}",
+                skill_dir,
+            )
+            continue
+
+        if not is_within(resolved, resolved_plugin_root):
+            add_issue(
+                issues,
+                "error",
+                "REF_OUTSIDE_PLUGIN",
+                skill_md,
+                f"引用最终目标越过 Plugin 根目录：{reference}",
+                skill_dir,
+            )
+            continue
+
+        if not (skill_dir / normalized).exists():
             add_issue(
                 issues,
                 "error",
@@ -342,7 +412,14 @@ def validate_workflows(skill_dir: Path, skill_md_text: str, issues: List[Issue])
     if not workflow_dir.exists():
         return
     if not workflow_dir.is_dir():
-        add_issue(issues, "error", "WORKFLOW_NOT_DIR", workflow_dir, "workflows 必须是目录。", skill_dir)
+        add_issue(
+            issues,
+            "error",
+            "WORKFLOW_NOT_DIR",
+            workflow_dir,
+            "workflows 必须是目录。",
+            skill_dir,
+        )
         return
 
     numbered: List[Tuple[int, Path]] = []
@@ -385,11 +462,75 @@ def validate_workflows(skill_dir: Path, skill_md_text: str, issues: List[Issue])
         )
 
 
-def validate_directory_conventions(skill_dir: Path, issues: List[Issue]) -> None:
+def validate_symlink(path: Path, skill_dir: Path, plugin_root: Path, issues: List[Issue]) -> None:
+    try:
+        target = os.readlink(path)
+    except OSError as exc:
+        add_issue(
+            issues,
+            "error",
+            "SYMLINK_READ",
+            path,
+            f"无法读取软链接：{exc}",
+            skill_dir,
+        )
+        return
+
+    if Path(target).is_absolute():
+        add_issue(
+            issues,
+            "error",
+            "SYMLINK_ABSOLUTE",
+            path,
+            "软链接必须使用相对路径。",
+            skill_dir,
+        )
+        return
+
+    try:
+        resolved = path.resolve(strict=False)
+    except (OSError, RuntimeError) as exc:
+        add_issue(
+            issues,
+            "error",
+            "SYMLINK_RESOLVE",
+            path,
+            f"无法解析软链接：{exc}",
+            skill_dir,
+        )
+        return
+
+    if not is_within(resolved, plugin_root.resolve()):
+        add_issue(
+            issues,
+            "error",
+            "SYMLINK_OUTSIDE_PLUGIN",
+            path,
+            f"软链接目标越过 Plugin 根目录：{target}",
+            skill_dir,
+        )
+        return
+
+    if not path.exists():
+        add_issue(
+            issues,
+            "error",
+            "SYMLINK_BROKEN",
+            path,
+            f"软链接目标不存在：{target}",
+            skill_dir,
+        )
+
+
+def validate_directory_conventions(
+    skill_dir: Path,
+    plugin_root: Path,
+    issues: List[Issue],
+) -> None:
     template_dir = skill_dir / "templates"
     if template_dir.is_dir():
         for path in template_dir.iterdir():
-            if path.is_file() and ".template." not in path.name:
+            if (path.is_file() or path.is_symlink()) and ".template." not in path.name:
                 add_issue(
                     issues,
                     "error",
@@ -402,7 +543,7 @@ def validate_directory_conventions(skill_dir: Path, issues: List[Issue]) -> None
     example_dir = skill_dir / "examples"
     if example_dir.is_dir():
         for path in example_dir.iterdir():
-            if path.is_file() and ".example." not in path.name:
+            if (path.is_file() or path.is_symlink()) and ".example." not in path.name:
                 add_issue(
                     issues,
                     "error",
@@ -412,40 +553,107 @@ def validate_directory_conventions(skill_dir: Path, issues: List[Issue]) -> None
                     skill_dir,
                 )
 
+    prompts_dir = skill_dir / "prompts"
+    if prompts_dir.is_dir():
+        for path in prompts_dir.iterdir():
+            if path.is_file() or path.is_symlink():
+                if not AGENT_PROMPT_RE.fullmatch(path.name):
+                    add_issue(
+                        issues,
+                        "error",
+                        "AGENT_PROMPT_NAME",
+                        path,
+                        "prompts/ 文件必须使用 <name>.agent.md 格式。",
+                        skill_dir,
+                    )
+
     for path in skill_dir.rglob("*"):
         if path.is_symlink():
-            add_issue(
-                issues,
-                "error",
-                "SYMLINK_FORBIDDEN",
-                path,
-                "Skill 中不允许符号链接，以免引用越界或安装结果不一致。",
-                skill_dir,
-            )
+            validate_symlink(path, skill_dir, plugin_root, issues)
             continue
+
         if path.is_file():
             try:
                 size = path.stat().st_size
             except OSError as exc:
-                add_issue(issues, "error", "FILE_STAT", path, f"无法读取文件信息：{exc}", skill_dir)
+                add_issue(
+                    issues,
+                    "error",
+                    "FILE_STAT",
+                    path,
+                    f"无法读取文件信息：{exc}",
+                    skill_dir,
+                )
                 continue
             if size == 0:
                 add_issue(issues, "error", "EMPTY_FILE", path, "文件为空。", skill_dir)
             if " " in path.name:
-                add_issue(issues, "warning", "FILENAME_SPACE", path, "文件名包含空格。", skill_dir)
+                add_issue(
+                    issues,
+                    "warning",
+                    "FILENAME_SPACE",
+                    path,
+                    "文件名包含空格。",
+                    skill_dir,
+                )
 
 
-def validate_openai_adapter(skill_dir: Path, issues: List[Issue]) -> None:
+def read_openai_policy(adapter: Path) -> Optional[str]:
+    if not adapter.exists():
+        return None
+    try:
+        text = adapter.read_text(encoding="utf-8")
+    except (OSError, UnicodeError):
+        return None
+    match = re.search(
+        r"(?m)^\s*allow_implicit_invocation\s*:\s*(\S+)\s*$",
+        text,
+    )
+    return match.group(1).lower() if match else None
+
+
+def validate_openai_adapter(
+    skill_dir: Path,
+    profile: str,
+    frontmatter: Mapping[str, Scalar],
+    issues: List[Issue],
+) -> None:
     adapter = skill_dir / "agents" / "openai.yaml"
     if not adapter.exists():
+        if (
+            profile == "dual"
+            and str(frontmatter.get("disable-model-invocation", "")).lower() == "true"
+        ):
+            add_issue(
+                issues,
+                "error",
+                "OPENAI_ADAPTER_REQUIRED",
+                adapter,
+                "双平台显式调用 Skill 必须提供 agents/openai.yaml。",
+                skill_dir,
+            )
         return
+
     try:
         text = adapter.read_text(encoding="utf-8")
     except (OSError, UnicodeError) as exc:
-        add_issue(issues, "error", "OPENAI_ADAPTER_READ", adapter, f"无法读取适配文件：{exc}", skill_dir)
+        add_issue(
+            issues,
+            "error",
+            "OPENAI_ADAPTER_READ",
+            adapter,
+            f"无法读取适配文件：{exc}",
+            skill_dir,
+        )
         return
 
-    for match in re.finditer(r"(?m)^\s*allow_implicit_invocation\s*:\s*(\S+)\s*$", text):
+    matches = list(
+        re.finditer(
+            r"(?m)^\s*allow_implicit_invocation\s*:\s*(\S+)\s*$",
+            text,
+        )
+    )
+    for match in matches:
         if match.group(1).lower() not in {"true", "false"}:
             add_issue(
                 issues,
@@ -456,13 +664,45 @@ def validate_openai_adapter(skill_dir: Path, issues: List[Issue]) -> None:
                 skill_dir,
             )
 
+    if (
+        profile == "dual"
+        and str(frontmatter.get("disable-model-invocation", "")).lower() == "true"
+        and read_openai_policy(adapter) != "false"
+    ):
+        add_issue(
+            issues,
+            "error",
+            "MANUAL_POLICY_MISMATCH",
+            adapter,
+            "Claude Code 已设置仅显式调用时，Codex 也必须设置 allow_implicit_invocation: false。",
+            skill_dir,
+        )
 
-def validate_skill(skill_dir: Path, profile: str = "portable") -> Report:
+
+def validate_skill(
+    skill_dir: Path,
+    profile: str = "portable",
+    plugin_root: Optional[Path] = None,
+) -> Report:
     skill_dir = skill_dir.expanduser().resolve()
     issues: List[Issue] = []
 
     if not skill_dir.is_dir():
         issues.append(Issue("error", "SKILL_DIR", str(skill_dir), "Skill 目录不存在或不是目录。"))
+        return Report(str(skill_dir), profile, issues)
+
+    effective_plugin_root = (
+        plugin_root.expanduser().resolve() if plugin_root else discover_plugin_root(skill_dir)
+    )
+    if not is_within(skill_dir, effective_plugin_root):
+        issues.append(
+            Issue(
+                "error",
+                "SKILL_OUTSIDE_PLUGIN",
+                str(skill_dir),
+                f"Skill 不在 Plugin 根目录 {effective_plugin_root} 内。",
+            )
+        )
         return Report(str(skill_dir), profile, issues)
 
     skill_md = skill_dir / "SKILL.md"
@@ -473,7 +713,14 @@ def validate_skill(skill_dir: Path, profile: str = "portable") -> Report:
     try:
         text = skill_md.read_text(encoding="utf-8")
     except (OSError, UnicodeError) as exc:
-        add_issue(issues, "error", "SKILL_MD_READ", skill_md, f"无法以 UTF-8 读取：{exc}", skill_dir)
+        add_issue(
+            issues,
+            "error",
+            "SKILL_MD_READ",
+            skill_md,
+            f"无法以 UTF-8 读取：{exc}",
+            skill_dir,
+        )
         return Report(str(skill_dir), profile, issues)
 
     line_count = len(text.splitlines())
@@ -490,6 +737,7 @@ def validate_skill(skill_dir: Path, profile: str = "portable") -> Report:
     frontmatter, _closing, parse_error = parse_frontmatter(text)
     if parse_error:
         add_issue(issues, "error", "FRONTMATTER_PARSE", skill_md, parse_error, skill_dir)
+        frontmatter = {}
     else:
         validate_frontmatter(
             data=frontmatter,
@@ -500,10 +748,10 @@ def validate_skill(skill_dir: Path, profile: str = "portable") -> Report:
         )
 
     validate_headings(text, skill_dir, skill_md, issues)
-    validate_references(text, skill_dir, skill_md, issues)
+    validate_references(text, skill_dir, skill_md, effective_plugin_root, issues)
     validate_workflows(skill_dir, text, issues)
-    validate_directory_conventions(skill_dir, issues)
-    validate_openai_adapter(skill_dir, issues)
+    validate_directory_conventions(skill_dir, effective_plugin_root, issues)
+    validate_openai_adapter(skill_dir, profile, frontmatter, issues)
 
     return Report(str(skill_dir), profile, issues)
 
@@ -514,20 +762,28 @@ def print_human(report: Report) -> None:
 
     if report.errors:
         print(
-            f"FAIL: {len(report.errors)} error(s), {len(report.warnings)} warning(s) — {report.skill_dir}"
+            f"FAIL: {len(report.errors)} error(s), "
+            f"{len(report.warnings)} warning(s) — {report.skill_dir}"
         )
     else:
         print(f"PASS: 0 error(s), {len(report.warnings)} warning(s) — {report.skill_dir}")
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="校验 Agent Skill 的结构、Frontmatter 和本地引用。")
+    parser = argparse.ArgumentParser(
+        description="校验 Agent Skill 的结构、Frontmatter、本地引用和软链接。"
+    )
     parser.add_argument("skill_dir", type=Path, help="包含 SKILL.md 的 Skill 目录")
     parser.add_argument(
         "--profile",
-        choices=("portable", "claude", "codex"),
+        choices=("portable", "claude", "codex", "dual"),
         default="portable",
-        help="按目标配置允许对应 Frontmatter 字段",
+        help="按目标平台允许对应 Frontmatter 与适配配置",
+    )
+    parser.add_argument(
+        "--plugin-root",
+        type=Path,
+        help="允许软链接解析到的 Plugin 根目录；默认自动发现",
     )
     parser.add_argument("--strict", action="store_true", help="将 warning 视为失败")
     parser.add_argument("--json", action="store_true", help="输出 JSON")
@@ -536,7 +792,7 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: Optional[Sequence[str]] = None) -> int:
     args = build_parser().parse_args(argv)
-    report = validate_skill(args.skill_dir, args.profile)
+    report = validate_skill(args.skill_dir, args.profile, args.plugin_root)
 
     if args.json:
         print(json.dumps(report.to_dict(), ensure_ascii=False, indent=2))

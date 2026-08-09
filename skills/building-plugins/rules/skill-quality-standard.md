@@ -1,0 +1,1 @@
+../../building-skills/rules/quality-standard.md
