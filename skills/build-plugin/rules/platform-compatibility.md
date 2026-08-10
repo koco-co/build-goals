@@ -12,9 +12,11 @@
 ## Claude Code
 
 - Manifest：`.claude-plugin/plugin.json`；
+- 仓库 Marketplace：`.claude-plugin/marketplace.json`；
 - Skills：Plugin 根目录 `skills/`；
 - 调用：`/<plugin-name>:<skill-name>`；
 - 本地加载：`claude --plugin-dir <plugin-root>`；
+- Marketplace 安装：`claude plugin marketplace add <owner>/<repo>@<ref>`，再执行 `claude plugin install <plugin-name>@<marketplace-name>`；
 - 官方校验：`claude plugin validate <plugin-root> --strict`；
 - 仅限显式调用的 Skill 使用 `disable-model-invocation: true`。
 

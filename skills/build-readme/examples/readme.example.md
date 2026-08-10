@@ -14,10 +14,10 @@
 
 <h2 align="center">𝑶𝒗𝒆𝒓𝒗𝒊𝒆𝒘 · 简介</h2>
 
-<p>_Build Flow_ 读取项目入口、命令、测试和现有文档，先生成写入预览，再在用户确认后更新 _README_。</p>
+<p><b>Build Flow</b> 读取项目入口、命令、测试和现有文档，先生成写入预览，再在用户确认后更新 <b>README</b>。</p>
 
 - 从代码和配置提取已实现能力。
-- 使用统一的 _GitHub_ 标题、_Shields_ 和图表风格。
+- 使用统一的 <b>GitHub</b> 标题、<b>Shields</b> 和图表风格。
 - 分开记录机械检查、渲染检查和未验证项。
 
 <a id="workflow"></a>
@@ -43,7 +43,7 @@ flowchart LR
 Analyze this repository and preview the README you would write.
 ```
 
-<p>确认后运行项目的 _README_ 校验器：</p>
+<p>确认后运行项目的 <b>README</b> 校验器：</p>
 
 ```bash
 python3 path/to/validate_readme.py README.md --strict

@@ -105,6 +105,27 @@ class ValidatePluginTests(unittest.TestCase):
         self.assertIn("skills/shape-idea", result.stdout)
         self.assertIn("skills/handoff", result.stdout)
 
+    def test_claude_marketplace_manifest_is_allowed(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            plugin = self.write_fixture(Path(temp))
+            marketplace = plugin / ".claude-plugin" / "marketplace.json"
+            marketplace.write_text(
+                json.dumps(
+                    {
+                        "name": "fixture-marketplace",
+                        "owner": {"name": "fixture"},
+                        "plugins": [
+                            {"name": "fixture-plugin", "source": "./"}
+                        ],
+                    },
+                    indent=2,
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            result = self.run_validator(plugin)
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
     def test_dual_version_mismatch_fails(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
             plugin = self.write_fixture(Path(temp))

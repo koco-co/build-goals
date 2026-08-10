@@ -42,11 +42,10 @@ PLACEHOLDER_RE = re.compile(
 BODY_BOLD_RE = re.compile(
     r"(?<!\*)\*\*[^*\n]+\*\*(?!\*)|(?<!_)__[^_\n]+__(?!_)"
 )
-HTML_BOLD_RE = re.compile(r"<(?:strong|b)\b", re.I)
+HTML_STRONG_RE = re.compile(r"</?strong\b", re.I)
+HTML_B_RE = re.compile(r"<b\b[^>]*>(?P<content>.*?)</b\s*>", re.I | re.S)
 HTML_ITALIC_RE = re.compile(r"</?(?:i|em)\b", re.I)
-CHINESE_MARKDOWN_ITALIC_RE = re.compile(
-    r"(?<!\w)_[^_\n]*[\u3400-\u9fff][^_\n]*_(?!\w)"
-)
+MARKDOWN_ITALIC_RE = re.compile(r"(?<!\w)_[^_\n]+_(?!\w)")
 MARKUP_ARTIFACT_RE = re.compile(r"(?mi)^\s*(?:[-*+]\s+)?`span`\s*$")
 REMOTE_IMAGE_HOSTS = {"img.shields.io"}
 TRACKED_HTML_TAGS = {
@@ -370,23 +369,26 @@ def validate_section_anchors(
             )
 
 
-def _english_italic_intervals(value: str) -> list[tuple[int, int]]:
+def _english_bold_intervals(value: str) -> list[tuple[int, int]]:
     return [
-        match.span()
-        for match in re.finditer(r"(?<!\w)_[^_\n]+_(?!\w)", value)
+        match.span("content")
+        for match in HTML_B_RE.finditer(value)
+        if re.search(r"[A-Za-z]", match.group("content"))
     ]
 
 
 def _english_prose(value: str) -> str:
     """Remove machine-readable markup before checking visible English prose."""
-    value = re.sub(r"<code\b[^>]*>.*?</code>", "", value, flags=re.I | re.S)
-    value = re.sub(r"!?(\[[^\]]*\])\([^)]*\)", r"\1", value)
-    value = re.sub(r"https?://\S+", "", value, flags=re.I)
-    value = re.sub(r"<[^>]+>", "", value)
+    mask = lambda match: " " * len(match.group(0))
+    value = re.sub(r"<code\b[^>]*>.*?</code>", mask, value, flags=re.I | re.S)
+    value = re.sub(r"`[^`\n]+`", mask, value)
+    value = re.sub(r"!?(\[[^\]]*\])\([^)]*\)", mask, value)
+    value = re.sub(r"https?://\S+", mask, value, flags=re.I)
+    value = re.sub(r"<[^>]+>", mask, value)
     return value
 
 
-def validate_body_english_italics(
+def validate_body_english_markup(
     body: str,
     body_offset: int,
     full_text: str,
@@ -412,7 +414,7 @@ def validate_body_english_italics(
         if stripped.startswith("```") or stripped.startswith("~~~"):
             continue
         visible = _english_prose(stripped)
-        intervals = _english_italic_intervals(visible)
+        intervals = _english_bold_intervals(stripped)
         for match in re.finditer(r"[A-Za-z]+", visible):
             if any(
                 start <= match.start() and match.end() <= end
@@ -422,12 +424,26 @@ def validate_body_english_italics(
             add_issue(
                 issues,
                 "error",
-                "ENGLISH_ITALIC",
+                "ENGLISH_MARKUP",
                 path,
                 line_number(full_text, line_offset),
-                "英文正文必须使用 Markdown _斜体_；中文正文保持普通字体。",
+                "英文正文请使用 <b>English</b>；中文正文保持普通字体。",
             )
             return
+
+
+def validate_markdown_italics(text: str, path: Path, issues: list[Issue]) -> None:
+    masked = mask_code(text)
+    match = MARKDOWN_ITALIC_RE.search(masked)
+    if match:
+        add_issue(
+            issues,
+            "error",
+            "MARKDOWN_ITALIC_FORBIDDEN",
+            path,
+            line_number(masked, match.start()),
+            "禁止使用 Markdown 下划线斜体；英文正文请使用 <b>English</b>。",
+        )
 
 
 def validate_html_italics(text: str, path: Path, issues: list[Issue]) -> None:
@@ -440,22 +456,39 @@ def validate_html_italics(text: str, path: Path, issues: list[Issue]) -> None:
             "HTML_ITALIC_FORBIDDEN",
             path,
             line_number(masked, match.start()),
-            "禁止使用 HTML <i> 或 <em> 斜体标签；英文正文请使用 Markdown _斜体_。",
+            "禁止使用 HTML <i> 或 <em> 斜体标签；英文正文请使用 <b>English</b>。",
         )
 
 
-def validate_chinese_italics(text: str, path: Path, issues: list[Issue]) -> None:
+def validate_bold_markup(text: str, path: Path, issues: list[Issue]) -> None:
     masked = mask_code(text)
-    match = CHINESE_MARKDOWN_ITALIC_RE.search(masked)
-    if match:
+    markdown_bold = BODY_BOLD_RE.search(re.sub(r"`[^`\n]+`", "", masked))
+    strong = HTML_STRONG_RE.search(masked)
+    if markdown_bold or strong:
+        match = markdown_bold or strong
+        assert match is not None
         add_issue(
             issues,
             "error",
-            "CHINESE_ITALIC_FORBIDDEN",
+            "BODY_BOLD",
             path,
             line_number(masked, match.start()),
-            "中文正文必须保持普通字体，不能使用 Markdown _斜体_。",
+            "正文不能使用 Markdown 粗体或 HTML <strong>；英文标签可使用 <b>。",
         )
+    for match in HTML_B_RE.finditer(masked):
+        content = match.group("content")
+        if re.search(r"[\u3400-\u9fff]", content) or not re.search(
+            r"[A-Za-z]", content
+        ):
+            add_issue(
+                issues,
+                "error",
+                "CHINESE_BOLD_FORBIDDEN",
+                path,
+                line_number(masked, match.start()),
+                "<b> 仅用于英文标签；中文正文必须保持普通字体。",
+            )
+            break
 
 
 def validate_fences(text: str, path: Path, issues: list[Issue]) -> None:
@@ -542,24 +575,10 @@ def validate_section_style(text: str, path: Path, issues: list[Issue]) -> None:
                 "英文章节标题应使用 Mathematical Bold Italic 字形。",
             )
 
-    body_without_inline_code = re.sub(r"`[^`\n]+`", "", body)
-    bold = BODY_BOLD_RE.search(body_without_inline_code)
-    html_bold = HTML_BOLD_RE.search(body_without_inline_code)
-    if bold or html_bold:
-        match = bold or html_bold
-        assert match is not None
-        add_issue(
-            issues,
-            "error",
-            "BODY_BOLD",
-            path,
-            line_number(masked, body_offset + match.start()),
-            "正文不能使用 Markdown 或 HTML 粗体。",
-        )
-
-    validate_body_english_italics(body, body_offset, masked, path, issues)
+    validate_body_english_markup(body, body_offset, masked, path, issues)
+    validate_bold_markup(text, path, issues)
+    validate_markdown_italics(text, path, issues)
     validate_html_italics(text, path, issues)
-    validate_chinese_italics(text, path, issues)
 
     original_hero_end = text.lower().find("</div>")
     original_body_offset = (

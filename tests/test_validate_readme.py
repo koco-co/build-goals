@@ -28,10 +28,10 @@ VALID_README = """
 <a id="overview"></a>
 <h2 align="center">𝑶𝒗𝒆𝒓𝒗𝒊𝒆𝒘 · 简介</h2>
 
-<p>_Build Flow_ 用于把项目事实整理成可执行文档。</p>
+<p><b>Build Flow</b> 用于把项目事实整理成可执行文档。</p>
 
 - 先读取仓库事实。
-- 再生成可验证的 _README_。
+- 再生成可验证的 <b>README</b>。
 
 <a id="workflow"></a>
 <h2 align="center">𝑾𝒐𝒓𝒌𝒇𝒍𝒐𝒘 · 流程</h2>
@@ -172,7 +172,14 @@ class ValidateReadmeTests(unittest.TestCase):
             )
             result = self.run_validator(path)
             self.assertEqual(result.returncode, 1)
-            self.assertIn("ENGLISH_ITALIC", result.stdout)
+            self.assertIn("ENGLISH_MARKUP", result.stdout)
+
+    def test_markdown_italic_fails(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            path = self.write_readme(Path(temp), VALID_README + "\n<p>_Plain English_</p>\n")
+            result = self.run_validator(path)
+            self.assertEqual(result.returncode, 1)
+            self.assertIn("MARKDOWN_ITALIC_FORBIDDEN", result.stdout)
 
     def test_html_italic_fails(self) -> None:
         for tag in ("i", "em"):
@@ -184,21 +191,29 @@ class ValidateReadmeTests(unittest.TestCase):
                 self.assertEqual(result.returncode, 1)
                 self.assertIn("HTML_ITALIC_FORBIDDEN", result.stdout)
 
-    def test_chinese_markdown_italic_fails(self) -> None:
+    def test_chinese_bold_fails(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
-            path = self.write_readme(Path(temp), VALID_README + "\n<p>_中文说明_</p>\n")
+            path = self.write_readme(Path(temp), VALID_README + "\n<p><b>中文说明</b></p>\n")
             result = self.run_validator(path)
             self.assertEqual(result.returncode, 1)
-            self.assertIn("CHINESE_ITALIC_FORBIDDEN", result.stdout)
+            self.assertIn("CHINESE_BOLD_FORBIDDEN", result.stdout)
 
     def test_all_bold_syntaxes_fail(self) -> None:
-        variants = ("__Bold text__", "<strong>Bold text</strong>", "<b>Bold text</b>")
+        variants = ("__Bold text__", "<strong>Bold text</strong>", "<b>中文文本</b>")
         for variant in variants:
             with self.subTest(variant=variant), tempfile.TemporaryDirectory() as temp:
                 path = self.write_readme(Path(temp), VALID_README + f"\n{variant}\n")
                 result = self.run_validator(path)
                 self.assertEqual(result.returncode, 1)
-                self.assertIn("BODY_BOLD", result.stdout)
+                self.assertRegex(
+                    result.stdout, r"(BODY_BOLD|CHINESE_BOLD_FORBIDDEN)"
+                )
+
+    def test_english_bold_markup_passes(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            path = self.write_readme(Path(temp), VALID_README + "\n<p><b>English Label</b></p>\n")
+            result = self.run_validator(path)
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
     def test_malformed_html_fails(self) -> None:
         with tempfile.TemporaryDirectory() as temp:

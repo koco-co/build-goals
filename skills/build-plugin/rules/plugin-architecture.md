@@ -22,7 +22,9 @@ Plugin 负责组织可安装、可升级的能力包。它可以包含 Skills、
 
 ```text
 <plugin-root>/
-├── .claude-plugin/plugin.json
+├── .claude-plugin/
+│   ├── marketplace.json # 按需
+│   └── plugin.json
 ├── .codex-plugin/plugin.json
 ├── skills/
 ├── agents/          # 按需

@@ -296,17 +296,22 @@ def validate_manifest_directory(
     config_dir: Path,
     plugin_root: Path,
     issues: List[Issue],
+    *,
+    allow_marketplace: bool = False,
 ) -> None:
     if not config_dir.is_dir():
         return
+    allowed = {"plugin.json"}
+    if allow_marketplace:
+        allowed.add("marketplace.json")
     for child in config_dir.iterdir():
-        if child.name != "plugin.json":
+        if child.name not in allowed:
             add_issue(
                 issues,
                 "error",
                 "MANIFEST_DIRECTORY_CONTENT",
                 child,
-                f"{config_dir.name}/ 只应包含 plugin.json。",
+                f"{config_dir.name}/ 只应包含 {', '.join(sorted(allowed))}。",
                 plugin_root,
             )
 
@@ -640,7 +645,12 @@ def validate_plugin(plugin_dir: Path, platform: str = "dual") -> Report:
 
     if platform in {"claude", "dual"}:
         claude_dir = plugin_root / ".claude-plugin"
-        validate_manifest_directory(claude_dir, plugin_root, issues)
+        validate_manifest_directory(
+            claude_dir,
+            plugin_root,
+            issues,
+            allow_marketplace=True,
+        )
         claude_result = validate_manifest(
             platform="claude",
             manifest_path=claude_dir / "plugin.json",

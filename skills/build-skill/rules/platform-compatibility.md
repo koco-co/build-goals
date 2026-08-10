@@ -28,6 +28,12 @@ Plugin Manifest：
 .claude-plugin/plugin.json
 ```
 
+仓库 Marketplace：
+
+```text
+.claude-plugin/marketplace.json
+```
+
 Skill 位于 Plugin 根目录的：
 
 ```text
@@ -50,6 +56,13 @@ Plugin 内调用使用命名空间：
 
 ```bash
 claude --plugin-dir .
+```
+
+Marketplace 安装：
+
+```bash
+claude plugin marketplace add <owner>/<repo>@<ref>
+claude plugin install <plugin-name>@<marketplace-name> --scope user
 ```
 
 平台侧验证：

@@ -1,0 +1,23 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "build-goals",
+  "owner": {
+    "name": "koco-co",
+    "url": "https://github.com/koco-co"
+  },
+  "description": "Clarify goals and deliver verifiable software projects, Agent Skills, plugins, product PRDs, and GitHub READMEs.",
+  "plugins": [
+    {
+      "name": "build-goals",
+      "source": "./",
+      "description": "Clarify goals and deliver verifiable software projects, Agent Skills, plugins, product PRDs, and GitHub READMEs.",
+      "version": "1.2.0",
+      "author": {
+        "name": "koco-co",
+        "url": "https://github.com/koco-co"
+      },
+      "homepage": "https://github.com/koco-co/build-goals",
+      "repository": "https://github.com/koco-co/build-goals"
+    }
+  ]
+}
