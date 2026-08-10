@@ -100,6 +100,7 @@ class ValidatePluginTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertIn("skills/building-skills", result.stdout)
         self.assertIn("skills/building-plugins", result.stdout)
+        self.assertIn("skills/building-prds", result.stdout)
         self.assertIn("skills/grill-me", result.stdout)
         self.assertIn("skills/handoff", result.stdout)
 

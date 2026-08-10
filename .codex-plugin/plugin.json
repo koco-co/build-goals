@@ -1,28 +1,37 @@
 {
   "name": "awesome-agent-skills",
-  "version": "0.4.0",
-  "description": "A curated, verifiable collection of skills for building Agent Skills and plugins.",
+  "version": "0.5.0+codex.20260810092022",
+  "description": "A curated, verifiable collection of skills for building Agent Skills, plugins, and complete product PRDs.",
   "author": {
     "name": "koco-co",
     "url": "https://github.com/koco-co"
   },
   "homepage": "https://github.com/koco-co/awesome-agent-skills",
   "repository": "https://github.com/koco-co/awesome-agent-skills",
-  "keywords": ["agent-skills", "codex", "claude-code", "plugin-development"],
+  "keywords": [
+    "agent-skills",
+    "codex",
+    "claude-code",
+    "plugin-development",
+    "product-requirements"
+  ],
   "skills": "./skills/",
   "interface": {
     "displayName": "Awesome Agent Skills",
-    "shortDescription": "Build and maintain high-quality Agent Skills and plugins",
-    "longDescription": "A focused toolkit for designing, implementing, validating, and delivering Agent Skills and Claude Code or Codex plugins.",
+    "shortDescription": "Build Agent Skills, plugins, and complete product PRDs",
+    "longDescription": "A focused toolkit for designing, implementing, validating, and delivering Agent Skills, Claude Code or Codex plugins, and research-backed product requirements documents.",
     "developerName": "koco-co",
     "category": "Productivity",
-    "capabilities": ["Read", "Write"],
+    "capabilities": [
+      "Read",
+      "Write",
+      "Web Research"
+    ],
     "websiteURL": "https://github.com/koco-co/awesome-agent-skills",
     "defaultPrompt": [
-      "Use building-skills to create or improve an Agent Skill.",
-      "Use building-plugins to create or improve a Claude Code and Codex plugin.",
-      "Use grill-me to stress-test a plan or decision one question at a time.",
-      "Use handoff to turn the current conversation into a handoff document for the next agent."
+      "Use building-skills or building-plugins to create a verifiable Agent capability.",
+      "Use building-prds to turn an existing product or early idea into a research-backed, fully decided PRD.",
+      "Use grill-me to refine a decision, or handoff to prepare the next session."
     ],
     "brandColor": "#111827"
   }

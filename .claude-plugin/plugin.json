@@ -2,14 +2,20 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "awesome-agent-skills",
   "displayName": "Awesome Agent Skills",
-  "version": "0.4.0",
-  "description": "Build and maintain high-quality Agent Skills and Claude Code or Codex plugins.",
+  "version": "0.5.0+codex.20260810092022",
+  "description": "Build high-quality Agent Skills, Claude Code or Codex plugins, and complete product PRDs.",
   "author": {
     "name": "koco-co",
     "url": "https://github.com/koco-co"
   },
   "homepage": "https://github.com/koco-co/awesome-agent-skills",
   "repository": "https://github.com/koco-co/awesome-agent-skills",
-  "keywords": ["agent-skills", "claude-code", "codex", "plugin-development"],
+  "keywords": [
+    "agent-skills",
+    "claude-code",
+    "codex",
+    "plugin-development",
+    "product-requirements"
+  ],
   "skills": "./skills/"
 }

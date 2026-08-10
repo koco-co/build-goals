@@ -32,10 +32,13 @@
 | ---------------------------------------------- | ------------------------------------------- | ---------------------------------------- | ------------------- |
 | [`building-skills`](skills/building-skills/)   | 从零构建或系统升级高质量 Agent Skill        | `/awesome-agent-skills:building-skills`  | `$building-skills`  |
 | [`building-plugins`](skills/building-plugins/) | 构建、升级或迁移 Claude Code / Codex Plugin | `/awesome-agent-skills:building-plugins` | `$building-plugins` |
+| [`building-prds`](skills/building-prds/)       | 调研并生成决策完整的产品 PRD                | `/awesome-agent-skills:building-prds`    | `$building-prds`    |
 | [`grill-me`](skills/grill-me/)                 | 通过逐项访谈完善计划、设计或决策            | `/awesome-agent-skills:grill-me`         | `$grill-me`         |
 | [`handoff`](skills/handoff/)                   | 将当前会话整理为供下一位 Agent 接续的文档   | `/awesome-agent-skills:handoff`          | `$handoff`          |
 
-四个 Skill 都采用**仅限用户显式调用**的策略。普通提示词润色、一般编码或文档任务不会自动进入这些工作流。
+五个 Skill 都采用**仅限用户显式调用**的策略。普通提示词润色、一般编码或文档任务不会自动进入这些工作流。
+
+`building-prds` 支持已有项目的全功能梳理，也能把尚不完整的产品想法完善为详细 PRD。它会联网调研当前竞品、活跃开源项目与适用的官方规范，逐项确认所有产品决策，并生成或规范化更新当前项目唯一的 `docs/PRD需求文档.md`。文档只包含产品作用、功能、输入输出、交互、最终文案和可验收的质量要求，不包含技术架构或技术选型。
 
 ## 核心原则
 
@@ -66,6 +69,7 @@ awesome-agent-skills/
 ├── skills/
 │   ├── building-skills/
 │   ├── building-plugins/
+│   ├── building-prds/
 │   ├── grill-me/
 │   └── handoff/
 └── tests/
@@ -88,6 +92,7 @@ claude --plugin-dir .
 ```text
 /awesome-agent-skills:building-skills
 /awesome-agent-skills:building-plugins
+/awesome-agent-skills:building-prds
 /awesome-agent-skills:grill-me
 /awesome-agent-skills:handoff
 ```
@@ -116,6 +121,7 @@ codex plugin marketplace list
 ```text
 $building-skills
 $building-plugins
+$building-prds
 $grill-me
 $handoff
 ```
@@ -142,7 +148,7 @@ python3 scripts/install_skill.py building-skills \
   --scope user
 ```
 
-将 `building-skills` 替换为 `building-plugins`、`grill-me` 或 `handoff` 即可安装另一个 Skill。目标目录已存在时默认拒绝覆盖；明确确认后添加 `--force`。
+将 `building-skills` 替换为 `building-plugins`、`building-prds`、`grill-me` 或 `handoff` 即可安装另一个 Skill。目标目录已存在时默认拒绝覆盖；明确确认后添加 `--force`。
 
 ## 验证
 
@@ -161,6 +167,14 @@ python3 skills/building-plugins/scripts/validate_plugin.py \
 python3 skills/building-skills/scripts/validate_skill.py \
   skills/building-skills \
   --profile dual \
+  --strict
+```
+
+验证 `building-prds` 生成的目标文档：
+
+```bash
+python3 skills/building-prds/scripts/validate_prd.py \
+  /path/to/project/docs/PRD需求文档.md \
   --strict
 ```
 
