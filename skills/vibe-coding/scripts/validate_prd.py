@@ -1,0 +1,1 @@
+../../build-prd/scripts/validate_prd.py

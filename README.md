@@ -2,10 +2,10 @@
 
 # 𝓑𝓾𝓲𝓵𝓭 𝓖𝓸𝓪𝓵𝓼
 
-<p align="center"><i>从目标澄清到可验证的 𝑺𝒌𝒊𝒍𝒍、𝑷𝒍𝒖𝒈𝒊𝒏、𝑷𝑹𝑫 与 𝑹𝑬𝑨𝑫𝑴𝑬 交付 · 𝑭𝒓𝒐𝒎 𝑰𝒅𝒆𝒂𝒔 𝒕𝒐 𝑽𝒆𝒓𝒊𝒇𝒊𝒂𝒃𝒍𝒆 𝑫𝒆𝒍𝒊𝒗𝒆𝒓𝒚</i></p>
+<p align="center"><i>从目标澄清到可验证的软件项目、𝑺𝒌𝒊𝒍𝒍、𝑷𝒍𝒖𝒈𝒊𝒏、𝑷𝑹𝑫 与 𝑹𝑬𝑨𝑫𝑴𝑬 交付 · 𝑭𝒓𝒐𝒎 𝑰𝒅𝒆𝒂𝒔 𝒕𝒐 𝑽𝒆𝒓𝒊𝒇𝒊𝒂𝒃𝒍𝒆 𝑫𝒆𝒍𝒊𝒗𝒆𝒓𝒚</i></p>
 
 [![Claude Code](https://img.shields.io/badge/Claude_Code-Plugin-D97757?logo=anthropic&logoColor=white&cacheSeconds=3600)](https://code.claude.com/docs/en/plugins)
-[![Codex](https://img.shields.io/badge/Codex-Supported-000000?style=flat-square&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMCAyMCI+PHBhdGggZmlsbD0iI2ZmZiIgZD0iTTExLjI0OCAxOC4yNXEtLjgyNSAwLTEuNTY4LS4zMTRhNC4zIDQuMyAwIDAgMS0xLjMyLS44NzQgNCA0IDAgMCAxLTEuMzA0LjIxNCA0IDQgMCAwIDEtMi4wNDYtLjU0NCA0LjI3IDQuMjcgMCAwIDEtMS41MTgtMS40ODUgNCA0IDAgMCAxLS41Ni0yLjA5NXEwLS40OC4xMzEtMS4wNEE0LjQgNC40IDAgMCAxIDIuMDQgMTAuNzFhNC4wNyA0LjA3IDAgMCAxIC4wMTctMy40IDQuMiA0LjIgMCAwIDEgMS4wNTYtMS40MTggMy44IDMuOCAwIDAgMSAxLjYtLjg0MiAzLjkgMy45IDAgMCAxIC43Ni0xLjY4M3EuNTkzLS43NTkgMS40NTEtMS4xODhhNC4wNCA0LjA0IDAgMCAxIDEuODMyLS40MjlxLjgyNSAwIDEuNTY3LjMxMy43NDIuMzE0IDEuMzIuODc1YTQgNCAwIDAgMSAxLjMwNC0uMjE1cTEuMTA2IDAgMi4wNDYuNTQ1YTQuMTQgNC4xNCAwIDAgMSAxLjUwMSAxLjQ4NXEuNTc4Ljk0MS41NzggMi4wOTUgMCAuNDgtLjEzMiAxLjA0LjY2LjYxIDEuMDIzIDEuNDE5LjM2My43OTIuMzYzIDEuNjY2IDAgLjg5Mi0uMzggMS43MTdhNC4zIDQuMyAwIDAgMS0xLjA3MiAxLjQzNSAzLjggMy44IDAgMCAxLTEuNTg0LjgyNSAzLjggMy44IDAgMCAxLS43NzUgMS42ODMgNC4wNiA0LjA2IDAgMCAxLTEuNDM2IDEuMTg4IDQuMDQgNC4wNCAwIDAgMS0xLjgzMi40MjltLTQuMDc2LTIuMDYycS44MjUgMCAxLjQzNS0uMzQ3bDMuMTAzLTEuNzgyYS4zNi4zNiAwIDAgMCAuMTY0LS4zMTN2LTEuNDJMNy44ODEgMTQuNjJhLjY3LjY3IDAgMCAxLS43MjYgMGwtMy4xMTgtMS43OThhLjUuNSAwIDAgMS0uMDE3LjExNXYuMTk4cTAgLjg0MS4zOTYgMS41NTEuNDEzLjY5MyAxLjEzOSAxLjA4OWEzLjIgMy4yIDAgMCAwIDEuNjE3LjQxMm0uMTY1LTIuNjlhLjQuNCAwIDAgMCAuMTgxLjA1cS4wODMgMCAuMTY1LS4wNWwxLjIzOC0uNzEtMy45NzctMi4zMWEuNy43IDAgMCAxLS4zNjMtLjY0M3YtMy41OHEtLjgyNS4zNjItMS4zMiAxLjEyMmEyLjkgMi45IDAgMCAwLS40OTUgMS42NXEwIC44MDkuNDEzIDEuNTUuNDEyLjc0MyAxLjA3MiAxLjEyM3ptMy45MSAzLjY2M3EuODc1IDAgMS41ODUtLjM5NmEyLjk2IDIuOTYgMCAwIDAgMS41MzQtMi42NHYtMy41NjRhLjMyLjMyIDAgMCAwLS4xNjUtLjI5N2wtMS4yNTQtLjcyNnY0LjYwNGEuNy43IDAgMCAxLS4zNjMuNjQzbC0zLjExOSAxLjc5OWEzIDMgMyAwIDAgMCAxLjc4My41NzdtLjYyNy02LjAzOVY4Ljg3OEwxMC4wMSA3LjgyMiA4LjEyOSA4Ljg3OHYyLjI0NGwxLjg4MSAxLjA1NnoiLz48L3N2Zz4=&logoWidth=14)](https://developers.openai.com/plugins/)
+[![Codex](https://img.shields.io/badge/Codex-Supported-000000?style=flat-square&logo=openai&logoColor=white&cacheSeconds=3600)](https://developers.openai.com/plugins/)
 [![Agent Skills](https://img.shields.io/badge/Agent_Skills-Compatible-2563EB?cacheSeconds=3600)](https://github.com/agentskills/agentskills)
 [![Validate Plugin](https://github.com/koco-co/build-goals/actions/workflows/validate-skills.yml/badge.svg)](https://github.com/koco-co/build-goals/actions/workflows/validate-skills.yml)
 [![Python](https://img.shields.io/badge/Python-3.9%2B-3776AB?logo=python&logoColor=white&cacheSeconds=3600)](https://www.python.org/)
@@ -27,16 +27,19 @@
 
 <h2 align="center">𝑪𝒂𝒑𝒂𝒃𝒊𝒍𝒊𝒕𝒊𝒆𝒔 · 已收录能力</h2>
 
-| <i>Skill</i>                           | <i>作用</i>                                      | <i>Claude Code</i>          | <i>Codex</i>    |
-| -------------------------------------- | ------------------------------------------------ | --------------------------- | --------------- |
-| [`shape-idea`](skills/shape-idea/)     | <i>将初步想法塑造成完整、无歧义的定义</i>        | `/build-goals:shape-idea`   | `$shape-idea`   |
-| [`build-skill`](skills/build-skill/)   | <i>从零构建或系统升级高质量 Agent Skill</i>      | `/build-goals:build-skill`  | `$build-skill`  |
-| [`build-plugin`](skills/build-plugin/) | <i>构建、升级或迁移双平台 Plugin</i>             | `/build-goals:build-plugin` | `$build-plugin` |
-| [`build-prd`](skills/build-prd/)       | <i>调研并生成决策完整的产品 PRD</i>              | `/build-goals:build-prd`    | `$build-prd`    |
-| [`build-readme`](skills/build-readme/) | <i>探索项目并创建或更新 GitHub 风格 README</i>   | `/build-goals:build-readme` | `$build-readme` |
-| [`handoff`](skills/handoff/)           | <i>将当前会话整理为供下一位 Agent 接续的文档</i> | `/build-goals:handoff`      | `$handoff`      |
+| <i>Skill</i>                           | <i>作用</i>                                                   | <i>Claude Code</i>          | <i>Codex</i>    |
+| -------------------------------------- | ------------------------------------------------------------- | --------------------------- | --------------- |
+| [`shape-idea`](skills/shape-idea/)     | <i>将初步想法塑造成完整、无歧义的定义</i>                     | `/build-goals:shape-idea`   | `$shape-idea`   |
+| [`build-skill`](skills/build-skill/)   | <i>从零构建或系统升级高质量 Agent Skill</i>                   | `/build-goals:build-skill`  | `$build-skill`  |
+| [`build-plugin`](skills/build-plugin/) | <i>构建、升级或迁移双平台 Plugin</i>                          | `/build-goals:build-plugin` | `$build-plugin` |
+| [`build-prd`](skills/build-prd/)       | <i>调研并生成决策完整的产品 PRD</i>                           | `/build-goals:build-prd`    | `$build-prd`    |
+| [`vibe-coding`](skills/vibe-coding/)   | <i>从 PRD 或旧项目编排架构、TDD、多 Agent 开发与全链路验收</i> | `/build-goals:vibe-coding`  | `$vibe-coding`  |
+| [`build-readme`](skills/build-readme/) | <i>探索项目并创建或更新 GitHub 风格 README</i>                | `/build-goals:build-readme` | `$build-readme` |
+| [`handoff`](skills/handoff/)           | <i>将当前会话整理为供下一位 Agent 接续的文档</i>              | `/build-goals:handoff`      | `$handoff`      |
 
 <p><i><code>build-prd</code> 支持已有项目的全功能梳理，也能把尚不完整的想法完善为详细 PRD。它会调研当前竞品、活跃开源项目与适用的官方规范，逐项确认产品决策，并生成或规范化更新项目唯一的 <code>docs/PRD需求文档.md</code>。</i></p>
+
+<p><i><code>vibe-coding</code> 是端到端软件交付总控：它可以实现 <code>build-prd</code> 的确认产物，也可以审查并迁移已有低质量项目。架构方案和任务列表分别经过用户确认后，才会搭建脚手架、组织 TDD 功能切片、按依赖使用多 Agent 与 Git worktrees、创建原子提交，并完成单元、集成、E2E、条件式视觉/交互、安全和正常测试数据验收。</i></p>
 
 <p><i><code>build-readme</code> 会先探索代码、命令、测试、CI、文档和资源，提交具体写入预览；用户确认后才创建或更新 README，并分别报告机械检查、GitHub 渲染和未验证项。</i></p>
 
@@ -46,16 +49,20 @@
 
 ```mermaid
 flowchart LR
-    A[Shape Idea] --> B{Build Artifact}
+    A[Shape Idea] --> B{Build Goal}
     B --> C[Skill]
     B --> D[Plugin]
     B --> E[PRD]
     B --> F[README]
-    C --> G[Validate]
-    D --> G
-    E --> G
-    F --> G
-    G --> H[Handoff]
+    E --> G[Vibe Coding]
+    G --> H[Architecture Approval]
+    H --> I[Task Approval]
+    I --> J[TDD Agent Team]
+    C --> K[Validate]
+    D --> K
+    F --> K
+    J --> K
+    K --> L[Handoff]
 ```
 
 <a id="principles"></a>
@@ -64,6 +71,7 @@ flowchart LR
 
 - <i>先查明，再设计：先读取需求、仓库与平台约定，再提出方案。</i>
 - <i>确认后实施：用户确认目录、边界和验收标准前，不修改目标文件。</i>
+- <i>保护当前工作：最新 HEAD、未提交修改和新增文件都视为用户资产，不回滚、不覆盖。</i>
 - <i>单一规范源：共享能力使用仓库内相对软链接，不复制多份相同文件。</i>
 - <i>确定性优先：已有 CLI → 脚本 → 模板 → Few-shot → 规则 → 提示词。</i>
 - <i>渐进式读取：主 <code>SKILL.md</code> 只保留路由和主流程，复杂内容按需读取。</i>
@@ -93,12 +101,13 @@ build-goals/
 │   ├── build-skill/
 │   ├── build-plugin/
 │   ├── build-prd/
+│   ├── vibe-coding/
 │   ├── build-readme/
 │   └── handoff/
 └── tests/
 ```
 
-<p><i><code>build-plugin</code> 中复用的 Skill 模板、质量规则、校验器、检查清单和 Reviewer Agent 均通过相对软链接指向 <code>build-skill</code>。所有链接必须解析在当前 Plugin 根目录内；CI 会拒绝绝对链接、失效链接和越界链接。</i></p>
+<p><i><code>build-plugin</code> 中复用的 Skill 模板、质量规则、校验器、检查清单和 Reviewer Agent 均通过相对软链接指向 <code>build-skill</code>。<code>vibe-coding</code> 同样通过相对软链接复用 <code>build-prd</code> 的 PRD 校验器和 <code>build-skill</code> 的独立 Reviewer。所有链接必须解析在当前 Plugin 根目录内；CI 会拒绝绝对链接、失效链接和越界链接。</i></p>
 
 <a id="quick-start"></a>
 
@@ -121,6 +130,7 @@ claude --plugin-dir .
 /build-goals:build-skill
 /build-goals:build-plugin
 /build-goals:build-prd
+/build-goals:vibe-coding
 /build-goals:build-readme
 /build-goals:handoff
 ```
@@ -153,6 +163,7 @@ $shape-idea
 $build-skill
 $build-plugin
 $build-prd
+$vibe-coding
 $build-readme
 $handoff
 ```
@@ -181,7 +192,7 @@ python3 scripts/install_skill.py build-skill \
   --scope user
 ```
 
-<p><i>将 <code>build-skill</code> 替换为 <code>build-plugin</code>、<code>build-prd</code>、<code>build-readme</code>、<code>shape-idea</code> 或 <code>handoff</code> 即可安装另一个 Skill。目标目录已存在时默认拒绝覆盖；明确确认后添加 <code>--force</code>。</i></p>
+<p><i>将 <code>build-skill</code> 替换为 <code>build-plugin</code>、<code>build-prd</code>、<code>vibe-coding</code>、<code>build-readme</code>、<code>shape-idea</code> 或 <code>handoff</code> 即可安装另一个 Skill。目标目录已存在时默认拒绝覆盖；明确确认后添加 <code>--force</code>。</i></p>
 
 <a id="validation"></a>
 
@@ -200,8 +211,9 @@ python3 skills/build-plugin/scripts/validate_plugin.py \
 
 ```bash
 python3 skills/build-skill/scripts/validate_skill.py \
-  skills/build-skill \
+  skills/vibe-coding \
   --profile dual \
+  --plugin-root . \
   --strict
 ```
 
@@ -210,6 +222,17 @@ python3 skills/build-skill/scripts/validate_skill.py \
 ```bash
 python3 skills/build-prd/scripts/validate_prd.py \
   /path/to/project/docs/PRD需求文档.md \
+  --strict
+```
+
+<p><i>验证 <code>vibe-coding</code> 的架构、任务追踪和最终交付：</i></p>
+
+```bash
+python3 skills/vibe-coding/scripts/validate_delivery.py \
+  /path/to/project \
+  --mode greenfield \
+  --phase delivery \
+  --require-clean \
   --strict
 ```
 

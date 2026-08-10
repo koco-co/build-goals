@@ -1,7 +1,7 @@
 {
   "name": "build-goals",
-  "version": "1.1.0",
-  "description": "A focused toolkit for clarifying goals and building verifiable Agent Skills, plugins, product PRDs, and GitHub READMEs.",
+  "version": "1.2.0",
+  "description": "A focused toolkit for clarifying goals and delivering verifiable software projects, Agent Skills, plugins, product PRDs, and GitHub READMEs.",
   "author": {
     "name": "koco-co",
     "url": "https://github.com/koco-co"
@@ -14,13 +14,17 @@
     "claude-code",
     "plugin-development",
     "product-requirements",
-    "readme-generation"
+    "readme-generation",
+    "vibe-coding",
+    "software-delivery",
+    "multi-agent-development",
+    "tdd"
   ],
   "skills": "./skills/",
   "interface": {
     "displayName": "Build Goals",
-    "shortDescription": "Clarify goals and build Skills, plugins, PRDs, and READMEs",
-    "longDescription": "A focused toolkit that turns clarified goals and repository facts into designed, implemented, validated, and deliverable Agent Skills, Claude Code or Codex plugins, product requirements documents, and GitHub READMEs.",
+    "shortDescription": "Clarify goals and deliver software, Skills, plugins, PRDs, and READMEs",
+    "longDescription": "A focused toolkit that turns clarified goals and repository facts into designed, implemented, tested, validated, and deliverable software projects, Agent Skills, Claude Code or Codex plugins, product requirements documents, and GitHub READMEs.",
     "developerName": "koco-co",
     "category": "Productivity",
     "capabilities": [
@@ -32,8 +36,9 @@
     "defaultPrompt": [
       "Use shape-idea to turn a rough idea into a clear scope with fully resolved decisions.",
       "Use build-skill or build-plugin to create a verifiable Agent capability.",
-      "Use build-readme to explore a repository and create or update its GitHub README after a confirmed preview.",
-      "Use build-prd to turn an existing product or early idea into a research-backed, fully decided PRD, or handoff to prepare the next session."
+      "Use build-prd to produce a research-backed, fully decided product requirements document.",
+      "Use vibe-coding to implement a confirmed PRD or modernize an existing project through architecture approval, task approval, TDD, multi-agent delivery, and end-to-end validation.",
+      "Use build-readme to explore a repository and create or update its GitHub README after a confirmed preview, or handoff to prepare the next session."
     ],
     "brandColor": "#111827"
   }

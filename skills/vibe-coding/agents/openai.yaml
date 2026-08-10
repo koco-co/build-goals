@@ -1,0 +1,7 @@
+interface:
+  display_name: "Vibe Coding"
+  short_description: "从 PRD 或现有项目编排端到端软件交付"
+  default_prompt: "使用 $vibe-coding 通过架构确认、任务确认、TDD、多 Agent 和全链路验收完成项目。"
+
+policy:
+  allow_implicit_invocation: false
