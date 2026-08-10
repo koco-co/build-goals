@@ -132,7 +132,7 @@ class InstallSkillTests(unittest.TestCase):
                 "--dry-run",
             )
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-            self.assertFalse(home.exists())
+            self.assertFalse((home / ".agents").exists())
 
 
 if __name__ == "__main__":

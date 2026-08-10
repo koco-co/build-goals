@@ -30,7 +30,7 @@
 
 | Skill                                      | 作用                                        | Claude Code                    | Codex           |
 | ------------------------------------------ | ------------------------------------------- | ------------------------------ | --------------- |
-| [`clarify-goal`](skills/clarify-goal/)     | 逐项澄清目标、范围与关键决策                | `/build-goals:clarify-goal`    | `$clarify-goal` |
+| [`shape-idea`](skills/shape-idea/)         | 将初步想法塑造成完整、无歧义的定义          | `/build-goals:shape-idea`      | `$shape-idea`   |
 | [`build-skill`](skills/build-skill/)       | 从零构建或系统升级高质量 Agent Skill        | `/build-goals:build-skill`     | `$build-skill`  |
 | [`build-plugin`](skills/build-plugin/)     | 构建、升级或迁移 Claude Code / Codex Plugin | `/build-goals:build-plugin`    | `$build-plugin` |
 | [`build-prd`](skills/build-prd/)           | 调研并生成决策完整的产品 PRD                | `/build-goals:build-prd`       | `$build-prd`    |
@@ -67,7 +67,7 @@ build-goals/
 ├── scripts/
 │   └── install_skill.py
 ├── skills/
-│   ├── clarify-goal/
+│   ├── shape-idea/
 │   ├── build-skill/
 │   ├── build-plugin/
 │   ├── build-prd/
@@ -90,7 +90,7 @@ claude --plugin-dir .
 进入 Claude Code 后显式调用：
 
 ```text
-/build-goals:clarify-goal
+/build-goals:shape-idea
 /build-goals:build-skill
 /build-goals:build-plugin
 /build-goals:build-prd
@@ -119,7 +119,7 @@ codex plugin marketplace list
 随后在支持 Plugin 的 Codex / ChatGPT 界面中安装 `build-goals`，并显式调用：
 
 ```text
-$clarify-goal
+$shape-idea
 $build-skill
 $build-plugin
 $build-prd
@@ -148,7 +148,7 @@ python3 scripts/install_skill.py build-skill \
   --scope user
 ```
 
-将 `build-skill` 替换为 `build-plugin`、`build-prd`、`clarify-goal` 或 `handoff` 即可安装另一个 Skill。目标目录已存在时默认拒绝覆盖；明确确认后添加 `--force`。
+将 `build-skill` 替换为 `build-plugin`、`build-prd`、`shape-idea` 或 `handoff` 即可安装另一个 Skill。目标目录已存在时默认拒绝覆盖；明确确认后添加 `--force`。
 
 ## 验证
 

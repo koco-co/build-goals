@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "build-goals",
   "displayName": "Build Goals",
-  "version": "1.0.0",
+  "version": "1.0.0+codex.20260810103622",
   "description": "Clarify goals and build high-quality Agent Skills, Claude Code or Codex plugins, and complete product PRDs.",
   "author": {
     "name": "koco-co",

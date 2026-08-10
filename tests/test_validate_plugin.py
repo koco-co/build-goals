@@ -101,7 +101,7 @@ class ValidatePluginTests(unittest.TestCase):
         self.assertIn("skills/build-skill", result.stdout)
         self.assertIn("skills/build-plugin", result.stdout)
         self.assertIn("skills/build-prd", result.stdout)
-        self.assertIn("skills/clarify-goal", result.stdout)
+        self.assertIn("skills/shape-idea", result.stdout)
         self.assertIn("skills/handoff", result.stdout)
 
     def test_dual_version_mismatch_fails(self) -> None:

@@ -1,6 +1,6 @@
 {
   "name": "build-goals",
-  "version": "1.0.0",
+  "version": "1.0.0+codex.20260810103622",
   "description": "A focused toolkit for clarifying goals and building verifiable Agent Skills, plugins, and complete product PRDs.",
   "author": {
     "name": "koco-co",
@@ -29,7 +29,7 @@
     ],
     "websiteURL": "https://github.com/koco-co/build-goals",
     "defaultPrompt": [
-      "Use clarify-goal to resolve a goal, its scope, and its key decisions.",
+      "Use shape-idea to turn a rough idea into a clear scope with fully resolved decisions.",
       "Use build-skill or build-plugin to create a verifiable Agent capability.",
       "Use build-prd to turn an existing product or early idea into a research-backed, fully decided PRD, or handoff to prepare the next session."
     ],

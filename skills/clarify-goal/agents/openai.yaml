@@ -1,7 +1,0 @@
-interface:
-  display_name: "Clarify Goal"
-  short_description: "逐项澄清目标、范围与关键决策"
-  default_prompt: "使用 $clarify-goal 逐项澄清我的目标、范围和关键决策，直到形成完整且无歧义的确认结论。"
-
-policy:
-  allow_implicit_invocation: false

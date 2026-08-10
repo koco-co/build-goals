@@ -1,6 +1,6 @@
 ---
-name: clarify-goal
-description: 逐项澄清目标、范围、约束与关键决策，沿决策树一次解决一个问题，直到形成无歧义的确认结论。
+name: shape-idea
+description: 通过逐项访谈与事实核查，把初步想法塑造成目标、范围、约束与关键决策均明确的完整定义。
 compatibility: 当前适配 Claude Code 与 Codex。
 disable-model-invocation: true
 metadata:
@@ -10,11 +10,11 @@ metadata:
 
 # Outcome
 
-通过逐项访谈系统梳理用户的目标或想法，查明事实并确定关键决策，直到双方形成完整、无歧义的共同理解。
+通过逐项访谈系统梳理用户的初步想法，查明事实并确定关键决策，直到将其塑造成完整、无歧义的共同理解。
 
 ## Routing
 
-- 用户明确调用 `clarify-goal` 时进入本工作流。
+- 用户明确调用 `shape-idea` 时进入本工作流。
 - 围绕用户提出的目标、想法、计划、设计或决策展开澄清。
 - 普通问答、评审或实现请求不得自动触发本 Skill。
 
