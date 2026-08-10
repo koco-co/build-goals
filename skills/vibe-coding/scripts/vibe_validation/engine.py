@@ -81,7 +81,9 @@ def validate_project(
         plan_path = root / PLAN_PATH
         plan_text = read_required(plan_path, root, issues)
         if plan_text is not None:
-            _validate_document(plan_text, plan_path, PLAN_HEADINGS, "已确认", root, issues)
+            _validate_document(
+                plan_text, plan_path, PLAN_HEADINGS, "已确认", root, issues
+            )
             validate_substantive_sections(
                 plan_text,
                 ("## 测试数据计划", "## 验收矩阵"),
@@ -89,7 +91,9 @@ def validate_project(
                 root,
                 issues,
             )
-            tasks = validate_tasks(plan_text, plan_path, root, issues, phase == "delivery")
+            tasks = validate_tasks(
+                plan_text, plan_path, root, issues, phase == "delivery"
+            )
             if source_text is not None:
                 validate_traceability(
                     mode,
@@ -106,7 +110,9 @@ def validate_project(
         report_path = root / REPORT_PATH
         report_text = read_required(report_path, root, issues)
         if report_text is not None:
-            _validate_document(report_text, report_path, REPORT_HEADINGS, "已完成", root, issues)
+            _validate_document(
+                report_text, report_path, REPORT_HEADINGS, "已完成", root, issues
+            )
             validate_substantive_sections(
                 report_text,
                 (

@@ -39,7 +39,9 @@ def split_tasks(text: str) -> list[Task]:
     tasks: list[Task] = []
     for index, match in enumerate(matches):
         end = matches[index + 1].start() if index + 1 < len(matches) else len(text)
-        tasks.append(Task(match.group(1), int(match.group(2)), text[match.end():end].strip()))
+        tasks.append(
+            Task(match.group(1), int(match.group(2)), text[match.end() : end].strip())
+        )
     return tasks
 
 
@@ -57,11 +59,20 @@ def validate_tasks(
 ) -> list[Task]:
     tasks = split_tasks(text)
     if not tasks:
-        add_issue(issues, "error", "TASKS_REQUIRED", path, "至少需要一个 TASK-NNN。", root)
+        add_issue(
+            issues, "error", "TASKS_REQUIRED", path, "至少需要一个 TASK-NNN。", root
+        )
         return []
     numbers = [task.number for task in tasks]
     if numbers != list(range(1, len(numbers) + 1)):
-        add_issue(issues, "error", "TASK_SEQUENCE", path, f"任务编号必须从 001 连续递增；实际为 {numbers}。", root)
+        add_issue(
+            issues,
+            "error",
+            "TASK_SEQUENCE",
+            path,
+            f"任务编号必须从 001 连续递增；实际为 {numbers}。",
+            root,
+        )
     for task in tasks:
         for label in TASK_LABELS:
             value = _field(task.body, label)
@@ -78,14 +89,35 @@ def validate_tasks(
             continue
         status = _field(task.body, "状态")
         if status not in FINAL_STATES:
-            add_issue(issues, "error", "TASK_STATUS", path, f"{task.task_id} 缺少最终状态。", root)
+            add_issue(
+                issues,
+                "error",
+                "TASK_STATUS",
+                path,
+                f"{task.task_id} 缺少最终状态。",
+                root,
+            )
             continue
         commit = _field(task.body, "Commit")
         if status == "已完成":
             if not commit or not COMMIT_RE.fullmatch(commit.strip("`")):
-                add_issue(issues, "error", "TASK_COMMIT", path, f"{task.task_id} 缺少有效 commit SHA。", root)
+                add_issue(
+                    issues,
+                    "error",
+                    "TASK_COMMIT",
+                    path,
+                    f"{task.task_id} 缺少有效 commit SHA。",
+                    root,
+                )
             elif _is_git_repo(root) and not _commit_exists(root, commit.strip("`")):
-                add_issue(issues, "error", "TASK_COMMIT_UNKNOWN", path, f"{task.task_id} 的 commit 不存在。", root)
+                add_issue(
+                    issues,
+                    "error",
+                    "TASK_COMMIT_UNKNOWN",
+                    path,
+                    f"{task.task_id} 的 commit 不存在。",
+                    root,
+                )
     return tasks
 
 
@@ -120,7 +152,9 @@ def validate_traceability(
     issues: list[Issue],
 ) -> None:
     if mode == "greenfield":
-        identifiers = sorted(set(FUNCTION_RE.findall(source_text)) | set(AC_RE.findall(source_text)))
+        identifiers = sorted(
+            set(FUNCTION_RE.findall(source_text)) | set(AC_RE.findall(source_text))
+        )
         code = "PRD_TRACEABILITY"
         label = "PRD 需求/验收"
     else:
@@ -128,13 +162,29 @@ def validate_traceability(
         code = "AUDIT_TRACEABILITY"
         label = "迁移 Finding"
     if not identifiers:
-        add_issue(issues, "error", f"{code}_SOURCE", plan_path, f"权威输入中没有发现可追踪的{label} ID。", root)
+        add_issue(
+            issues,
+            "error",
+            f"{code}_SOURCE",
+            plan_path,
+            f"权威输入中没有发现可追踪的{label} ID。",
+            root,
+        )
         return
     for identifier in identifiers:
         if identifier not in plan_text:
-            add_issue(issues, "error", code, plan_path, f"任务清单未追踪 {identifier}。", root)
+            add_issue(
+                issues, "error", code, plan_path, f"任务清单未追踪 {identifier}。", root
+            )
         if report_text is not None and identifier not in report_text:
-            add_issue(issues, "error", f"{code}_REPORT", report_path, f"交付报告未追踪 {identifier}。", root)
+            add_issue(
+                issues,
+                "error",
+                f"{code}_REPORT",
+                report_path,
+                f"交付报告未追踪 {identifier}。",
+                root,
+            )
 
 
 def validate_report_tasks(
@@ -146,4 +196,11 @@ def validate_report_tasks(
 ) -> None:
     for task in tasks:
         if task.task_id not in report_text:
-            add_issue(issues, "error", "REPORT_TASK_MISSING", report_path, f"交付报告未追踪 {task.task_id}。", root)
+            add_issue(
+                issues,
+                "error",
+                "REPORT_TASK_MISSING",
+                report_path,
+                f"交付报告未追踪 {task.task_id}。",
+                root,
+            )

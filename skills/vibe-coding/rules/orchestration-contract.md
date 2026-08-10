@@ -46,18 +46,18 @@ docs/交付验收报告.md
 
 ## 3. Agent 团队角色
 
-| 角色 | 主要职责 | 写权限 |
-| --- | --- | --- |
-| Architecture Researcher | 官方规范、工具链、架构方案 | 无 |
-| Competitor Researcher | 竞品与开源参考 | 无 |
-| Repository Auditor | 全仓事实与风险 | 无 |
-| Implementation Planner | 功能切片、依赖和追踪 | 仅任务草案 |
-| Feature Developer | 单一功能切片和测试 | 仅分配 worktree |
-| Test Engineer | 测试矩阵、fixture、E2E | 分配范围内 |
-| UI Reviewer | 视觉、交互、无障碍 | 默认只读 |
-| Security Reviewer | 权限、秘密、依赖与数据流 | 默认只读 |
-| Integration Manager | 唯一集成、冲突处理和全量验证 | 集成分支 |
-| Independent Reviewer | 对照方案审查证据 | 无 |
+| 角色                    | 主要职责                     | 写权限          |
+| ----------------------- | ---------------------------- | --------------- |
+| Architecture Researcher | 官方规范、工具链、架构方案   | 无              |
+| Competitor Researcher   | 竞品与开源参考               | 无              |
+| Repository Auditor      | 全仓事实与风险               | 无              |
+| Implementation Planner  | 功能切片、依赖和追踪         | 仅任务草案      |
+| Feature Developer       | 单一功能切片和测试           | 仅分配 worktree |
+| Test Engineer           | 测试矩阵、fixture、E2E       | 分配范围内      |
+| UI Reviewer             | 视觉、交互、无障碍           | 默认只读        |
+| Security Reviewer       | 权限、秘密、依赖与数据流     | 默认只读        |
+| Integration Manager     | 唯一集成、冲突处理和全量验证 | 集成分支        |
+| Independent Reviewer    | 对照方案审查证据             | 无              |
 
 同一 Agent 不同时担任功能实现者和最终独立 Reviewer。
 
@@ -84,11 +84,17 @@ docs/交付验收报告.md
 
 ```markdown
 ## Facts
+
 ## Sources
+
 ## Findings
+
 ## Options
+
 ## Recommendation
+
 ## Risks
+
 ## Evidence Gaps
 ```
 
@@ -96,12 +102,19 @@ docs/交付验收报告.md
 
 ```markdown
 ## Task
+
 ## Files Changed
+
 ## Tests Added First
+
 ## Implementation
+
 ## Commands and Results
+
 ## Commit
+
 ## Deviations
+
 ## Blockers
 ```
 
@@ -109,9 +122,13 @@ docs/交付验收报告.md
 
 ```markdown
 ## Integrated Commits
+
 ## Conflicts
+
 ## Validation
+
 ## Task Plan Updates
+
 ## Remaining Risks
 ```
 

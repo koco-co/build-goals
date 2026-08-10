@@ -37,11 +37,25 @@ def is_git_repo(root: Path) -> bool:
 
 def validate_clean_git(root: Path, issues: list[Issue]) -> None:
     if not is_git_repo(root):
-        add_issue(issues, "warning", "GIT_UNAVAILABLE", root, "项目不是 Git 工作树，无法验证干净状态。", root)
+        add_issue(
+            issues,
+            "warning",
+            "GIT_UNAVAILABLE",
+            root,
+            "项目不是 Git 工作树，无法验证干净状态。",
+            root,
+        )
         return
     result = git_run(root, "status", "--porcelain")
     if result.returncode != 0:
-        add_issue(issues, "error", "GIT_STATUS", root, result.stderr.strip() or "无法读取 Git 状态。", root)
+        add_issue(
+            issues,
+            "error",
+            "GIT_STATUS",
+            root,
+            result.stderr.strip() or "无法读取 Git 状态。",
+            root,
+        )
     elif result.stdout.strip():
         add_issue(issues, "error", "GIT_DIRTY", root, "Git 工作区不干净。", root)
 
@@ -59,7 +73,14 @@ def validate_tracked_secrets(root: Path, issues: list[Issue]) -> None:
         path = root / raw
         lower_name = path.name.lower()
         if lower_name in SUSPICIOUS_NAMES or path.suffix.lower() in SECRET_SUFFIXES:
-            add_issue(issues, "error", "TRACKED_SECRET_FILE", path, "疑似秘密文件已被 Git 跟踪。", root)
+            add_issue(
+                issues,
+                "error",
+                "TRACKED_SECRET_FILE",
+                path,
+                "疑似秘密文件已被 Git 跟踪。",
+                root,
+            )
             continue
         try:
             if not path.is_file() or path.stat().st_size > 1_000_000:
@@ -68,4 +89,11 @@ def validate_tracked_secrets(root: Path, issues: list[Issue]) -> None:
         except OSError:
             continue
         if PRIVATE_KEY_RE.search(content):
-            add_issue(issues, "error", "TRACKED_PRIVATE_KEY", path, "已跟踪文件包含私钥头。", root)
+            add_issue(
+                issues,
+                "error",
+                "TRACKED_PRIVATE_KEY",
+                path,
+                "已跟踪文件包含私钥头。",
+                root,
+            )

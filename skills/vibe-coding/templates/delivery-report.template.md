@@ -14,9 +14,9 @@
 
 ## 需求追踪结果
 
-| 需求/验收/Finding | 任务 | Commit | 测试证据 | 结果 |
-| --- | --- | --- | --- | --- |
-| {{ID}} | TASK-001 | `{{sha}}` | `{{command/report}}` | 通过 |
+| 需求/验收/Finding | 任务     | Commit    | 测试证据             | 结果 |
+| ----------------- | -------- | --------- | -------------------- | ---- |
+| {{ID}}            | TASK-001 | `{{sha}}` | `{{command/report}}` | 通过 |
 
 ## 最终架构与目录
 
@@ -28,17 +28,17 @@
 
 ## Agent、Worktree 与提交
 
-| 任务 | Agent | Worktree/分支 | Commit | 集成状态 |
-| --- | --- | --- | --- | --- |
-| TASK-001 | {{role}} | `{{path/branch}}` | `{{sha}}` | 已集成 |
+| 任务     | Agent    | Worktree/分支     | Commit    | 集成状态 |
+| -------- | -------- | ----------------- | --------- | -------- |
+| TASK-001 | {{role}} | `{{path/branch}}` | `{{sha}}` | 已集成   |
 
 ## 实际验证
 
-| 层级 | 命令或场景 | 结果 | 证据 |
-| --- | --- | --- | --- |
-| Format/Lint/Type | `{{command}}` | 通过 | {{output}} |
-| Unit/Integration | `{{command}}` | 通过 | {{report}} |
-| E2E | {{journey}} | 通过 | {{evidence}} |
+| 层级             | 命令或场景    | 结果 | 证据         |
+| ---------------- | ------------- | ---- | ------------ |
+| Format/Lint/Type | `{{command}}` | 通过 | {{output}}   |
+| Unit/Integration | `{{command}}` | 通过 | {{report}}   |
+| E2E              | {{journey}}   | 通过 | {{evidence}} |
 
 ## 正常测试数据
 

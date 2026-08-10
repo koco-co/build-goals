@@ -108,13 +108,29 @@ def validate_headings(
     for heading in required_tuple:
         matches = list(re.finditer(rf"(?m)^{re.escape(heading)}\s*$", text))
         if not matches:
-            add_issue(issues, "error", "HEADING_REQUIRED", path, f"缺少章节 {heading!r}。", root)
+            add_issue(
+                issues,
+                "error",
+                "HEADING_REQUIRED",
+                path,
+                f"缺少章节 {heading!r}。",
+                root,
+            )
             continue
         if len(matches) > 1:
-            add_issue(issues, "error", "HEADING_DUPLICATE", path, f"章节 {heading!r} 出现多次。", root)
+            add_issue(
+                issues,
+                "error",
+                "HEADING_DUPLICATE",
+                path,
+                f"章节 {heading!r} 出现多次。",
+                root,
+            )
         positions.append(matches[0].start())
     if len(positions) == len(required_tuple) and positions != sorted(positions):
-        add_issue(issues, "error", "HEADING_ORDER", path, "核心章节顺序不符合模板契约。", root)
+        add_issue(
+            issues, "error", "HEADING_ORDER", path, "核心章节顺序不符合模板契约。", root
+        )
 
 
 def validate_status(
@@ -135,12 +151,21 @@ def validate_status(
         )
 
 
-def validate_placeholders(text: str, path: Path, root: Path, issues: list[Issue]) -> None:
+def validate_placeholders(
+    text: str, path: Path, root: Path, issues: list[Issue]
+) -> None:
     for pattern, label in PLACEHOLDERS:
         match = pattern.search(text)
         if match:
             line = text.count("\n", 0, match.start()) + 1
-            add_issue(issues, "error", "PLACEHOLDER", path, f"第 {line} 行包含 {label}。", root)
+            add_issue(
+                issues,
+                "error",
+                "PLACEHOLDER",
+                path,
+                f"第 {line} 行包含 {label}。",
+                root,
+            )
 
 
 def section_body(text: str, heading: str) -> Optional[str]:
@@ -164,4 +189,11 @@ def validate_substantive_sections(
     for heading in headings:
         body = section_body(text, heading)
         if body is not None and len(re.sub(r"\s+", "", body)) < minimum:
-            add_issue(issues, "error", "SECTION_EMPTY", path, f"章节 {heading!r} 内容不足。", root)
+            add_issue(
+                issues,
+                "error",
+                "SECTION_EMPTY",
+                path,
+                f"章节 {heading!r} 内容不足。",
+                root,
+            )
