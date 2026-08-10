@@ -20,8 +20,8 @@ from typing import Iterable, Optional, Sequence
 HERO_RE = re.compile(r"\A\s*<div\s+align=[\"']center[\"']\s*>", re.IGNORECASE)
 TITLE_RE = re.compile(r"(?m)^#\s+(.+?)\s*$")
 TAGLINE_RE = re.compile(
-    r"<p\s+align=[\"']center[\"']\s*>\s*<(?P<tag>i|em)>"
-    r"(?P<content>.+?)</(?P=tag)>\s*</p>",
+    r"<p\s+align=[\"']center[\"']\s*>\s*"
+    r"(?P<content>.+?)\s*</p>",
     re.IGNORECASE | re.DOTALL,
 )
 HTML_HEADING_RE = re.compile(r"<h([2-6])\b([^>]*)>(.*?)</h\1>", re.I | re.S)
@@ -43,6 +43,10 @@ BODY_BOLD_RE = re.compile(
     r"(?<!\*)\*\*[^*\n]+\*\*(?!\*)|(?<!_)__[^_\n]+__(?!_)"
 )
 HTML_BOLD_RE = re.compile(r"<(?:strong|b)\b", re.I)
+HTML_ITALIC_RE = re.compile(r"</?(?:i|em)\b", re.I)
+CHINESE_MARKDOWN_ITALIC_RE = re.compile(
+    r"(?<!\w)_[^_\n]*[\u3400-\u9fff][^_\n]*_(?!\w)"
+)
 MARKUP_ARTIFACT_RE = re.compile(r"(?mi)^\s*(?:[-*+]\s+)?`span`\s*$")
 REMOTE_IMAGE_HOSTS = {"img.shields.io"}
 TRACKED_HTML_TAGS = {
@@ -297,7 +301,7 @@ def validate_hero(text: str, path: Path, issues: list[Issue]) -> None:
             "TAGLINE_STYLE",
             path,
             1,
-            "一句话描述必须使用居中的 <p><i> HTML 结构，不能使用 ***。",
+            "一句话描述必须使用居中的 <p> 段落，不能使用 *** 或 HTML 斜体标签。",
         )
     elif not uses_mathematical_style(
         plain_text(tagline.group("content")), "BOLD ITALIC"
@@ -366,13 +370,23 @@ def validate_section_anchors(
             )
 
 
-def has_visible_prose(value: str) -> bool:
-    without_links = re.sub(r"!?\[([^\]]*)\]\([^)]+\)", r"\1", value)
-    without_tags = re.sub(r"<[^>]+>", "", without_links)
-    return bool(re.search(r"[A-Za-z0-9\u3400-\u9fff]", without_tags))
+def _english_italic_intervals(value: str) -> list[tuple[int, int]]:
+    return [
+        match.span()
+        for match in re.finditer(r"(?<!\w)_[^_\n]+_(?!\w)", value)
+    ]
 
 
-def validate_body_italics(
+def _english_prose(value: str) -> str:
+    """Remove machine-readable markup before checking visible English prose."""
+    value = re.sub(r"<code\b[^>]*>.*?</code>", "", value, flags=re.I | re.S)
+    value = re.sub(r"!?(\[[^\]]*\])\([^)]*\)", r"\1", value)
+    value = re.sub(r"https?://\S+", "", value, flags=re.I)
+    value = re.sub(r"<[^>]+>", "", value)
+    return value
+
+
+def validate_body_english_italics(
     body: str,
     body_offset: int,
     full_text: str,
@@ -395,19 +409,53 @@ def validate_body_italics(
         ):
             continue
 
-        remaining = re.sub(
-            r"<(?:i|em)>.*?</(?:i|em)>", "", stripped, flags=re.I
-        )
-        if has_visible_prose(remaining):
+        if stripped.startswith("```") or stripped.startswith("~~~"):
+            continue
+        visible = _english_prose(stripped)
+        intervals = _english_italic_intervals(visible)
+        for match in re.finditer(r"[A-Za-z]+", visible):
+            if any(
+                start <= match.start() and match.end() <= end
+                for start, end in intervals
+            ):
+                continue
             add_issue(
                 issues,
                 "error",
-                "BODY_ITALIC",
+                "ENGLISH_ITALIC",
                 path,
                 line_number(full_text, line_offset),
-                "普通正文和列表说明必须完整使用 <i> 或 <em> 斜体。",
+                "英文正文必须使用 Markdown _斜体_；中文正文保持普通字体。",
             )
             return
+
+
+def validate_html_italics(text: str, path: Path, issues: list[Issue]) -> None:
+    masked = mask_code(text)
+    match = HTML_ITALIC_RE.search(masked)
+    if match:
+        add_issue(
+            issues,
+            "error",
+            "HTML_ITALIC_FORBIDDEN",
+            path,
+            line_number(masked, match.start()),
+            "禁止使用 HTML <i> 或 <em> 斜体标签；英文正文请使用 Markdown _斜体_。",
+        )
+
+
+def validate_chinese_italics(text: str, path: Path, issues: list[Issue]) -> None:
+    masked = mask_code(text)
+    match = CHINESE_MARKDOWN_ITALIC_RE.search(masked)
+    if match:
+        add_issue(
+            issues,
+            "error",
+            "CHINESE_ITALIC_FORBIDDEN",
+            path,
+            line_number(masked, match.start()),
+            "中文正文必须保持普通字体，不能使用 Markdown _斜体_。",
+        )
 
 
 def validate_fences(text: str, path: Path, issues: list[Issue]) -> None:
@@ -509,17 +557,9 @@ def validate_section_style(text: str, path: Path, issues: list[Issue]) -> None:
             "正文不能使用 Markdown 或 HTML 粗体。",
         )
 
-    if "<i>" not in body.lower() and "<em>" not in body.lower():
-        add_issue(
-            issues,
-            "warning",
-            "BODY_ITALIC",
-            path,
-            1,
-            "正文未发现 HTML 斜体内容。",
-        )
-    else:
-        validate_body_italics(body, body_offset, masked, path, issues)
+    validate_body_english_italics(body, body_offset, masked, path, issues)
+    validate_html_italics(text, path, issues)
+    validate_chinese_italics(text, path, issues)
 
     original_hero_end = text.lower().find("</div>")
     original_body_offset = (

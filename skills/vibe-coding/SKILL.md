@@ -1,6 +1,6 @@
 ---
 name: vibe-coding
-description: 仅由用户显式调用的端到端软件交付总控编排 Skill。用于依据 docs/PRD需求文档.md 从零设计并实现项目，或对已有项目完成竞品、官方与开源参考调研、全仓架构审查和最佳实践迁移；经过架构方案与实施任务两次确认后，以现代化工具链、TDD、多 Agent 和可选 Git worktrees 完成功能开发、原子提交与全链路验收。
+description: 依据 docs/PRD需求文档.md 从零设计并实现项目，或对已有项目完成竞品、官方与开源参考调研、全仓架构审查和最佳实践迁移；经过架构方案与实施任务两次确认后，以现代化工具链、TDD、多 Agent 和可选 Git worktrees 完成功能开发、原子提交与全链路验收。
 compatibility: 当前适配 Claude Code 与 Codex；需要联网调研、仓库读写、Git、测试工具，以及按项目需要提供浏览器、视觉或组件交互验证能力。
 disable-model-invocation: true
 metadata:

@@ -18,7 +18,7 @@ VALID_README = """
 
 # 𝓑𝓾𝓲𝓵𝓭 𝓕𝓵𝓸𝔀
 
-<p align="center"><i>从想法到可验证交付 · 𝑭𝒓𝒐𝒎 𝑰𝒅𝒆𝒂 𝒕𝒐 𝑽𝒆𝒓𝒊𝒇𝒊𝒂𝒃𝒍𝒆 𝑫𝒆𝒍𝒊𝒗𝒆𝒓𝒚</i></p>
+<p align="center">从想法到可验证交付 · 𝑭𝒓𝒐𝒎 𝑰𝒅𝒆𝒂 𝒕𝒐 𝑽𝒆𝒓𝒊𝒇𝒊𝒂𝒃𝒍𝒆 𝑫𝒆𝒍𝒊𝒗𝒆𝒓𝒚</p>
 
 [![Python](https://img.shields.io/badge/Python-3.9%2B-3776AB)](https://python.org)
 [![License](https://img.shields.io/badge/License-MIT-green)](https://opensource.org/license/mit)
@@ -28,10 +28,10 @@ VALID_README = """
 <a id="overview"></a>
 <h2 align="center">𝑶𝒗𝒆𝒓𝒗𝒊𝒆𝒘 · 简介</h2>
 
-<p><i>Build Flow 用于把项目事实整理成可执行文档。</i></p>
+<p>_Build Flow_ 用于把项目事实整理成可执行文档。</p>
 
-- <i>先读取仓库事实。</i>
-- <i>再生成可验证的 README。</i>
+- 先读取仓库事实。
+- 再生成可验证的 _README_。
 
 <a id="workflow"></a>
 <h2 align="center">𝑾𝒐𝒓𝒌𝒇𝒍𝒐𝒘 · 流程</h2>
@@ -121,7 +121,7 @@ class ValidateReadmeTests(unittest.TestCase):
             path = self.write_readme(
                 Path(temp),
                 VALID_README.replace(
-                    '<p align="center"><i>从想法到可验证交付 · 𝑭𝒓𝒐𝒎 𝑰𝒅𝒆𝒂 𝒕𝒐 𝑽𝒆𝒓𝒊𝒇𝒊𝒂𝒃𝒍𝒆 𝑫𝒆𝒍𝒊𝒗𝒆𝒓𝒚</i></p>',
+                    '<p align="center">从想法到可验证交付 · 𝑭𝒓𝒐𝒎 𝑰𝒅𝒆𝒂 𝒕𝒐 𝑽𝒆𝒓𝒊𝒇𝒊𝒂𝒃𝒍𝒆 𝑫𝒆𝒍𝒊𝒗𝒆𝒓𝒚</p>',
                     '***从想法到可验证交付***',
                 ),
             )
@@ -165,14 +165,31 @@ class ValidateReadmeTests(unittest.TestCase):
             self.assertEqual(result.returncode, 1)
             self.assertIn("SECTION_DECORATION", result.stdout)
 
-    def test_plain_body_paragraph_fails(self) -> None:
+    def test_plain_english_body_paragraph_fails(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
             path = self.write_readme(
                 Path(temp), VALID_README + "\n<p>This paragraph is not italic.</p>\n"
             )
             result = self.run_validator(path)
             self.assertEqual(result.returncode, 1)
-            self.assertIn("BODY_ITALIC", result.stdout)
+            self.assertIn("ENGLISH_ITALIC", result.stdout)
+
+    def test_html_italic_fails(self) -> None:
+        for tag in ("i", "em"):
+            with self.subTest(tag=tag), tempfile.TemporaryDirectory() as temp:
+                path = self.write_readme(
+                    Path(temp), VALID_README + f"\n<p><{tag}>中文</{tag}></p>\n"
+                )
+                result = self.run_validator(path)
+                self.assertEqual(result.returncode, 1)
+                self.assertIn("HTML_ITALIC_FORBIDDEN", result.stdout)
+
+    def test_chinese_markdown_italic_fails(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            path = self.write_readme(Path(temp), VALID_README + "\n<p>_中文说明_</p>\n")
+            result = self.run_validator(path)
+            self.assertEqual(result.returncode, 1)
+            self.assertIn("CHINESE_ITALIC_FORBIDDEN", result.stdout)
 
     def test_all_bold_syntaxes_fail(self) -> None:
         variants = ("__Bold text__", "<strong>Bold text</strong>", "<b>Bold text</b>")
@@ -297,7 +314,7 @@ class ValidateReadmeTests(unittest.TestCase):
     def test_body_bold_fails(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
             path = self.write_readme(
-                Path(temp), VALID_README + "\n<p><i>**Do not use bold.**</i></p>\n"
+                Path(temp), VALID_README + "\n<p>**Do not use bold.**</p>\n"
             )
             result = self.run_validator(path)
             self.assertEqual(result.returncode, 1)
