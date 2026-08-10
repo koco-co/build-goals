@@ -1,7 +1,7 @@
 {
   "name": "build-goals",
-  "version": "1.0.0+codex.20260810103622",
-  "description": "A focused toolkit for clarifying goals and building verifiable Agent Skills, plugins, and complete product PRDs.",
+  "version": "1.1.0",
+  "description": "A focused toolkit for clarifying goals and building verifiable Agent Skills, plugins, product PRDs, and GitHub READMEs.",
   "author": {
     "name": "koco-co",
     "url": "https://github.com/koco-co"
@@ -13,13 +13,14 @@
     "codex",
     "claude-code",
     "plugin-development",
-    "product-requirements"
+    "product-requirements",
+    "readme-generation"
   ],
   "skills": "./skills/",
   "interface": {
     "displayName": "Build Goals",
-    "shortDescription": "Clarify goals and build Skills, plugins, and PRDs",
-    "longDescription": "A focused toolkit that turns clarified goals into designed, implemented, validated, and deliverable Agent Skills, Claude Code or Codex plugins, and research-backed product requirements documents.",
+    "shortDescription": "Clarify goals and build Skills, plugins, PRDs, and READMEs",
+    "longDescription": "A focused toolkit that turns clarified goals and repository facts into designed, implemented, validated, and deliverable Agent Skills, Claude Code or Codex plugins, product requirements documents, and GitHub READMEs.",
     "developerName": "koco-co",
     "category": "Productivity",
     "capabilities": [
@@ -31,6 +32,7 @@
     "defaultPrompt": [
       "Use shape-idea to turn a rough idea into a clear scope with fully resolved decisions.",
       "Use build-skill or build-plugin to create a verifiable Agent capability.",
+      "Use build-readme to explore a repository and create or update its GitHub README after a confirmed preview.",
       "Use build-prd to turn an existing product or early idea into a research-backed, fully decided PRD, or handoff to prepare the next session."
     ],
     "brandColor": "#111827"

@@ -1,0 +1,7 @@
+interface:
+  display_name: "Build README"
+  short_description: "探索项目并创建或更新可验证的 GitHub README"
+  default_prompt: "使用 $build-readme 探索当前项目，预览并在确认后创建或更新 README.md。"
+
+policy:
+  allow_implicit_invocation: false
