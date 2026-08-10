@@ -149,7 +149,7 @@ def install_skill(
     repo_root = repo_root.expanduser().resolve()
     source = repo_root / "skills" / skill_name
     validator = (
-        repo_root / "skills" / "building-skills" / "scripts" / "validate_skill.py"
+        repo_root / "skills" / "build-skill" / "scripts" / "validate_skill.py"
     )
 
     if scope == "project":

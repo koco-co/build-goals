@@ -1,13 +1,13 @@
 <div align="center">
 
-# 𝓐𝔀𝓮𝓼𝓸𝓶𝓮 𝓐𝓰𝓮𝓷𝓽 𝓢𝓴𝓲𝓵𝓵𝓼
+# 𝓑𝓾𝓲𝓵𝓭 𝓖𝓸𝓪𝓵𝓼
 
-**面向 Claude Code 与 Codex 的高质量 Agent Skills / Plugin 构建仓库**
+**从目标澄清到 Agent Skill、Plugin 与产品 PRD 交付**
 
 [![Claude Code](https://img.shields.io/badge/Claude_Code-Plugin-D97757?logo=anthropic&logoColor=white&cacheSeconds=3600)](https://code.claude.com/docs/en/plugins)
 [![Codex](https://img.shields.io/badge/Codex-Supported-000000?style=flat-square&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMCAyMCI+PHBhdGggZmlsbD0iI2ZmZiIgZD0iTTExLjI0OCAxOC4yNXEtLjgyNSAwLTEuNTY4LS4zMTRhNC4zIDQuMyAwIDAgMS0xLjMyLS44NzQgNCA0IDAgMCAxLTEuMzA0LjIxNCA0IDQgMCAwIDEtMi4wNDYtLjU0NCA0LjI3IDQuMjcgMCAwIDEtMS41MTgtMS40ODUgNCA0IDAgMCAxLS41Ni0yLjA5NXEwLS40OC4xMzEtMS4wNEE0LjQgNC40IDAgMCAxIDIuMDQgMTAuNzFhNC4wNyA0LjA3IDAgMCAxIC4wMTctMy40IDQuMiA0LjIgMCAwIDEgMS4wNTYtMS40MTggMy44IDMuOCAwIDAgMSAxLjYtLjg0MiAzLjkgMy45IDAgMCAxIC43Ni0xLjY4M3EuNTkzLS43NTkgMS40NTEtMS4xODhhNC4wNCA0LjA0IDAgMCAxIDEuODMyLS40MjlxLjgyNSAwIDEuNTY3LjMxMy43NDIuMzE0IDEuMzIuODc1YTQgNCAwIDAgMSAxLjMwNC0uMjE1cTEuMTA2IDAgMi4wNDYuNTQ1YTQuMTQgNC4xNCAwIDAgMSAxLjUwMSAxLjQ4NXEuNTc4Ljk0MS41NzggMi4wOTUgMCAuNDgtLjEzMiAxLjA0LjY2LjYxIDEuMDIzIDEuNDE5LjM2My43OTIuMzYzIDEuNjY2IDAgLjg5Mi0uMzggMS43MTdhNC4zIDQuMyAwIDAgMS0xLjA3MiAxLjQzNSAzLjggMy44IDAgMCAxLTEuNTg0LjgyNSAzLjggMy44IDAgMCAxLS43NzUgMS42ODMgNC4wNiA0LjA2IDAgMCAxLTEuNDM2IDEuMTg4IDQuMDQgNC4wNCAwIDAgMS0xLjgzMi40MjltLTQuMDc2LTIuMDYycS44MjUgMCAxLjQzNS0uMzQ3bDMuMTAzLTEuNzgyYS4zNi4zNiAwIDAgMCAuMTY0LS4zMTN2LTEuNDJMNy44ODEgMTQuNjJhLjY3LjY3IDAgMCAxLS43MjYgMGwtMy4xMTgtMS43OThhLjUuNSAwIDAgMS0uMDE3LjExNXYuMTk4cTAgLjg0MS4zOTYgMS41NTEuNDEzLjY5MyAxLjEzOSAxLjA4OWEzLjIgMy4yIDAgMCAwIDEuNjE3LjQxMm0uMTY1LTIuNjlhLjQuNCAwIDAgMCAuMTgxLjA1cS4wODMgMCAuMTY1LS4wNWwxLjIzOC0uNzEtMy45NzctMi4zMWEuNy43IDAgMCAxLS4zNjMtLjY0M3YtMy41OHEtLjgyNS4zNjItMS4zMiAxLjEyMmEyLjkgMi45IDAgMCAwLS40OTUgMS42NXEwIC44MDkuNDEzIDEuNTUuNDEyLjc0MyAxLjA3MiAxLjEyM3ptMy45MSAzLjY2M3EuODc1IDAgMS41ODUtLjM5NmEyLjk2IDIuOTYgMCAwIDAgMS41MzQtMi42NHYtMy41NjRhLjMyLjMyIDAgMCAwLS4xNjUtLjI5N2wtMS4yNTQtLjcyNnY0LjYwNGEuNy43IDAgMCAxLS4zNjMuNjQzbC0zLjExOSAxLjc5OWEzIDMgMyAwIDAgMCAxLjc4My41NzdtLjYyNy02LjAzOVY4Ljg3OEwxMC4wMSA3LjgyMiA4LjEyOSA4Ljg3OHYyLjI0NGwxLjg4MSAxLjA1NnoiLz48L3N2Zz4=&logoWidth=14)](https://developers.openai.com/plugins/)
 [![Agent Skills](https://img.shields.io/badge/Agent_Skills-Compatible-2563EB?cacheSeconds=3600)](https://agentskills.io/)
-[![Validate Plugin](https://github.com/koco-co/awesome-agent-skills/actions/workflows/validate-skills.yml/badge.svg)](https://github.com/koco-co/awesome-agent-skills/actions/workflows/validate-skills.yml)
+[![Validate Plugin](https://github.com/koco-co/build-goals/actions/workflows/validate-skills.yml/badge.svg)](https://github.com/koco-co/build-goals/actions/workflows/validate-skills.yml)
 [![Python](https://img.shields.io/badge/Python-3.9%2B-3776AB?logo=python&logoColor=white&cacheSeconds=3600)](https://www.python.org/)
 [![License](https://img.shields.io/badge/License-Not_declared-lightgrey?cacheSeconds=3600)](#license)
 
@@ -17,7 +17,7 @@
 
 ## 简介
 
-`awesome-agent-skills` 是一个个人维护、持续演进的 Agent 能力仓库。它既是一个可以直接加载的双平台 Plugin，也保留了单个 Skill 的独立安装方式。
+`build-goals` 是一个个人维护、持续演进的 Agent 目标构建仓库。它既是一个可以直接加载的双平台 Plugin，也保留了单个 Skill 的独立安装方式。
 
 当前只适配：
 
@@ -28,17 +28,17 @@
 
 ## 已收录能力
 
-| Skill                                          | 作用                                        | Claude Code                              | Codex               |
-| ---------------------------------------------- | ------------------------------------------- | ---------------------------------------- | ------------------- |
-| [`building-skills`](skills/building-skills/)   | 从零构建或系统升级高质量 Agent Skill        | `/awesome-agent-skills:building-skills`  | `$building-skills`  |
-| [`building-plugins`](skills/building-plugins/) | 构建、升级或迁移 Claude Code / Codex Plugin | `/awesome-agent-skills:building-plugins` | `$building-plugins` |
-| [`building-prds`](skills/building-prds/)       | 调研并生成决策完整的产品 PRD                | `/awesome-agent-skills:building-prds`    | `$building-prds`    |
-| [`grill-me`](skills/grill-me/)                 | 通过逐项访谈完善计划、设计或决策            | `/awesome-agent-skills:grill-me`         | `$grill-me`         |
-| [`handoff`](skills/handoff/)                   | 将当前会话整理为供下一位 Agent 接续的文档   | `/awesome-agent-skills:handoff`          | `$handoff`          |
+| Skill                                      | 作用                                        | Claude Code                    | Codex           |
+| ------------------------------------------ | ------------------------------------------- | ------------------------------ | --------------- |
+| [`clarify-goal`](skills/clarify-goal/)     | 逐项澄清目标、范围与关键决策                | `/build-goals:clarify-goal`    | `$clarify-goal` |
+| [`build-skill`](skills/build-skill/)       | 从零构建或系统升级高质量 Agent Skill        | `/build-goals:build-skill`     | `$build-skill`  |
+| [`build-plugin`](skills/build-plugin/)     | 构建、升级或迁移 Claude Code / Codex Plugin | `/build-goals:build-plugin`    | `$build-plugin` |
+| [`build-prd`](skills/build-prd/)           | 调研并生成决策完整的产品 PRD                | `/build-goals:build-prd`       | `$build-prd`    |
+| [`handoff`](skills/handoff/)               | 将当前会话整理为供下一位 Agent 接续的文档   | `/build-goals:handoff`         | `$handoff`      |
 
 五个 Skill 都采用**仅限用户显式调用**的策略。普通提示词润色、一般编码或文档任务不会自动进入这些工作流。
 
-`building-prds` 支持已有项目的全功能梳理，也能把尚不完整的产品想法完善为详细 PRD。它会联网调研当前竞品、活跃开源项目与适用的官方规范，逐项确认所有产品决策，并生成或规范化更新当前项目唯一的 `docs/PRD需求文档.md`。文档只包含产品作用、功能、输入输出、交互、最终文案和可验收的质量要求，不包含技术架构或技术选型。
+`build-prd` 支持已有项目的全功能梳理，也能把尚不完整的想法完善为详细 PRD。它会联网调研当前竞品、活跃开源项目与适用的官方规范，逐项确认所有产品决策，并生成或规范化更新当前项目唯一的 `docs/PRD需求文档.md`。文档只包含产品作用、功能、输入输出、交互、最终文案和可验收的质量要求，不包含技术架构或技术选型。
 
 ## 核心原则
 
@@ -53,7 +53,7 @@
 ## 仓库结构
 
 ```text
-awesome-agent-skills/
+build-goals/
 ├── .agents/
 │   └── plugins/
 │       └── marketplace.json
@@ -67,34 +67,34 @@ awesome-agent-skills/
 ├── scripts/
 │   └── install_skill.py
 ├── skills/
-│   ├── building-skills/
-│   ├── building-plugins/
-│   ├── building-prds/
-│   ├── grill-me/
+│   ├── clarify-goal/
+│   ├── build-skill/
+│   ├── build-plugin/
+│   ├── build-prd/
 │   └── handoff/
 └── tests/
 ```
 
-`building-plugins` 中复用的 Skill 模板、质量规则、校验器、检查清单和 Reviewer Agent 均通过相对软链接指向 `building-skills`。所有链接必须解析在当前 Plugin 根目录内；CI 会拒绝绝对链接、失效链接和越界链接。
+`build-plugin` 中复用的 Skill 模板、质量规则、校验器、检查清单和 Reviewer Agent 均通过相对软链接指向 `build-skill`。所有链接必须解析在当前 Plugin 根目录内；CI 会拒绝绝对链接、失效链接和越界链接。
 
 ## 快速开始
 
 ### Claude Code：本地加载整个 Plugin
 
 ```bash
-git clone https://github.com/koco-co/awesome-agent-skills.git
-cd awesome-agent-skills
+git clone https://github.com/koco-co/build-goals.git
+cd build-goals
 claude --plugin-dir .
 ```
 
 进入 Claude Code 后显式调用：
 
 ```text
-/awesome-agent-skills:building-skills
-/awesome-agent-skills:building-plugins
-/awesome-agent-skills:building-prds
-/awesome-agent-skills:grill-me
-/awesome-agent-skills:handoff
+/build-goals:clarify-goal
+/build-goals:build-skill
+/build-goals:build-plugin
+/build-goals:build-prd
+/build-goals:handoff
 ```
 
 修改 Plugin 后执行：
@@ -112,17 +112,17 @@ claude plugin validate . --strict
 ### Codex：添加仓库 Marketplace
 
 ```bash
-codex plugin marketplace add koco-co/awesome-agent-skills --ref main
+codex plugin marketplace add koco-co/build-goals --ref main
 codex plugin marketplace list
 ```
 
-随后在支持 Plugin 的 Codex / ChatGPT 界面中安装 `awesome-agent-skills`，并显式调用：
+随后在支持 Plugin 的 Codex / ChatGPT 界面中安装 `build-goals`，并显式调用：
 
 ```text
-$building-skills
-$building-plugins
-$building-prds
-$grill-me
+$clarify-goal
+$build-skill
+$build-plugin
+$build-prd
 $handoff
 ```
 
@@ -135,7 +135,7 @@ Plugin 是推荐分发方式。确实只需要一个 Skill 时，仍可使用兼
 Codex：
 
 ```bash
-python3 scripts/install_skill.py building-skills \
+python3 scripts/install_skill.py build-skill \
   --platform codex \
   --scope user
 ```
@@ -143,19 +143,19 @@ python3 scripts/install_skill.py building-skills \
 Claude Code：
 
 ```bash
-python3 scripts/install_skill.py building-skills \
+python3 scripts/install_skill.py build-skill \
   --platform claude \
   --scope user
 ```
 
-将 `building-skills` 替换为 `building-plugins`、`building-prds`、`grill-me` 或 `handoff` 即可安装另一个 Skill。目标目录已存在时默认拒绝覆盖；明确确认后添加 `--force`。
+将 `build-skill` 替换为 `build-plugin`、`build-prd`、`clarify-goal` 或 `handoff` 即可安装另一个 Skill。目标目录已存在时默认拒绝覆盖；明确确认后添加 `--force`。
 
 ## 验证
 
 验证整个双平台 Plugin：
 
 ```bash
-python3 skills/building-plugins/scripts/validate_plugin.py \
+python3 skills/build-plugin/scripts/validate_plugin.py \
   . \
   --platform dual \
   --strict
@@ -164,16 +164,16 @@ python3 skills/building-plugins/scripts/validate_plugin.py \
 验证单个 Skill：
 
 ```bash
-python3 skills/building-skills/scripts/validate_skill.py \
-  skills/building-skills \
+python3 skills/build-skill/scripts/validate_skill.py \
+  skills/build-skill \
   --profile dual \
   --strict
 ```
 
-验证 `building-prds` 生成的目标文档：
+验证 `build-prd` 生成的目标文档：
 
 ```bash
-python3 skills/building-prds/scripts/validate_prd.py \
+python3 skills/build-prd/scripts/validate_prd.py \
   /path/to/project/docs/PRD需求文档.md \
   --strict
 ```

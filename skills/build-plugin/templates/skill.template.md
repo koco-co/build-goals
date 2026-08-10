@@ -1,0 +1,1 @@
+../../build-skill/templates/skill.template.md

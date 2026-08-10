@@ -1,11 +1,11 @@
 {
-  "name": "awesome-agent-skills",
+  "name": "build-goals",
   "interface": {
-    "displayName": "Awesome Agent Skills"
+    "displayName": "Build Goals"
   },
   "plugins": [
     {
-      "name": "awesome-agent-skills",
+      "name": "build-goals",
       "source": {
         "source": "local",
         "path": "./"

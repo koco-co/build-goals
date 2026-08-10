@@ -16,7 +16,7 @@ class InstallSkillTests(unittest.TestCase):
         self,
         home: Path,
         platform: str,
-        skill: str = "building-skills",
+        skill: str = "build-skill",
         *extra: str,
     ) -> subprocess.CompletedProcess[str]:
         env = os.environ.copy()
@@ -45,7 +45,7 @@ class InstallSkillTests(unittest.TestCase):
             result = self.run_installer(home, "codex")
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
-            destination = home / ".agents" / "skills" / "building-skills"
+            destination = home / ".agents" / "skills" / "build-skill"
             skill_md = destination.joinpath("SKILL.md").read_text(encoding="utf-8")
             self.assertNotIn("disable-model-invocation:", skill_md)
             self.assertTrue(destination.joinpath("agents", "openai.yaml").is_file())
@@ -62,7 +62,7 @@ class InstallSkillTests(unittest.TestCase):
             result = self.run_installer(home, "claude")
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
-            destination = home / ".claude" / "skills" / "building-skills"
+            destination = home / ".claude" / "skills" / "build-skill"
             skill_md = destination.joinpath("SKILL.md").read_text(encoding="utf-8")
             self.assertIn("disable-model-invocation: true", skill_md)
             self.assertFalse(destination.joinpath("agents").exists())
@@ -71,20 +71,20 @@ class InstallSkillTests(unittest.TestCase):
             self.assertEqual(second.returncode, 1)
             self.assertIn("--force", second.stderr)
 
-            forced = self.run_installer(home, "claude", "building-skills", "--force")
+            forced = self.run_installer(home, "claude", "build-skill", "--force")
             self.assertEqual(forced.returncode, 0, forced.stdout + forced.stderr)
 
-    def test_building_plugins_install_materializes_shared_files(self) -> None:
+    def test_build_plugin_install_materializes_shared_files(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
             home = Path(temp)
             result = self.run_installer(
                 home,
                 "codex",
-                "building-plugins",
+                "build-plugin",
             )
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
-            destination = home / ".agents" / "skills" / "building-plugins"
+            destination = home / ".agents" / "skills" / "build-plugin"
             shared = destination / "prompts" / "reviewer.agent.md"
             self.assertTrue(shared.is_file())
             self.assertFalse(shared.is_symlink())
@@ -103,14 +103,14 @@ class InstallSkillTests(unittest.TestCase):
             self.assertNotIn("argument-hint:", skill_md)
             self.assertNotIn("disable-model-invocation:", skill_md)
 
-    def test_building_prds_installs_for_both_platforms(self) -> None:
+    def test_build_prd_installs_for_both_platforms(self) -> None:
         for platform, root_name in (("claude", ".claude"), ("codex", ".agents")):
             with self.subTest(platform=platform), tempfile.TemporaryDirectory() as temp:
                 home = Path(temp)
-                result = self.run_installer(home, platform, "building-prds")
+                result = self.run_installer(home, platform, "build-prd")
                 self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
-                destination = home / root_name / "skills" / "building-prds"
+                destination = home / root_name / "skills" / "build-prd"
                 self.assertTrue(destination.joinpath("SKILL.md").is_file())
                 self.assertTrue(
                     destination.joinpath("scripts", "validate_prd.py").is_file()
@@ -128,7 +128,7 @@ class InstallSkillTests(unittest.TestCase):
             result = self.run_installer(
                 home,
                 "codex",
-                "building-skills",
+                "build-skill",
                 "--dry-run",
             )
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)

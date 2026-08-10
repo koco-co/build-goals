@@ -8,7 +8,7 @@ import unittest
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-VALIDATOR = REPO_ROOT / "skills" / "building-prds" / "scripts" / "validate_prd.py"
+VALIDATOR = REPO_ROOT / "skills" / "build-prd" / "scripts" / "validate_prd.py"
 
 VALID_PRD = """
 # PRD需求文档
@@ -150,7 +150,7 @@ class ValidatePrdTests(unittest.TestCase):
             self.assertIn("PASS", result.stdout)
 
     def test_shipped_example_passes(self) -> None:
-        example = REPO_ROOT / "skills" / "building-prds" / "examples" / "prd.example.md"
+        example = REPO_ROOT / "skills" / "build-prd" / "examples" / "prd.example.md"
         with tempfile.TemporaryDirectory() as temp:
             result = self.run_validator(
                 self.write_prd(Path(temp), example.read_text(encoding="utf-8"))

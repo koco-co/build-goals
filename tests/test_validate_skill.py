@@ -9,7 +9,7 @@ import unittest
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-VALIDATOR = REPO_ROOT / "skills" / "building-skills" / "scripts" / "validate_skill.py"
+VALIDATOR = REPO_ROOT / "skills" / "build-skill" / "scripts" / "validate_skill.py"
 
 VALID_BODY = """
 # Outcome

@@ -1,0 +1,1 @@
+../../build-skill/rules/quality-standard.md

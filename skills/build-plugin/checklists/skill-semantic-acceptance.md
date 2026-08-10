@@ -1,0 +1,1 @@
+../../build-skill/checklists/semantic-acceptance.md

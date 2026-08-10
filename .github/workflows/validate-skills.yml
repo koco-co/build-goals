@@ -21,7 +21,7 @@ jobs:
 
       - name: Validate dual-platform plugin
         run: |
-          python3 skills/building-plugins/scripts/validate_plugin.py \
+          python3 skills/build-plugin/scripts/validate_plugin.py \
             . \
             --platform dual \
             --strict

@@ -10,7 +10,7 @@ import unittest
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-VALIDATOR = REPO_ROOT / "skills" / "building-plugins" / "scripts" / "validate_plugin.py"
+VALIDATOR = REPO_ROOT / "skills" / "build-plugin" / "scripts" / "validate_plugin.py"
 
 VALID_BODY = """
 # Outcome
@@ -98,10 +98,10 @@ class ValidatePluginTests(unittest.TestCase):
     def test_repository_plugin_passes(self) -> None:
         result = self.run_validator(REPO_ROOT)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-        self.assertIn("skills/building-skills", result.stdout)
-        self.assertIn("skills/building-plugins", result.stdout)
-        self.assertIn("skills/building-prds", result.stdout)
-        self.assertIn("skills/grill-me", result.stdout)
+        self.assertIn("skills/build-skill", result.stdout)
+        self.assertIn("skills/build-plugin", result.stdout)
+        self.assertIn("skills/build-prd", result.stdout)
+        self.assertIn("skills/clarify-goal", result.stdout)
         self.assertIn("skills/handoff", result.stdout)
 
     def test_dual_version_mismatch_fails(self) -> None:

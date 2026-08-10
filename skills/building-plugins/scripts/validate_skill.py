@@ -1,1 +1,0 @@
-../../building-skills/scripts/validate_skill.py

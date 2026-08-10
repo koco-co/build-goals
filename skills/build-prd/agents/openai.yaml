@@ -1,0 +1,7 @@
+interface:
+  display_name: "Build PRD"
+  short_description: "调研并生成完整、无未决项的产品 PRD"
+  default_prompt: "使用 $build-prd 梳理已有项目的全部功能，或把一个想法完善为完整 PRD；先联网调研并确认所有产品决策，再写入当前目录的 docs/PRD需求文档.md。"
+
+policy:
+  allow_implicit_invocation: false
