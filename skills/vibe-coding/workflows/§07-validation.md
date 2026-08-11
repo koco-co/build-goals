@@ -80,4 +80,6 @@ python3 <vibe-coding>/scripts/validate_delivery.py \
   --strict
 ```
 
+该门禁会枚举 Git worktrees；任务清单中已完成且已集成的任务如果仍登记着对应 worktree，将以 `COMPLETED_WORKTREE_REMAINS` 失败。阻塞、存在独有提交或未纳入本轮任务清单的 worktree 必须保留并在报告中解释，不得为通过校验而强制删除。
+
 无法完成真实客户端、外部服务或生产等价验证时，标记为未验证，并说明缺少的证据和影响。

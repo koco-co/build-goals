@@ -18,6 +18,7 @@
 创建 worktree 前记录：
 
 - 主工作树分支和 HEAD；
+- 本轮唯一集成分支及最终受保护主分支；
 - 工作区状态；
 - 现有 worktrees；
 - 任务依赖提交；
@@ -88,8 +89,10 @@ Tests: uv run pytest tests/auth -q
 4. 冲突时重新读取最新两侧内容；
 5. 保留用户最新改动；
 6. 运行受影响测试；
-7. 更新任务清单；
-8. 再处理下一提交。
+7. 确认任务 worktree 干净，并确认任务分支相对集成分支不存在未集成补丁；
+8. 立即移除该 worktree 和对应本地任务分支；
+9. 更新任务清单中的任务 SHA、集成 SHA、验证与清理证据；
+10. 再处理下一提交。
 
 禁止通过覆盖文件、选择“theirs/ours”整文件或重置分支隐藏冲突。
 
@@ -103,9 +106,22 @@ Tests: uv run pytest tests/auth -q
 - `git reset --hard`；
 - `git clean`；
 - 删除包含未集成提交的分支或 worktree；
+- 清理未在本轮任务清单中声明、会话开始前已存在或所有权不明的 worktree；
 - 自动 stash 用户工作；
 - 修改 Git 远程或权限。
 
 ## 8. 清理
 
-只有在提交已安全集成、验证通过且不存在独有改动时，才移除 worktree。交付报告记录保留和清理的 worktrees。
+任务清单确认后，本轮任务 worktree 的安全清理属于已授权实施步骤，不再逐个询问。每个任务集成后立即执行：
+
+1. 核对任务分支、worktree 路径和当前集成分支均与任务清单一致；
+2. `git status --porcelain` 必须为空；
+3. 任务 commit 已成为集成分支祖先，或 `git cherry <integration> <task-branch>` 不存在以 `+` 开头的未集成补丁；
+4. 受影响测试在集成分支通过；
+5. 使用精确路径执行 `git worktree remove <task-worktree>`；
+6. merge 集成时使用 `git branch -d <task-branch>`；cherry-pick 集成时，只有前述补丁等价检查通过后才可对精确分支执行 `git branch -D <task-branch>`；
+7. 重新运行 `git worktree list --porcelain` 和分支枚举，记录删除结果。
+
+任一条件失败就保留 worktree 和分支，将任务标记为进行中或阻塞，并报告独有提交、脏文件或验证失败。不得把尚未集成的任务标记为已完成。交付报告分别记录已清理与因证据不足而保留的 worktrees。
+
+全部任务和最终质量门禁通过后，合并集成分支到受保护主分支仍需用户单独授权。获准并验证成功后，按相同证据标准清理本地集成 worktree 和分支；没有授权时保留集成分支，不 push。

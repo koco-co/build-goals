@@ -2,11 +2,13 @@
 
 from __future__ import annotations
 
+import os
 import re
 import subprocess
 from pathlib import Path
 
 from .model import Issue, add_issue
+from .traceability import Task, task_field
 
 PRIVATE_KEY_RE = re.compile(r"-----BEGIN (?:RSA |EC |DSA |OPENSSH )?PRIVATE KEY-----")
 SUSPICIOUS_NAMES = {
@@ -58,6 +60,60 @@ def validate_clean_git(root: Path, issues: list[Issue]) -> None:
         )
     elif result.stdout.strip():
         add_issue(issues, "error", "GIT_DIRTY", root, "Git 工作区不干净。", root)
+
+
+def validate_completed_worktrees(
+    root: Path, tasks: list[Task], issues: list[Issue]
+) -> None:
+    """Reject task-owned worktrees that should have been removed after integration."""
+    if not is_git_repo(root):
+        return
+    result = git_run(root, "worktree", "list", "--porcelain")
+    if result.returncode != 0:
+        add_issue(
+            issues,
+            "error",
+            "GIT_WORKTREE_LIST",
+            root,
+            result.stderr.strip() or "无法枚举 Git worktrees。",
+            root,
+        )
+        return
+
+    project_root = root.resolve()
+    registered: list[Path] = []
+    for line in result.stdout.splitlines():
+        if not line.startswith("worktree "):
+            continue
+        worktree = Path(line[len("worktree ") :]).resolve()
+        if worktree != project_root:
+            registered.append(worktree)
+
+    for task in tasks:
+        status = task_field(task, "状态")
+        integration_status = task_field(task, "集成状态") or ""
+        declared_worktree = task_field(task, "Worktree") or ""
+        if status not in {"已完成", "完成"} or "已集成" not in integration_status:
+            continue
+        declared_paths = {
+            piece.strip().strip("`")
+            for piece in re.split(r"\s+/\s+|[,;，；]", declared_worktree)
+            if piece.strip()
+        }
+        for worktree in registered:
+            relative = Path(os.path.relpath(worktree, project_root)).as_posix()
+            candidates = {str(worktree), worktree.as_posix(), relative}
+            if candidates.isdisjoint(declared_paths):
+                continue
+            add_issue(
+                issues,
+                "error",
+                "COMPLETED_WORKTREE_REMAINS",
+                worktree,
+                f"{task.task_id} 已完成并集成，但对应 worktree 仍已注册。",
+                root,
+            )
+            break
 
 
 def validate_tracked_secrets(root: Path, issues: list[Issue]) -> None:

@@ -20,7 +20,11 @@ from .documents import (
     validate_substantive_sections,
 )
 from .model import Issue, Report
-from .repository import validate_clean_git, validate_tracked_secrets
+from .repository import (
+    validate_clean_git,
+    validate_completed_worktrees,
+    validate_tracked_secrets,
+)
 from .traceability import validate_report_tasks, validate_tasks, validate_traceability
 
 
@@ -143,6 +147,7 @@ def validate_project(
                     issues,
                 )
         validate_tracked_secrets(root, issues)
+        validate_completed_worktrees(root, tasks, issues)
         if require_clean:
             validate_clean_git(root, issues)
 

@@ -50,6 +50,10 @@ def _field(body: str, label: str) -> Optional[str]:
     return match.group(1).strip() if match else None
 
 
+def task_field(task: Task, label: str) -> Optional[str]:
+    return _field(task.body, label)
+
+
 def validate_tasks(
     text: str,
     path: Path,
@@ -98,6 +102,27 @@ def validate_tasks(
                 root,
             )
             continue
+        if status == "已完成":
+            worktree = _field(task.body, "Worktree")
+            if not worktree:
+                add_issue(
+                    issues,
+                    "error",
+                    "TASK_WORKTREE",
+                    path,
+                    f"{task.task_id} 缺少 Worktree 或 N/A 记录。",
+                    root,
+                )
+            integration_status = _field(task.body, "集成状态")
+            if not integration_status or "已集成" not in integration_status:
+                add_issue(
+                    issues,
+                    "error",
+                    "TASK_INTEGRATION_STATUS",
+                    path,
+                    f"{task.task_id} 已完成但缺少已验证的集成状态。",
+                    root,
+                )
         commit = _field(task.body, "Commit")
         if status == "已完成":
             if not commit or not COMMIT_RE.fullmatch(commit.strip("`")):

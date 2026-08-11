@@ -86,6 +86,11 @@ class VibeCodingValidatorTests(unittest.TestCase):
     def task_block(
         self, marker: str, status: str = "待开始", commit: str = "待生成"
     ) -> str:
+        integration_status = (
+            "已集成到指定集成分支并验证通过。"
+            if status == "已完成"
+            else "尚未集成。"
+        )
         return textwrap.dedent(
             f"""
             ### TASK-001 账号创建
@@ -95,6 +100,8 @@ class VibeCodingValidatorTests(unittest.TestCase):
             - 第一条失败测试：test_account_creation
             - 正常测试数据：factory 创建隔离普通用户并自动清理。
             - 验证命令：python -m unittest
+            - Worktree：N/A（串行执行）
+            - 集成状态：{integration_status}
             - 提交边界：账号创建实现及其必要测试。
             - Commit：{commit}
             - 回滚：revert 本任务 commit。
@@ -200,6 +207,115 @@ class VibeCodingValidatorTests(unittest.TestCase):
             )
             failed = self.run_validator(root, "greenfield", "delivery")
             self.assertIn("TASK_COMMIT_UNKNOWN", failed.stdout)
+
+    def test_delivery_rejects_completed_task_with_registered_worktree(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            subprocess.run(["git", "init", "-q", str(root)], check=True)
+            subprocess.run(
+                ["git", "-C", str(root), "config", "user.name", "Test"], check=True
+            )
+            subprocess.run(
+                ["git", "-C", str(root), "config", "user.email", "test@example.com"],
+                check=True,
+            )
+            self.write_architecture(root, "greenfield")
+            (root / ".gitignore").write_text(".worktrees/\n", encoding="utf-8")
+            (root / "app.txt").write_text("implemented\n", encoding="utf-8")
+            subprocess.run(["git", "-C", str(root), "add", "."], check=True)
+            subprocess.run(
+                ["git", "-C", str(root), "commit", "-qm", "initial implementation"],
+                check=True,
+            )
+            sha = subprocess.check_output(
+                ["git", "-C", str(root), "rev-parse", "--short", "HEAD"], text=True
+            ).strip()
+            worktree = root / ".worktrees" / "TASK-001"
+            subprocess.run(
+                [
+                    "git",
+                    "-C",
+                    str(root),
+                    "worktree",
+                    "add",
+                    "-q",
+                    "-b",
+                    "feat/task-001",
+                    str(worktree),
+                    sha,
+                ],
+                check=True,
+            )
+            self.write_plan(root, "F-001 F-001-AC-01", "已完成", sha)
+            plan = root / "docs" / "实施任务清单.md"
+            plan.write_text(
+                plan.read_text().replace(
+                    "- Worktree：N/A（串行执行）",
+                    "- Worktree：`.worktrees/TASK-001`",
+                ),
+                encoding="utf-8",
+            )
+            self.write_report(root, "F-001 F-001-AC-01", sha)
+            subprocess.run(["git", "-C", str(root), "add", "docs"], check=True)
+            subprocess.run(
+                ["git", "-C", str(root), "commit", "-qm", "docs: record delivery"],
+                check=True,
+            )
+
+            failed = self.run_validator(
+                root, "greenfield", "delivery", "--require-clean"
+            )
+            self.assertEqual(failed.returncode, 1, failed.stdout + failed.stderr)
+            self.assertIn("COMPLETED_WORKTREE_REMAINS", failed.stdout)
+
+            plan.write_text(
+                plan.read_text()
+                .replace("- 状态：已完成", "- 状态：阻塞")
+                .replace(
+                    "- 集成状态：已集成到指定集成分支并验证通过。",
+                    "- 集成状态：尚未集成，保留 worktree 供问题恢复。",
+                ),
+                encoding="utf-8",
+            )
+            subprocess.run(["git", "-C", str(root), "add", "docs"], check=True)
+            subprocess.run(
+                ["git", "-C", str(root), "commit", "-qm", "docs: record blocker"],
+                check=True,
+            )
+            blocked = self.run_validator(
+                root, "greenfield", "delivery", "--require-clean"
+            )
+            self.assertEqual(blocked.returncode, 0, blocked.stdout + blocked.stderr)
+
+            plan.write_text(
+                plan.read_text()
+                .replace("- 状态：阻塞", "- 状态：已完成")
+                .replace(
+                    "- 集成状态：尚未集成，保留 worktree 供问题恢复。",
+                    "- 集成状态：已集成到指定集成分支并验证通过。",
+                ),
+                encoding="utf-8",
+            )
+            subprocess.run(["git", "-C", str(root), "add", "docs"], check=True)
+            subprocess.run(
+                ["git", "-C", str(root), "commit", "-qm", "docs: clear blocker"],
+                check=True,
+            )
+
+            subprocess.run(
+                ["git", "-C", str(root), "worktree", "remove", str(worktree)],
+                check=True,
+            )
+            subprocess.run(
+                ["git", "-C", str(root), "branch", "-d", "feat/task-001"],
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+            passed = self.run_validator(
+                root, "greenfield", "delivery", "--require-clean"
+            )
+            self.assertEqual(passed.returncode, 0, passed.stdout + passed.stderr)
 
     def test_vibe_coding_installs_for_both_platforms(self) -> None:
         for platform, platform_root in (("claude", ".claude"), ("codex", ".agents")):
