@@ -44,6 +44,7 @@ class ValidateSkillTests(unittest.TestCase):
         skill_dir: Path,
         profile: str = "portable",
         plugin_root: Path | None = None,
+        strict: bool = False,
     ) -> subprocess.CompletedProcess[str]:
         command = [
             sys.executable,
@@ -54,6 +55,8 @@ class ValidateSkillTests(unittest.TestCase):
         ]
         if plugin_root is not None:
             command.extend(["--plugin-root", str(plugin_root)])
+        if strict:
+            command.append("--strict")
         return subprocess.run(
             command,
             check=False,
@@ -175,6 +178,31 @@ class ValidateSkillTests(unittest.TestCase):
             result = self.run_validator(skill_dir, "claude")
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
+    def test_empty_compatibility_fails(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            skill_dir = self.write_skill(
+                Path(temp),
+                "empty-compatibility",
+                "compatibility:\n",
+            )
+            result = self.run_validator(skill_dir)
+            self.assertEqual(result.returncode, 1)
+            self.assertIn("COMPATIBILITY_EMPTY", result.stdout)
+
+    def test_temporal_compatibility_claim_warns_and_fails_strict(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            skill_dir = self.write_skill(
+                Path(temp),
+                "generic-compatibility",
+                "compatibility: 当前适配 Claude Code 与 Codex。\n",
+            )
+            normal = self.run_validator(skill_dir)
+            strict = self.run_validator(skill_dir, strict=True)
+            self.assertEqual(normal.returncode, 0, normal.stdout + normal.stderr)
+            self.assertIn("COMPATIBILITY_TEMPORAL", normal.stdout)
+            self.assertEqual(strict.returncode, 1)
+            self.assertIn("COMPATIBILITY_TEMPORAL", strict.stdout)
+
     def test_prompt_name_must_end_with_agent_md(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
             skill_dir = self.write_skill(Path(temp), "prompt-skill")
@@ -274,13 +302,108 @@ class ValidateSkillTests(unittest.TestCase):
         self.assertIn("仅限用户调用的 Skill", quality)
         self.assertIn("不在正文重复说明调用权限", quality)
         self.assertIn("允许模型调用的 Skill", quality)
-        self.assertIn("`description` 或 `when_to_use`", quality)
+        self.assertIn("跨平台 `description`", quality)
+        self.assertIn("`when_to_use`", quality)
         self.assertIn("触发条件、排除条件", quality)
+
+    def test_build_skill_defines_frontmatter_decision_matrix(self) -> None:
+        skill_root = REPO_ROOT / "skills" / "build-skill"
+        frontmatter = skill_root.joinpath("rules", "frontmatter.md").read_text(
+            encoding="utf-8"
+        )
+        template = skill_root.joinpath("templates", "skill.template.md").read_text(
+            encoding="utf-8"
+        )
+        design = skill_root.joinpath(
+            "templates", "design-proposal.template.md"
+        ).read_text(encoding="utf-8")
+
+        for required in (
+            "字段决策矩阵",
+            "disable-model-invocation",
+            "user-invocable",
+            "argument-hint",
+            "arguments",
+            "allowed-tools",
+            "disallowed-tools",
+            "paths",
+            "context",
+            "agent",
+            "background",
+            "model",
+            "effort",
+            "hooks",
+            "shell",
+            "compatibility",
+            "agents/openai.yaml",
+        ):
+            with self.subTest(required=required):
+                self.assertIn(required, frontmatter)
+        self.assertNotIn("compatibility:", template.split("---", 2)[1])
+        self.assertNotIn("metadata:", template.split("---", 2)[1])
+        self.assertIn("Frontmatter 字段决策矩阵", design)
+
+    def test_build_skill_separates_content_and_copy_review(self) -> None:
+        skill_root = REPO_ROOT / "skills" / "build-skill"
+        content_review = skill_root.joinpath(
+            "checklists", "content-review.md"
+        ).read_text(encoding="utf-8")
+        copy_review = skill_root.joinpath(
+            "checklists", "copy-review.md"
+        ).read_text(encoding="utf-8")
+        examples = skill_root.joinpath(
+            "examples", "copy-review.example.md"
+        ).read_text(encoding="utf-8")
+        reviewer = skill_root.joinpath(
+            "prompts", "reviewer.agent.md"
+        ).read_text(encoding="utf-8")
+
+        self.assertIn("正确性和完整性", content_review)
+        self.assertIn("措辞润色不属于本清单", content_review)
+        self.assertNotIn("## 表达质量", content_review)
+        self.assertIn("自然、清楚、简洁", copy_review)
+        self.assertIn("不得改变", copy_review)
+        self.assertGreaterEqual(examples.count("## 样本"), 6)
+        self.assertIn("内容审查结果", reviewer)
+        self.assertIn("文案审查结果", reviewer)
+        self.assertIn("只审查，不修改", reviewer)
+
+    def test_shipped_compatibility_describes_only_hard_requirements(self) -> None:
+        expected = {
+            "build-agents-md": "需要 Python 3.9+ 运行内置校验脚本。",
+            "build-plugin": "需要互联网访问和 Python 3.9+ 运行内置静态校验脚本。",
+            "build-prd": "需要互联网访问和 Python 3.9+ 运行内置校验脚本。",
+            "build-readme": "需要 Python 3.9+ 运行内置校验脚本。",
+            "build-skill": "需要互联网访问和 Python 3.9+ 运行内置静态校验脚本。",
+            "handoff": None,
+            "shape-idea": None,
+            "vibe-coding": "需要 Python 3.9+、Git、互联网访问及目标项目的构建与测试工具。",
+        }
+        prohibited = ("当前适配", "目前适配", "目前仅适配")
+
+        for skill_md in sorted(REPO_ROOT.glob("skills/*/SKILL.md")):
+            name = skill_md.parent.name
+            frontmatter = skill_md.read_text(encoding="utf-8").split("---", 2)[1]
+            for phrase in prohibited:
+                with self.subTest(skill=name, phrase=phrase):
+                    self.assertNotIn(phrase, frontmatter)
+            compatibility = expected[name]
+            with self.subTest(skill=name, expected=compatibility):
+                if compatibility is None:
+                    self.assertNotIn("compatibility:", frontmatter)
+                else:
+                    self.assertIn(f"compatibility: {compatibility}", frontmatter)
 
     def test_behavior_changed_skill_versions_are_updated(self) -> None:
         expected = {
-            "build-agents-md": 'version: "1.1.0"',
-            "build-skill": 'version: "1.3.0"',
+            "build-agents-md": 'version: "1.1.1"',
+            "build-plugin": 'version: "1.2.0"',
+            "build-prd": 'version: "1.0.1"',
+            "build-readme": 'version: "1.0.1"',
+            "build-skill": 'version: "1.4.0"',
+            "handoff": 'version: "1.1.1"',
+            "shape-idea": 'version: "1.0.1"',
+            "vibe-coding": 'version: "1.1.0"',
         }
 
         for name, version_line in expected.items():

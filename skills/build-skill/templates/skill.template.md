@@ -1,10 +1,6 @@
 ---
-name: { { skill-name } }
-description: { { 核心能力；允许模型调用时，还要写明适用场景、排除条件及与相邻 Skill 的区别 } }
-compatibility: { { 可选；仅描述必要环境、目标平台或依赖，不填写空值 } }
-metadata:
-  author: { { author } }
-  version: "{{version}}"
+name: {{skill-name}}
+description: {{核心能力；允许模型调用时，还要写明适用场景、排除条件及与相邻 Skill 的区别}}
 ---
 
 # Outcome

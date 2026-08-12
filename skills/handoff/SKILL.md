@@ -2,11 +2,10 @@
 name: handoff
 description: 将当前对话整理为精简的交接文档和可直接复制的接续提示词，方便下一位 Agent 继续工作。
 argument-hint: "下一次会话将用于什么？"
-compatibility: 当前适配 Claude Code 与 Codex。
 disable-model-invocation: true
 metadata:
   author: koco-co
-  version: "1.1.0"
+  version: "1.1.1"
 ---
 
 # Outcome

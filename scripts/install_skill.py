@@ -3,7 +3,7 @@
 
 The repository itself is distributed as a Plugin. This compatibility installer
 creates a platform-specific standalone copy:
-- Claude Code keeps manual-invocation frontmatter and removes Codex UI metadata.
+- Claude Code preserves the source frontmatter and removes Codex UI metadata.
 - Codex removes Claude-only frontmatter and keeps agents/openai.yaml.
 Repository-internal symlinks are dereferenced in the installed copy.
 """
@@ -21,9 +21,13 @@ from pathlib import Path
 from typing import Optional
 
 NAME_PATTERN = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
-CLAUDE_ONLY_FIELDS = {
-    "argument-hint",
-    "disable-model-invocation",
+PORTABLE_FRONTMATTER_FIELDS = {
+    "name",
+    "description",
+    "license",
+    "compatibility",
+    "metadata",
+    "allowed-tools",
 }
 
 
@@ -43,33 +47,18 @@ def _frontmatter_bounds(lines: list[str]) -> tuple[int, int]:
     return 0, closing
 
 
-def ensure_claude_manual_invocation(skill_md: str) -> str:
-    """Return SKILL.md with Claude's manual-only field set to true."""
-    lines = skill_md.splitlines()
-    _opening, closing = _frontmatter_bounds(lines)
-    field_pattern = re.compile(r"^disable-model-invocation\s*:")
-    found = False
-    for index in range(1, closing):
-        if field_pattern.match(lines[index].strip()):
-            lines[index] = "disable-model-invocation: true"
-            found = True
-            break
-    if not found:
-        lines.insert(closing, "disable-model-invocation: true")
-    suffix = "\n" if skill_md.endswith("\n") else ""
-    return "\n".join(lines) + suffix
-
-
 def strip_claude_frontmatter(skill_md: str) -> str:
-    """Remove known Claude-only top-level frontmatter fields for Codex copies."""
+    """Keep only portable frontmatter fields in Codex standalone copies."""
     lines = skill_md.splitlines()
     _opening, closing = _frontmatter_bounds(lines)
     output = [lines[0]]
+    keep_current_block = True
     for line in lines[1:closing]:
         match = re.match(r"^([A-Za-z0-9_-]+):", line)
-        if match and match.group(1) in CLAUDE_ONLY_FIELDS:
-            continue
-        output.append(line)
+        if match:
+            keep_current_block = match.group(1) in PORTABLE_FRONTMATTER_FIELDS
+        if keep_current_block:
+            output.append(line)
     output.extend(lines[closing:])
     suffix = "\n" if skill_md.endswith("\n") else ""
     return "\n".join(output) + suffix
@@ -200,10 +189,6 @@ def install_skill(
         skill_md = stage / "SKILL.md"
         text = skill_md.read_text(encoding="utf-8")
         if platform == "claude":
-            skill_md.write_text(
-                ensure_claude_manual_invocation(text),
-                encoding="utf-8",
-            )
             shutil.rmtree(stage / "agents", ignore_errors=True)
             profile = "claude"
         else:

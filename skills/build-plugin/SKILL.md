@@ -1,11 +1,11 @@
 ---
 name: build-plugin
 description: 创建或改造 Claude Code、Codex 等 Agent Plugin，组织 Skills、Agents、Hooks、MCP、UI 与发布配置；Plugin 中的新建或升级 Skill 必须遵循 build-skill 的同一规范。
-compatibility: 目前仅适配 Claude Code 与 Codex；静态校验需 Python 3.9+。
+compatibility: 需要互联网访问和 Python 3.9+ 运行内置静态校验脚本。
 disable-model-invocation: true
 metadata:
   author: koco-co
-  version: "1.1.0"
+  version: "1.2.0"
 ---
 
 # Outcome
@@ -41,7 +41,7 @@ metadata:
 3. 提出设计并等待确认
    - 完整读取 `workflows/§03-design.md`。
    - 设计前读取 `rules/plugin-architecture.md`、`rules/platform-compatibility.md`、`rules/security-and-permissions.md`。
-   - Plugin 包含 Skill 时，同时读取 `rules/skill-architecture.md` 和 `rules/skill-quality-standard.md`。
+   - Plugin 包含 Skill 时，同时读取 `rules/skill-architecture.md`、`rules/skill-frontmatter.md` 和 `rules/skill-quality-standard.md`。
    - 使用 `templates/plugin-design-proposal.template.md` 输出 `tree` 风格目录、组件边界、平台适配、软链接、验证和交付方案。
    - 明确哪些能力属于 Skill、Agent、Hook、MCP、UI、CLI、CI 或 Manifest。
    - 用户确认前不得创建、修改、移动或删除目标文件。
@@ -49,11 +49,12 @@ metadata:
 
 4. 处理 Skill 子任务
    - 完整读取 `workflows/§04-skill-delegation.md`。
-   - 已有 Skill 先运行 `scripts/validate_skill.py` 并使用 `checklists/skill-design-review.md`、`checklists/skill-semantic-acceptance.md` 复核。
+   - 已有 Skill 先运行 `scripts/validate_skill.py`，再依次使用 `checklists/skill-design-review.md`、`checklists/skill-content-review.md` 和 `checklists/skill-copy-review.md` 复核。
    - 新建或升级 Skill 时，使用 `build-skill`；不得在本 Skill 中复制一套 Skill 构建流程。
    - 需要输出 Skill 骨架时，使用 `templates/skill.template.md`。
    - 多 Agent 提示文件必须使用 `<name>.agent.md`。
-   - 完成条件：所有纳入 Plugin 的 Skill 均符合 `build-skill` 的同一规范，并记录实际验证结果。
+   - 新建、整体重构或改变触发、Frontmatter、权限与平台行为时，使用 `prompts/reviewer.agent.md` 调起独立 Reviewer。
+   - 完成条件：所有纳入 Plugin 的 Skill 均符合 `build-skill` 的同一规范，并记录内容审查、文案审查、内容回归、适用的独立审查和实际验证结果。
 
 5. 执行
    - 完整读取 `workflows/§05-implementation.md`。
@@ -113,9 +114,10 @@ metadata:
 - 开始时完整读取 `workflows/§01-research.md`。
 - 澄清关键决策时完整读取 `workflows/§02-clarification.md`。
 - 输出设计前完整读取 `workflows/§03-design.md`、`rules/plugin-architecture.md`、`rules/platform-compatibility.md` 和 `rules/security-and-permissions.md`。
-- Plugin 包含 Skill 时读取 `rules/skill-architecture.md`、`rules/skill-quality-standard.md` 和 `templates/skill.template.md`。
+- Plugin 包含 Skill 时读取 `rules/skill-architecture.md`、`rules/skill-frontmatter.md`、`rules/skill-quality-standard.md` 和 `templates/skill.template.md`。
 - 处理 Skill 子任务时完整读取 `workflows/§04-skill-delegation.md`。
 - 实施时完整读取 `workflows/§05-implementation.md`。
 - 验证时完整读取 `workflows/§06-validation.md`、`checklists/plugin-design-review.md` 和 `checklists/plugin-semantic-acceptance.md`。
-- 需要独立 Reviewer 时读取 `prompts/reviewer.agent.md`。
+- 审查 Plugin 内 Skill 时读取 `checklists/skill-content-review.md` 和 `checklists/skill-copy-review.md`；需要改写参考时读取 `examples/skill-copy-review.example.md`。
+- 新建、整体重构或改变 Skill 的触发、Frontmatter、权限与平台行为时读取 `prompts/reviewer.agent.md` 并调起独立 Reviewer。
 - 交付时完整读取 `workflows/§07-delivery.md` 和 `templates/plugin-delivery-report.template.md`。

@@ -29,7 +29,7 @@
 | <b>Skill</b>                           | 作用                                                   |
 | -------------------------------------- | ------------------------------------------------------ |
 | [`shape-idea`](skills/shape-idea/)     | 将初步想法塑造成完整、无歧义的定义                     |
-| [`build-skill`](skills/build-skill/)   | 从零构建或系统升级高质量 <b>Agent Skill</b>           |
+| [`build-skill`](skills/build-skill/)   | 按能力设计 <b>Frontmatter</b>，构建并审查高质量 <b>Agent Skill</b> |
 | [`build-plugin`](skills/build-plugin/) | 构建、升级或迁移双平台 <b>Plugin</b>                  |
 | [`build-prd`](skills/build-prd/)       | 调研并生成决策完整的产品 <b>PRD</b>                   |
 | [`vibe-coding`](skills/vibe-coding/)   | 从 <b>PRD</b> 或旧项目编排架构、<b>TDD</b>、多 <b>Agent</b> 开发与全链路验收 |
@@ -38,6 +38,8 @@
 | [`handoff`](skills/handoff/)           | 整理跨会话交接文档并生成可直接复制的接续提示词      |
 
 <p><code>build-prd</code> 支持已有项目的全功能梳理，也能把尚不完整的想法完善为详细 <b>PRD</b>。它会调研当前竞品、活跃开源项目与适用的官方规范，逐项确认产品决策，并生成或规范化更新项目唯一的 <code>docs/PRD需求文档.md</code>。</p>
+
+<p><code>build-skill</code> 会根据调用方式、参数、权限、上下文与硬性环境要求形成 <b>Frontmatter</b> 字段决策矩阵；实现后分别完成内容审查、文案审查、内容回归和适用的独立 <b>Reviewer</b> 审查。</p>
 
 <p><code>vibe-coding</code> 是端到端软件交付总控：它可以实现 <code>build-prd</code> 的确认产物，也可以审查并迁移已有低质量项目。架构方案和任务列表分别经过用户确认后，才会搭建脚手架、组织 <b>TDD</b> 功能切片、按依赖使用多 <b>Agent</b> 与 <b>Git worktrees</b>、创建原子提交，并完成单元、集成、<b>E2E</b>、条件式视觉/交互、安全和正常测试数据验收。</p>
 
@@ -79,7 +81,7 @@ flowchart LR
 - 单一规范源：共享能力使用仓库内相对软链接，不复制多份相同文件。
 - 确定性优先：已有 <b>CLI</b> → 脚本 → 模板 → <b>Few-shot</b> → 规则 → 提示词。
 - 渐进式读取：主 <code>SKILL.md</code> 只保留路由和主流程，复杂内容按需读取。
-- 验证可复现：静态检查、内容审查与真实平台测试分别记录。
+- 验证可复现：静态检查、内容审查、文案审查与真实平台测试分别记录。
 - 平台差异隔离：<b>Claude Code</b> 与 <b>Codex</b> 的 <b>Manifest</b>、调用策略和平台扩展分别配置。
 
 <a id="structure"></a>

@@ -1,11 +1,11 @@
 ---
 name: build-prd
 description: 针对已有软件项目的全部产品功能，或尚未成形的产品想法，必须联网调研当前竞品、活跃开源项目与适用的官方规范，逐项确认所有产品决策，并在当前目录生成或更新 docs/PRD需求文档.md。
-compatibility: 当前适配 Claude Code 与 Codex；需要联网调研、读取项目文件，并写入当前目录的 docs/PRD需求文档.md。
+compatibility: 需要互联网访问和 Python 3.9+ 运行内置校验脚本。
 disable-model-invocation: true
 metadata:
   author: koco-co
-  version: "1.0.0"
+  version: "1.0.1"
 ---
 
 # Outcome

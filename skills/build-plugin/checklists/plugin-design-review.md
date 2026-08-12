@@ -21,7 +21,9 @@
 - [ ] 每个 Skill 均符合 `build-skill` 规范。
 - [ ] 新建或升级 Skill 已完成受控委派。
 - [ ] `prompts/` 文件使用 `*.agent.md`。
-- [ ] 每个 Skill 的调用权限由平台配置控制；允许模型调用时，触发条件和排除条件写在 `description` 或 `when_to_use` 中。
+- [ ] 每个 Skill 的调用权限由平台配置控制；允许模型调用时，触发条件和排除条件优先写在跨平台 `description` 中。
+- [ ] 每个 Skill 都有 Frontmatter 字段决策矩阵；`compatibility` 只描述硬性环境要求。
+- [ ] 新建、整体重构或改变 Skill 触发、Frontmatter、权限与平台行为时已安排独立 Reviewer。
 
 ## 平台
 

@@ -15,6 +15,17 @@
 - 调用权限：仅限用户调用，由平台配置控制，不在 Skill 正文重复说明；
 - 验收：Schema 解析、规则检查、样例契约与语义审阅。
 
+## Frontmatter 字段决策矩阵
+
+| 字段或配置 | 结论 | 理由 |
+| ---------- | ---- | ---- |
+| `name`、`description` | 添加 | 通用必填字段 |
+| `disable-model-invocation: true` | 添加到 Claude Code 源 | 审查时机由用户控制 |
+| `agents/openai.yaml` | 添加 | Codex 禁止模型隐式调用并提供展示信息 |
+| `compatibility` | 省略 | 没有通用 Skill 自身无法处理的硬性环境要求 |
+| `argument-hint` | 添加到 Claude Code 源 | 用户需要传入一个或多个契约路径 |
+| `metadata` | 省略 | 没有注册表或安装器消费该信息 |
+
 ## 推荐结构
 
 ```text

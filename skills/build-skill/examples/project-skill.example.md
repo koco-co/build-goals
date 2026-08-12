@@ -13,6 +13,16 @@
 
 用户希望构建一个项目级 Skill，帮助准备发布清单、运行预检并生成交付摘要，但不得自动发布。
 
+## Frontmatter 字段决策矩阵
+
+| 字段或配置 | 结论 | 理由 |
+| ---------- | ---- | ---- |
+| `name`、`description` | 添加 | 通用必填字段 |
+| `disable-model-invocation: true` | 添加到 Claude Code 源 | 发布准备包含命令执行，必须由用户控制时机 |
+| `agents/openai.yaml` | 添加 | Codex 禁止模型隐式调用 |
+| `compatibility` | `需要 Git 和项目内的 ./tools/release。` | 两者是所有分支都需要的硬性环境条件 |
+| `allowed-tools` | 省略 | 是否预授权命令应遵循目标项目权限策略，不在 Skill 中扩大权限 |
+
 ## 探索结论
 
 - 版本计算、变更日志生成和制品校验已经由 `./tools/release` 实现；

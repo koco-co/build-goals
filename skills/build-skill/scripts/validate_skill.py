@@ -271,16 +271,36 @@ def validate_frontmatter(
             skill_dir,
         )
 
-    compatibility = data.get("compatibility")
-    if isinstance(compatibility, str) and len(compatibility) > 500:
-        add_issue(
-            issues,
-            "error",
-            "COMPATIBILITY_LENGTH",
-            skill_md,
-            "compatibility 超过 500 字符。",
-            skill_dir,
-        )
+    if "compatibility" in data:
+        compatibility = data.get("compatibility")
+        if not isinstance(compatibility, str) or not compatibility.strip():
+            add_issue(
+                issues,
+                "error",
+                "COMPATIBILITY_EMPTY",
+                skill_md,
+                "compatibility 存在时必须描述非空的硬性环境要求；没有要求时应删除该字段。",
+                skill_dir,
+            )
+        else:
+            if len(compatibility) > 500:
+                add_issue(
+                    issues,
+                    "error",
+                    "COMPATIBILITY_LENGTH",
+                    skill_md,
+                    "compatibility 超过 500 字符。",
+                    skill_dir,
+                )
+            if re.search(r"当前适配|目前(?:仅)?适配", compatibility):
+                add_issue(
+                    issues,
+                    "warning",
+                    "COMPATIBILITY_TEMPORAL",
+                    skill_md,
+                    "compatibility 不应使用容易过时的泛化适配声明；只保留硬性环境要求。",
+                    skill_dir,
+                )
 
     if profile in {"claude", "dual"}:
         manual = data.get("disable-model-invocation")

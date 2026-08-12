@@ -1,11 +1,11 @@
 ---
 name: build-agents-md
 description: 初始化或整体重构项目的 AGENTS.md，并以 CLAUDE.md 相对符号链接供 Claude Code 与 Codex 共用；先研究仓库并给出完整内容预览，确认后写入和验证。
-compatibility: 当前适配 Claude Code 与 Codex；运行内置校验器需要 Python 3.9+。
+compatibility: 需要 Python 3.9+ 运行内置校验脚本。
 disable-model-invocation: true
 metadata:
   author: koco-co
-  version: "1.1.0"
+  version: "1.1.1"
 ---
 
 # Outcome

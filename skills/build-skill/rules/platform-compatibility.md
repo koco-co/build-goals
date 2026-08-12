@@ -1,6 +1,6 @@
 # 平台兼容规则
 
-平台能力会持续演进。实施平台专属配置前，重新核对目标平台当前官方文档；本文件只规定隔离方式，不替代平台契约。
+平台能力会持续演进。实施平台专属配置前，重新核对目标平台当前官方文档；本文件只规定隔离方式，不替代平台契约。字段选择遵循 `rules/frontmatter.md`。
 
 ## 1. 双平台规范源
 
@@ -16,8 +16,8 @@
 
 ```text
 双平台 Skill 源
-├── Claude Code：保留 disable-model-invocation，移除 agents/openai.yaml
-└── Codex：移除 Claude 专属 Frontmatter，保留 agents/openai.yaml
+├── Claude Code：保留通用字段和 Claude Code 字段，移除 agents/openai.yaml
+└── Codex：只保留通用 Agent Skills 字段，保留 agents/openai.yaml
 ```
 
 ## 2. Claude Code
@@ -45,6 +45,8 @@ skills/<skill-name>/SKILL.md
 ```yaml
 disable-model-invocation: true
 ```
+
+其他 Claude Code 专属字段只有在 `rules/frontmatter.md` 的决策条件成立时才添加。不得因为平台支持就统一补齐。
 
 Plugin 内调用使用命名空间：
 
@@ -100,6 +102,14 @@ $<skill-name>
 ```
 
 核心工作流不得复制到 Codex 适配文件。
+
+生成 Codex 独立安装副本时，只保留通用 Agent Skills Frontmatter：
+
+```text
+name, description, license, compatibility, metadata, allowed-tools
+```
+
+Claude Code 专属字段及其嵌套 YAML 内容必须完整移除；不能只删除字段首行而遗留子项。
 
 ## 4. 软链接
 

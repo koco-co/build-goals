@@ -1,0 +1,1 @@
+../../build-skill/examples/copy-review.example.md

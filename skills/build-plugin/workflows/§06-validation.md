@@ -13,6 +13,7 @@ python3 scripts/validate_plugin.py <plugin-root> --platform <dual|claude|codex> 
 - Manifest JSON、名称、版本和组件路径；
 - 双平台身份与版本一致；
 - Skills 遵循同一质量规范；
+- Skill Frontmatter 与字段决策矩阵一致；
 - `prompts/` 文件使用 `*.agent.md`；
 - 软链接相对、有效且没有越界；
 - Marketplace 路径；
@@ -63,3 +64,5 @@ Codex：
 - 失败后已修复并复验。
 
 完成条件：所有静态检查通过，关键路径有实际结果，未运行的平台没有被描述为已通过。
+
+Plugin 包含新建、整体重构或改变触发、Frontmatter、权限与平台行为的 Skill 时，还必须完成 `build-skill` 规定的内容审查、文案审查、内容回归和独立 Reviewer 复查。

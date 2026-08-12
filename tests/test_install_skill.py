@@ -1,11 +1,20 @@
 from __future__ import annotations
 
 import os
+import runpy
+import shutil
 import subprocess
 import sys
 import tempfile
+import textwrap
 import unittest
 from pathlib import Path
+
+from scripts.install_skill import (
+    PORTABLE_FRONTMATTER_FIELDS,
+    install_skill,
+    strip_claude_frontmatter,
+)
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 INSTALLER = REPO_ROOT / "scripts" / "install_skill.py"
@@ -74,6 +83,70 @@ class InstallSkillTests(unittest.TestCase):
             forced = self.run_installer(home, "claude", "build-skill", "--force")
             self.assertEqual(forced.returncode, 0, forced.stdout + forced.stderr)
 
+    def test_claude_install_preserves_model_invocation_fields(self) -> None:
+        variants = {
+            "default": "",
+            "explicit-false": "disable-model-invocation: false\n",
+            "model-only": "user-invocable: false\n",
+        }
+
+        for name, invocation_fields in variants.items():
+            with self.subTest(variant=name), tempfile.TemporaryDirectory() as temp:
+                root = Path(temp)
+                repo = root / "repo"
+                skill_name = f"fixture-{name}"
+                skill = repo / "skills" / skill_name
+                skill.mkdir(parents=True)
+                skill.joinpath("SKILL.md").write_text(
+                    (
+                        "---\n"
+                        f"name: {skill_name}\n"
+                        "description: 用于验证 Claude 调用配置保持不变。\n"
+                        f"{invocation_fields}"
+                        "---\n\n"
+                        "# Outcome\n\n完成目标。\n\n"
+                        "## Routing\n\n- 处理输入。\n\n"
+                        "## Steps\n\n1. 执行。\n\n"
+                        "## Delivery\n\n- 输出结果。\n\n"
+                        "## Guardrails\n\n- 保护数据。\n\n"
+                        "## References\n\n- 无附加文件。\n"
+                    ),
+                    encoding="utf-8",
+                )
+                validator = (
+                    repo
+                    / "skills"
+                    / "build-skill"
+                    / "scripts"
+                    / "validate_skill.py"
+                )
+                validator.parent.mkdir(parents=True)
+                shutil.copy2(
+                    REPO_ROOT
+                    / "skills"
+                    / "build-skill"
+                    / "scripts"
+                    / "validate_skill.py",
+                    validator,
+                )
+
+                destination = install_skill(
+                    repo_root=repo,
+                    skill_name=skill_name,
+                    platform="claude",
+                    scope="user",
+                    home_dir=root / "home",
+                )
+                installed = destination.joinpath("SKILL.md").read_text(
+                    encoding="utf-8"
+                )
+
+                if invocation_fields:
+                    self.assertIn(invocation_fields.strip(), installed)
+                else:
+                    self.assertNotIn("disable-model-invocation:", installed)
+                    self.assertNotIn("user-invocable:", installed)
+
     def test_build_plugin_install_materializes_shared_files(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
             home = Path(temp)
@@ -88,9 +161,17 @@ class InstallSkillTests(unittest.TestCase):
             shared = destination / "prompts" / "reviewer.agent.md"
             self.assertTrue(shared.is_file())
             self.assertFalse(shared.is_symlink())
-            self.assertTrue(
-                destination.joinpath("scripts", "validate_skill.py").is_file()
-            )
+            for shared_path in (
+                "scripts/validate_skill.py",
+                "rules/skill-frontmatter.md",
+                "checklists/skill-content-review.md",
+                "checklists/skill-copy-review.md",
+                "examples/skill-copy-review.example.md",
+            ):
+                with self.subTest(path=shared_path):
+                    materialized = destination / shared_path
+                    self.assertTrue(materialized.is_file())
+                    self.assertFalse(materialized.is_symlink())
 
     def test_handoff_codex_install_strips_claude_only_fields(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
@@ -102,6 +183,66 @@ class InstallSkillTests(unittest.TestCase):
             skill_md = destination.joinpath("SKILL.md").read_text(encoding="utf-8")
             self.assertNotIn("argument-hint:", skill_md)
             self.assertNotIn("disable-model-invocation:", skill_md)
+
+    def test_codex_copy_strips_all_claude_extensions_and_nested_blocks(self) -> None:
+        validator = runpy.run_path(
+            str(
+                REPO_ROOT
+                / "skills"
+                / "build-skill"
+                / "scripts"
+                / "validate_skill.py"
+            )
+        )
+        claude_extensions = validator["CLAUDE_EXTENSION_KEYS"]
+        scalar_extensions = sorted(claude_extensions - {"hooks"})
+        extension_lines = "".join(
+            f"{field}: fixture\n" for field in scalar_extensions
+        )
+        source = (
+            "---\n"
+            "name: fixture-skill\n"
+            "description: Portable description.\n"
+            "compatibility: Requires Python 3.9+.\n"
+            "metadata:\n"
+            "  author: fixture\n"
+            f"{extension_lines}"
+            "hooks:\n"
+            "  PreToolUse:\n"
+            "    - matcher: Bash\n"
+            "      hooks:\n"
+            "        - type: command\n"
+            "          command: echo ok\n"
+            "---\n\n"
+            "# Outcome\n\n"
+            "Complete fixture work.\n"
+        )
+
+        installed = strip_claude_frontmatter(source)
+
+        for claude_only in sorted(claude_extensions):
+            with self.subTest(field=claude_only):
+                self.assertNotIn(f"{claude_only}:", installed)
+        self.assertNotIn("PreToolUse:", installed)
+        self.assertNotIn("command: echo ok", installed)
+        self.assertIn("compatibility: Requires Python 3.9+.", installed)
+        self.assertIn("metadata:\n  author: fixture", installed)
+        self.assertIn("# Outcome", installed)
+
+    def test_installer_portable_fields_match_skill_validator(self) -> None:
+        validator = runpy.run_path(
+            str(
+                REPO_ROOT
+                / "skills"
+                / "build-skill"
+                / "scripts"
+                / "validate_skill.py"
+            )
+        )
+        self.assertEqual(
+            PORTABLE_FRONTMATTER_FIELDS,
+            validator["STANDARD_KEYS"],
+        )
 
     def test_build_prd_installs_for_both_platforms(self) -> None:
         for platform, root_name in (("claude", ".claude"), ("codex", ".agents")):
@@ -166,6 +307,37 @@ class InstallSkillTests(unittest.TestCase):
                     self.assertTrue(
                         destination.joinpath("agents", "openai.yaml").is_file()
                     )
+
+    def test_all_shipped_skills_install_for_both_platforms(self) -> None:
+        skill_names = sorted(
+            path.name for path in REPO_ROOT.joinpath("skills").iterdir()
+        )
+
+        for skill_name in skill_names:
+            for platform, root_name in (
+                ("claude", ".claude"),
+                ("codex", ".agents"),
+            ):
+                with (
+                    self.subTest(skill=skill_name, platform=platform),
+                    tempfile.TemporaryDirectory() as temp,
+                ):
+                    home = Path(temp)
+                    result = self.run_installer(home, platform, skill_name)
+                    self.assertEqual(
+                        result.returncode,
+                        0,
+                        result.stdout + result.stderr,
+                    )
+
+                    destination = home / root_name / "skills" / skill_name
+                    self.assertTrue(destination.joinpath("SKILL.md").is_file())
+                    if platform == "claude":
+                        self.assertFalse(destination.joinpath("agents").exists())
+                    else:
+                        self.assertTrue(
+                            destination.joinpath("agents", "openai.yaml").is_file()
+                        )
 
     def test_dry_run_does_not_create_target_directories(self) -> None:
         with tempfile.TemporaryDirectory() as temp:

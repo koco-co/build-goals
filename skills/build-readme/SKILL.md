@@ -1,11 +1,11 @@
 ---
 name: build-readme
 description: 新建或更新项目 README.md；先完整了解仓库并提供修改预览，确认后生成可验证的 GitHub 风格文档、图表与可选插图。
-compatibility: 当前适配 Claude Code 与 Codex；运行内置校验器需要 Python 3.9+。
+compatibility: 需要 Python 3.9+ 运行内置校验脚本。
 disable-model-invocation: true
 metadata:
   author: koco-co
-  version: "1.0.0"
+  version: "1.0.1"
 ---
 
 # Outcome

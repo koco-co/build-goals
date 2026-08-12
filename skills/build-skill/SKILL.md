@@ -1,11 +1,11 @@
 ---
 name: build-skill
 description: 从零设计、实现和验证通用 Skill 或项目级定制 Skill，也用于审查并重构已有低质量 Skill。
-compatibility: 当前适配 Claude Code 与 Codex；运行内置静态校验需要 Python 3.9 或更高版本。
+compatibility: 需要互联网访问和 Python 3.9+ 运行内置静态校验脚本。
 disable-model-invocation: true
 metadata:
   author: koco-co
-  version: "1.3.0"
+  version: "1.4.0"
 ---
 
 # Outcome
@@ -37,35 +37,39 @@ metadata:
    - 每轮只询问一个主要问题，同时给出推荐答案、推荐理由及其他选择的影响。
    - 已在提示词、代码、文档或此前回答中明确的内容不得重复询问。
    - 不存在真实未决问题时，明确记录“无待确认决策”，直接进入设计。
-   - 完成条件：目标、非目标、Skill 类型、触发方式、输入、输出、分支、权限边界和验收标准均已明确。
+   - 对已有 Skill 也要重新判断可选 Frontmatter，不因原文件只有 `name` 和 `description` 而跳过。
+   - 完成条件：目标、非目标、Skill 类型、触发方式、输入、输出、分支、权限边界、Frontmatter 决策和验收标准均已明确。
 
 3. 提出设计并等待确认
    - 完整读取 `workflows/§03-design.md`。
-   - 设计前读取 `rules/architecture.md`、`rules/quality-standard.md` 和 `rules/platform-compatibility.md`。
+   - 设计前读取 `rules/architecture.md`、`rules/frontmatter.md`、`rules/quality-standard.md` 和 `rules/platform-compatibility.md`。
    - 使用 `templates/design-proposal.template.md` 组织方案；需要参考粒度时，按 Skill 类型读取对应示例。
-   - 输出 `tree` 风格目录、文件职责、按需读取关系、静态校验、内容审查、平台适配和 Hooks/CLI 归属建议。
+   - 输出 `tree` 风格目录、文件职责、按需读取关系、Frontmatter 字段决策矩阵、静态校验、内容审查、文案审查、平台适配和 Hooks/CLI 归属建议。
    - 设计必须解释为何保留每个目录；不为形式完整创建空目录或占位文件。
    - 设计完成后只请求一次实施确认。用户确认前不得创建、修改、移动或删除目标文件。
    - 完成条件：用户明确确认实施范围和验收标准。
 
 4. 执行
    - 完整读取 `workflows/§04-implementation.md`。
-   - 使用 `templates/skill.template.md` 作为 `SKILL.md` 的结构基线，不得删除其中的核心章节。
+   - 使用 `templates/skill.template.md` 作为 `SKILL.md` 的结构基线，不得删除其中的核心章节；按照 `rules/frontmatter.md` 添加有依据的可选字段。
    - 优先复用仓库已有 CLI、校验器、测试和公共能力；只有确有缺口时才新增 Skill 内脚本。
    - 将确定性处理交给代码，将固定结构交给模板，将输出范式交给少样本示例，将无法静态判断的要求交给规则和清单。
+   - 完成初稿后先确认内容正确、完整，再按照文案审查规则润色；不确定原意时退回内容设计，不自行改变行为。
    - 保持单一规范源；平台差异集中在 Manifest、适配文件或安装过程，不复制两套核心工作流。
-   - 多 Agent 提示文件必须使用 `<name>.agent.md`，不得继续创建 `*.prompt.md`。
+   - Agent 提示文件格式: `<name>.agent.md`。
    - 只修改已确认范围内的文件，不留下空文件、空目录或无真实用途的占位内容。
    - 完成条件：设计中的全部目标项已实现，文件引用闭合，未引入未经同意的破坏性变化。
 
 5. 验证
    - 完整读取 `workflows/§05-validation.md`。
    - 先运行目标仓库已有检查；没有等价能力时，运行 `scripts/validate_skill.py` 或本次实现提供的校验入口。
-   - 使用 `checklists/design-review.md` 检查设计实现情况，再使用 `checklists/semantic-acceptance.md` 完成内容与场景审查。
+   - 使用 `checklists/design-review.md` 检查设计实现情况，再依次执行 `checklists/content-review.md` 和 `checklists/copy-review.md`。
+   - 文案修改后重新进行内容回归，确认触发、流程、权限和验收语义没有变化。
+   - 新建、整体重构或改变触发、Frontmatter、权限与平台行为时，使用 `prompts/reviewer.agent.md` 调起独立 Reviewer；微小且不改变语义的修改可以省略。
    - 根据目标 Skill 的调用配置验证对应触发方式，并覆盖新建通用 Skill、新建项目级 Skill、升级已有 Skill、确认步骤和失败路径。
    - 能够实际运行的平台必须进行真实验证；只能静态检查的平台必须标记为“未完成真实运行验证”。
    - 发现失败时，修复后重新运行受影响检查，不得用文字说明替代验证。
-   - 完成条件：静态检查和关键场景均通过，未验证内容和无法继续的原因均已记录。
+   - 完成条件：静态检查、内容审查、文案审查、适用的独立审查和关键场景均通过，未验证内容和无法继续的原因均已记录。
 
 6. 交付、请求发布确认并停止
    - 完整读取 `workflows/§06-delivery.md`。
@@ -84,7 +88,9 @@ metadata:
 - 最终目录树与每个关键文件的职责；
 - 新增、修改、删除及移出 Skill 目录的内容；
 - Claude Code、Codex 或其他目标平台的适配差异；
+- Frontmatter 字段决策矩阵及每个可选字段的依据；
 - 实际执行的校验命令、场景、结果和失败修复记录；
+- 内容审查、文案审查、内容回归和独立 Reviewer 的结果；
 - 外部来源与许可证信息；未使用外部来源时明确说明；
 - 已验证、未验证，以及无法完成的内容和原因；
 - 下一步状态、真实适用的交付动作及用户授权状态，并在当前 Skill 完成后停止。
@@ -104,9 +110,9 @@ metadata:
 
 - 开始调研时，完整读取 `workflows/§01-research.md`。
 - 识别和询问关键决策时，完整读取 `workflows/§02-clarification.md`。
-- 输出目录与实施方案前，完整读取 `workflows/§03-design.md`、`rules/architecture.md`、`rules/quality-standard.md` 和 `rules/platform-compatibility.md`。
+- 输出目录与实施方案前，完整读取 `workflows/§03-design.md`、`rules/architecture.md`、`rules/frontmatter.md`、`rules/quality-standard.md` 和 `rules/platform-compatibility.md`。
 - 构建通用 Skill 时，读取 `examples/global-skill.example.md`；构建项目级 Skill 时，读取 `examples/project-skill.example.md`。
 - 开始改动文件后，完整读取 `workflows/§04-implementation.md`。
-- 验证时，完整读取 `workflows/§05-validation.md`、`checklists/design-review.md` 和 `checklists/semantic-acceptance.md`。
-- 需要独立审阅者或 Subagent 时，读取 `prompts/reviewer.agent.md`；不涉及多 Agent 时不要读取。
+- 验证时，完整读取 `workflows/§05-validation.md`、`checklists/design-review.md`、`checklists/content-review.md` 和 `checklists/copy-review.md`；需要文案改写参考时读取 `examples/copy-review.example.md`。
+- 新建、整体重构或改变触发、Frontmatter、权限与平台行为时，读取 `prompts/reviewer.agent.md` 并调起独立 Reviewer；微小且不改变语义的修改可以省略。
 - 交付时，完整读取 `workflows/§06-delivery.md` 和 `templates/delivery-report.template.md`。

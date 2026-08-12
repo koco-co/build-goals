@@ -1,11 +1,10 @@
 ---
 name: shape-idea
 description: 通过逐项访谈与事实核查，把初步想法塑造成目标、范围、约束与关键决策均明确的完整定义。
-compatibility: 当前适配 Claude Code 与 Codex。
 disable-model-invocation: true
 metadata:
   author: koco-co
-  version: "1.0.0"
+  version: "1.0.1"
 ---
 
 # Outcome
