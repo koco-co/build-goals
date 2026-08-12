@@ -35,7 +35,7 @@
 | [`build-prd`](skills/build-prd/)       | 调研并生成决策完整的产品 <b>PRD</b>                   |
 | [`vibe-coding`](skills/vibe-coding/)   | 从 <b>PRD</b> 或旧项目编排架构、<b>TDD</b>、多 <b>Agent</b> 开发与全链路验收 |
 | [`build-readme`](skills/build-readme/) | 探索项目并创建或更新 <b>GitHub</b> 风格 <b>README</b> |
-| [`handoff`](skills/handoff/)           | 将当前会话整理为供下一位 <b>Agent</b> 接续的文档     |
+| [`handoff`](skills/handoff/)           | 整理跨会话交接文档并生成可直接复制的接续提示词      |
 
 <p><code>build-prd</code> 支持已有项目的全功能梳理，也能把尚不完整的想法完善为详细 <b>PRD</b>。它会调研当前竞品、活跃开源项目与适用的官方规范，逐项确认产品决策，并生成或规范化更新项目唯一的 <code>docs/PRD需求文档.md</code>。</p>
 
@@ -84,6 +84,8 @@ flowchart LR
 
 ```text
 build-goals/
+├── AGENTS.md
+├── CLAUDE.md -> AGENTS.md
 ├── .agents/
 │   └── plugins/
 │       └── marketplace.json

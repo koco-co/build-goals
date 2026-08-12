@@ -105,6 +105,49 @@ class ValidatePluginTests(unittest.TestCase):
         self.assertIn("skills/shape-idea", result.stdout)
         self.assertIn("skills/handoff", result.stdout)
 
+    def test_repository_agent_instructions_are_shared_and_actionable(self) -> None:
+        agents = REPO_ROOT / "AGENTS.md"
+        claude = REPO_ROOT / "CLAUDE.md"
+
+        self.assertTrue(agents.is_file())
+        self.assertTrue(claude.is_symlink())
+        self.assertEqual(os.readlink(claude), "AGENTS.md")
+
+        instructions = agents.read_text(encoding="utf-8")
+        for required in (
+            "每个验证通过的逻辑变更",
+            "不得提交或推送中间状态",
+            "origin/main",
+            "claude plugin marketplace update build-goals",
+            "claude plugin update build-goals@build-goals --scope user",
+            "codex plugin marketplace upgrade build-goals --json",
+            "build-goals-local",
+        ):
+            with self.subTest(required=required):
+                self.assertIn(required, instructions)
+
+    def test_repository_release_versions_are_synchronized(self) -> None:
+        claude_manifest = json.loads(
+            REPO_ROOT.joinpath(".claude-plugin", "plugin.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        codex_manifest = json.loads(
+            REPO_ROOT.joinpath(".codex-plugin", "plugin.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        marketplace = json.loads(
+            REPO_ROOT.joinpath(".claude-plugin", "marketplace.json").read_text(
+                encoding="utf-8"
+            )
+        )
+
+        self.assertEqual(claude_manifest["version"], codex_manifest["version"])
+        self.assertEqual(
+            claude_manifest["version"], marketplace["plugins"][0]["version"]
+        )
+
     def test_claude_marketplace_manifest_is_allowed(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
             plugin = self.write_fixture(Path(temp))

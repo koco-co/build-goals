@@ -231,6 +231,25 @@ class ValidateSkillTests(unittest.TestCase):
             self.assertEqual(result.returncode, 1)
             self.assertIn("SYMLINK_OUTSIDE_PLUGIN", result.stdout)
 
+    def test_handoff_requires_copyable_next_agent_prompt(self) -> None:
+        skill_md = REPO_ROOT.joinpath("skills", "handoff", "SKILL.md").read_text(
+            encoding="utf-8"
+        )
+
+        self.assertIn("给下一个 Agent 的提示词", skill_md)
+        self.assertIn("真实文件路径", skill_md)
+        self.assertIn("可直接复制", skill_md)
+        self.assertIn(
+            "请读取 `<真实文件路径>` 并继续完成其中记录的任务；"
+            "严格遵循文档中的目标、约束、已确认决策和后续步骤。",
+            skill_md,
+        )
+        self.assertIn(
+            "请使用 `$skill-name`，读取 `<真实文件路径>` 并继续完成其中记录的任务；"
+            "严格遵循文档中的目标、约束、已确认决策和后续步骤。",
+            skill_md,
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
