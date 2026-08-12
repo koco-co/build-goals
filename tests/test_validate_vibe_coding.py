@@ -137,8 +137,7 @@ class VibeCodingValidatorTests(unittest.TestCase):
         integration_status = (
             "已集成到指定集成分支并验证通过。" if status == "已完成" else "尚未集成。"
         )
-        return textwrap.dedent(
-            f"""
+        return textwrap.dedent(f"""
             ### TASK-001 账号创建
             - 状态：{status}
             - 需求/验收/Finding：{marker}
@@ -152,8 +151,7 @@ class VibeCodingValidatorTests(unittest.TestCase):
             - Commit：{commit}
             - 回滚：revert 本任务 commit。
             - 完成条件：主流程和错误路径均通过自动化测试。
-            """
-        ).strip()
+            """).strip()
 
     def write_plan(
         self, root: Path, marker: str, status: str = "待开始", commit: str = "待生成"
@@ -211,8 +209,7 @@ class VibeCodingValidatorTests(unittest.TestCase):
         self.write_plan(root, marker)
         plan = root / "docs" / "实施任务清单.md"
         text = plan.read_text(encoding="utf-8")
-        foundation = textwrap.dedent(
-            f"""
+        foundation = textwrap.dedent(f"""
             ## 基础工程就绪
 
             - 状态：已验证
@@ -224,10 +221,8 @@ class VibeCodingValidatorTests(unittest.TestCase):
             - 基础测试结果：exit 0，基础测试通过。
             - 基础工程提交：{foundation_commit}
             - 既有 Worktrees：{existing_worktrees}
-            """
-        ).strip()
-        readiness = textwrap.dedent(
-            f"""
+            """).strip()
+        readiness = textwrap.dedent(f"""
             ## 项目指令就绪
 
             - 状态：{status}
@@ -238,8 +233,7 @@ class VibeCodingValidatorTests(unittest.TestCase):
             - 治理提交：{commit}
             - 功能开发基线：{baseline}
             - 恢复条件：N/A（已就绪）
-            """
-        ).strip()
+            """).strip()
         text = text.replace(
             "## 基础工程就绪\n该章节包含完整、可执行且可复核的任务、数据、测试、集成与回滚说明。",
             foundation,

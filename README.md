@@ -26,16 +26,16 @@
 
 <h2 align="center">𝑪𝒂𝒑𝒂𝒃𝒊𝒍𝒊𝒕𝒊𝒆𝒔 · 已收录能力</h2>
 
-| <b>Skill</b>                           | 作用                                                   |
-| -------------------------------------- | ------------------------------------------------------ |
-| [`shape-idea`](skills/shape-idea/)     | 将初步想法塑造成完整、无歧义的定义                     |
-| [`build-skill`](skills/build-skill/)   | 按能力设计 <b>Frontmatter</b>，构建并审查高质量 <b>Agent Skill</b> |
-| [`build-plugin`](skills/build-plugin/) | 构建、升级或迁移双平台 <b>Plugin</b>                  |
-| [`build-prd`](skills/build-prd/)       | 调研并生成决策完整的产品 <b>PRD</b>                   |
-| [`vibe-coding`](skills/vibe-coding/)   | 从 <b>PRD</b> 或旧项目编排架构、<b>TDD</b>、多 <b>Agent</b> 开发与全链路验收 |
-| [`build-readme`](skills/build-readme/) | 探索项目并创建或更新 <b>GitHub</b> 风格 <b>README</b> |
-| [`build-agents-md`](skills/build-agents-md/) | 初始化或整体重构跨平台 <b>AGENTS.md</b> 与 <b>CLAUDE.md</b> |
-| [`handoff`](skills/handoff/)           | 整理跨会话交接文档并生成可直接复制的接续提示词      |
+| <b>Skill</b>                                 | 作用                                                                         |
+| -------------------------------------------- | ---------------------------------------------------------------------------- |
+| [`shape-idea`](skills/shape-idea/)           | 将初步想法塑造成完整、无歧义的定义                                           |
+| [`build-skill`](skills/build-skill/)         | 按能力设计 <b>Frontmatter</b>，构建并审查高质量 <b>Agent Skill</b>           |
+| [`build-plugin`](skills/build-plugin/)       | 构建、升级或迁移双平台 <b>Plugin</b>                                         |
+| [`build-prd`](skills/build-prd/)             | 调研并生成决策完整的产品 <b>PRD</b>                                          |
+| [`vibe-coding`](skills/vibe-coding/)         | 从 <b>PRD</b> 或旧项目编排架构、<b>TDD</b>、多 <b>Agent</b> 开发与全链路验收 |
+| [`build-readme`](skills/build-readme/)       | 探索项目并创建或更新 <b>GitHub</b> 风格 <b>README</b>                        |
+| [`build-agents-md`](skills/build-agents-md/) | 初始化或整体重构跨平台 <b>AGENTS.md</b> 与 <b>CLAUDE.md</b>                  |
+| [`handoff`](skills/handoff/)                 | 整理跨会话交接文档并生成可直接复制的接续提示词                               |
 
 <p><code>build-prd</code> 支持已有项目的全功能梳理，也能把尚不完整的想法完善为详细 <b>PRD</b>。它会调研当前竞品、活跃开源项目与适用的官方规范，逐项确认产品决策，并生成或规范化更新项目唯一的 <code>docs/PRD需求文档.md</code>。</p>
 
@@ -245,7 +245,7 @@ python3 -m unittest discover -s tests -p 'test_*.py' -v
 
 <h2 align="center">𝑵𝒂𝒎𝒊𝒏𝒈 · 文件命名约定</h2>
 
-| 目录  | 命名格式         |
+| 目录         | 命名格式                |
 | ------------ | ----------------------- |
 | `workflows/` | `§NN-name.md`           |
 | `templates/` | `<name>.template.<ext>` |
@@ -256,11 +256,11 @@ python3 -m unittest discover -s tests -p 'test_*.py' -v
 
 <h2 align="center">𝑷𝒍𝒂𝒕𝒇𝒐𝒓𝒎 𝑺𝒖𝒑𝒑𝒐𝒓𝒕 · 平台支持</h2>
 
-| 平台              | <b>Manifest</b>              | 静态校验  | 真实客户端验证                      |
-| ------------------------ | ---------------------------- | ---------------- | ------------------------------------------ |
-| <b>Claude Code</b>       | `.claude-plugin/plugin.json` | 已接入 <b>CI</b> | 需在本地 <b>Claude Code</b> 完成           |
+| 平台                     | <b>Manifest</b>              | 静态校验         | 真实客户端验证                                    |
+| ------------------------ | ---------------------------- | ---------------- | ------------------------------------------------- |
+| <b>Claude Code</b>       | `.claude-plugin/plugin.json` | 已接入 <b>CI</b> | 需在本地 <b>Claude Code</b> 完成                  |
 | <b>Codex</b>             | `.codex-plugin/plugin.json`  | 已接入 <b>CI</b> | 需在支持 <b>Plugin</b> 的 <b>Codex</b> 客户端完成 |
-| 其他 <b>Coding Agent</b> | 暂无                  | 暂无      | 暂无                                |
+| 其他 <b>Coding Agent</b> | 暂无                         | 暂无             | 暂无                                              |
 
 <a id="license"></a>
 

@@ -192,9 +192,7 @@ class ValidatePrdTests(unittest.TestCase):
                 "- `F-001-AC-02` Given 任务名称为空，When 用户点击“创建”，Then 显示“请输入任务名称”并聚焦输入框。\n",
                 "尚未编写验收标准。\n",
             )
-            result = self.run_validator(
-                self.write_prd(Path(temp), without_acceptance)
-            )
+            result = self.run_validator(self.write_prd(Path(temp), without_acceptance))
             self.assertEqual(result.returncode, 1)
             self.assertIn("AC_REQUIRED", result.stdout)
 

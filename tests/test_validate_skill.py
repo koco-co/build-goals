@@ -348,15 +348,15 @@ class ValidateSkillTests(unittest.TestCase):
         content_review = skill_root.joinpath(
             "checklists", "content-review.md"
         ).read_text(encoding="utf-8")
-        copy_review = skill_root.joinpath(
-            "checklists", "copy-review.md"
-        ).read_text(encoding="utf-8")
-        examples = skill_root.joinpath(
-            "examples", "copy-review.example.md"
-        ).read_text(encoding="utf-8")
-        reviewer = skill_root.joinpath(
-            "prompts", "reviewer.agent.md"
-        ).read_text(encoding="utf-8")
+        copy_review = skill_root.joinpath("checklists", "copy-review.md").read_text(
+            encoding="utf-8"
+        )
+        examples = skill_root.joinpath("examples", "copy-review.example.md").read_text(
+            encoding="utf-8"
+        )
+        reviewer = skill_root.joinpath("prompts", "reviewer.agent.md").read_text(
+            encoding="utf-8"
+        )
 
         self.assertIn("正确性和完整性", content_review)
         self.assertIn("措辞润色不属于本清单", content_review)
@@ -474,7 +474,9 @@ class ValidateSkillTests(unittest.TestCase):
         self.assertIn("确认依据", contract)
         self.assertIn("恢复条件", contract)
 
-    def test_stateful_build_skills_define_independent_and_controlled_delivery(self) -> None:
+    def test_stateful_build_skills_define_independent_and_controlled_delivery(
+        self,
+    ) -> None:
         for name, workflow in (
             ("build-agents-md", "§05-delivery.md"),
             ("build-skill", "§06-delivery.md"),

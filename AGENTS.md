@@ -39,13 +39,13 @@
 
 ## 验证流程
 
-| 修改内容 | 至少运行 |
-| --- | --- |
-| 新建或修改 Skill | 先补行为测试，再运行目标 Skill 检查和相关单元测试 |
-| Manifest、平台适配或共享文件 | 镜像检查、双平台 Plugin 检查、安装器测试和完整回归 |
-| `AGENTS.md` / `CLAUDE.md` | `validate_agents_md.py --strict --require-symlink`，并检查 Git 中的链接模式 |
-| README | `validate_readme.py`，并核对公开命令与当前仓库一致 |
-| 正式版本 | 核对 `.claude-plugin/plugin.json`、`.claude-plugin/marketplace.json` 和 `.codex-plugin/plugin.json` |
+| 修改内容                     | 至少运行                                                                                            |
+| ---------------------------- | --------------------------------------------------------------------------------------------------- |
+| 新建或修改 Skill             | 先补行为测试，再运行目标 Skill 检查和相关单元测试                                                   |
+| Manifest、平台适配或共享文件 | 镜像检查、双平台 Plugin 检查、安装器测试和完整回归                                                  |
+| `AGENTS.md` / `CLAUDE.md`    | `validate_agents_md.py --strict --require-symlink`，并检查 Git 中的链接模式                         |
+| README                       | `validate_readme.py`，并核对公开命令与当前仓库一致                                                  |
+| 正式版本                     | 核对 `.claude-plugin/plugin.json`、`.claude-plugin/marketplace.json` 和 `.codex-plugin/plugin.json` |
 
 - 行为变化还要在适用的真实客户端中验证；当前环境无法完成时，明确标为“未验证”。
 - 交付前运行相关测试、完整回归、双平台 Plugin 检查和 `git diff --check`，分别报告结果。

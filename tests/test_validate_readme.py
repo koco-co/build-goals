@@ -9,9 +9,7 @@ import unittest
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-VALIDATOR = (
-    REPO_ROOT / "skills" / "build-readme" / "scripts" / "validate_readme.py"
-)
+VALIDATOR = REPO_ROOT / "skills" / "build-readme" / "scripts" / "validate_readme.py"
 
 VALID_README = """
 <div align="center">
@@ -71,17 +69,12 @@ class ValidateReadmeTests(unittest.TestCase):
 
     def test_shipped_example_passes(self) -> None:
         example = (
-            REPO_ROOT
-            / "skills"
-            / "build-readme"
-            / "examples"
-            / "readme.example.md"
+            REPO_ROOT / "skills" / "build-readme" / "examples" / "readme.example.md"
         )
         example_text = example.read_text(encoding="utf-8")
         self.assertIn("# 𝓑𝓾𝓲𝓵𝓭 𝓕𝓵𝓸𝔀", example_text)
         self.assertIn(
-            "𝑭𝒓𝒐𝒎 𝑹𝒆𝒑𝒐𝒔𝒊𝒕𝒐𝒓𝒚 𝑭𝒂𝒄𝒕𝒔 𝒕𝒐 "
-            "𝑽𝒆𝒓𝒊𝒇𝒊𝒂𝒃𝒍𝒆 𝑫𝒐𝒄𝒖𝒎𝒆𝒏𝒕𝒂𝒕𝒊𝒐𝒏",
+            "𝑭𝒓𝒐𝒎 𝑹𝒆𝒑𝒐𝒔𝒊𝒕𝒐𝒓𝒚 𝑭𝒂𝒄𝒕𝒔 𝒕𝒐 " "𝑽𝒆𝒓𝒊𝒇𝒊𝒂𝒃𝒍𝒆 𝑫𝒐𝒄𝒖𝒎𝒆𝒏𝒕𝒂𝒕𝒊𝒐𝒏",
             example_text,
         )
         for heading in (
@@ -92,9 +85,7 @@ class ValidateReadmeTests(unittest.TestCase):
         ):
             self.assertIn(heading, example_text)
         with tempfile.TemporaryDirectory() as temp:
-            result = self.run_validator(
-                self.write_readme(Path(temp), example_text)
-            )
+            result = self.run_validator(self.write_readme(Path(temp), example_text))
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
     def test_plain_title_fails(self) -> None:
@@ -122,7 +113,7 @@ class ValidateReadmeTests(unittest.TestCase):
                 Path(temp),
                 VALID_README.replace(
                     '<p align="center">从想法到可验证交付 · 𝑭𝒓𝒐𝒎 𝑰𝒅𝒆𝒂 𝒕𝒐 𝑽𝒆𝒓𝒊𝒇𝒊𝒂𝒃𝒍𝒆 𝑫𝒆𝒍𝒊𝒗𝒆𝒓𝒚</p>',
-                    '***从想法到可验证交付***',
+                    "***从想法到可验证交付***",
                 ),
             )
             result = self.run_validator(path)
@@ -176,7 +167,9 @@ class ValidateReadmeTests(unittest.TestCase):
 
     def test_markdown_italic_fails(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
-            path = self.write_readme(Path(temp), VALID_README + "\n<p>_Plain English_</p>\n")
+            path = self.write_readme(
+                Path(temp), VALID_README + "\n<p>_Plain English_</p>\n"
+            )
             result = self.run_validator(path)
             self.assertEqual(result.returncode, 1)
             self.assertIn("MARKDOWN_ITALIC_FORBIDDEN", result.stdout)
@@ -193,7 +186,9 @@ class ValidateReadmeTests(unittest.TestCase):
 
     def test_chinese_bold_fails(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
-            path = self.write_readme(Path(temp), VALID_README + "\n<p><b>中文说明</b></p>\n")
+            path = self.write_readme(
+                Path(temp), VALID_README + "\n<p><b>中文说明</b></p>\n"
+            )
             result = self.run_validator(path)
             self.assertEqual(result.returncode, 1)
             self.assertIn("CHINESE_BOLD_FORBIDDEN", result.stdout)
@@ -205,13 +200,13 @@ class ValidateReadmeTests(unittest.TestCase):
                 path = self.write_readme(Path(temp), VALID_README + f"\n{variant}\n")
                 result = self.run_validator(path)
                 self.assertEqual(result.returncode, 1)
-                self.assertRegex(
-                    result.stdout, r"(BODY_BOLD|CHINESE_BOLD_FORBIDDEN)"
-                )
+                self.assertRegex(result.stdout, r"(BODY_BOLD|CHINESE_BOLD_FORBIDDEN)")
 
     def test_english_bold_markup_passes(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
-            path = self.write_readme(Path(temp), VALID_README + "\n<p><b>English Label</b></p>\n")
+            path = self.write_readme(
+                Path(temp), VALID_README + "\n<p><b>English Label</b></p>\n"
+            )
             result = self.run_validator(path)
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
@@ -287,7 +282,7 @@ class ValidateReadmeTests(unittest.TestCase):
             asset.parent.mkdir()
             asset.write_text(
                 '<svg xmlns="http://www.w3.org/2000/svg">'
-                '<script>alert(1)</script>'
+                "<script>alert(1)</script>"
                 '<image href="https://tracker.example/pixel"/>'
                 "</svg>",
                 encoding="utf-8",

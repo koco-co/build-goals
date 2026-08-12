@@ -102,9 +102,7 @@ class ValidateAgentsMdTests(unittest.TestCase):
             project.joinpath("AGENTS.md").write_text(
                 "# Agent Guide\n", encoding="utf-8"
             )
-            project.joinpath("CLAUDE.md").symlink_to(
-                project / "AGENTS.md"
-            )
+            project.joinpath("CLAUDE.md").symlink_to(project / "AGENTS.md")
 
             result = self.run_validator(project, "--strict")
 
@@ -117,13 +115,9 @@ class ValidateAgentsMdTests(unittest.TestCase):
             self.write_instruction_pair(project, use_import_fallback=True)
 
             portable = self.run_validator(project, "--strict")
-            symlink_only = self.run_validator(
-                project, "--strict", "--require-symlink"
-            )
+            symlink_only = self.run_validator(project, "--strict", "--require-symlink")
 
-            self.assertEqual(
-                portable.returncode, 0, portable.stdout + portable.stderr
-            )
+            self.assertEqual(portable.returncode, 0, portable.stdout + portable.stderr)
             self.assertEqual(symlink_only.returncode, 1)
             self.assertIn("CLAUDE_SYMLINK_REQUIRED", symlink_only.stdout)
 
@@ -131,9 +125,7 @@ class ValidateAgentsMdTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp:
             project = Path(temp)
             self.write_instruction_pair(project, use_import_fallback=True)
-            project.joinpath("CLAUDE.md").write_text(
-                "@AGENTS.md\n\n", encoding="utf-8"
-            )
+            project.joinpath("CLAUDE.md").write_text("@AGENTS.md\n\n", encoding="utf-8")
 
             result = self.run_validator(project, "--strict")
 
@@ -236,8 +228,7 @@ class BuildAgentsMdContractTests(unittest.TestCase):
     def test_skill_contract_covers_confirmed_behavior(self) -> None:
         skill_md = SKILL_DIR.joinpath("SKILL.md").read_text(encoding="utf-8")
         contract = "\n".join(
-            path.read_text(encoding="utf-8")
-            for path in sorted(SKILL_DIR.rglob("*.md"))
+            path.read_text(encoding="utf-8") for path in sorted(SKILL_DIR.rglob("*.md"))
         )
 
         self.assertIn("disable-model-invocation: true", skill_md)
@@ -296,9 +287,7 @@ class BuildAgentsMdContractTests(unittest.TestCase):
             "application.example.md",
             "monorepo.example.md",
         }
-        actual = {
-            path.name for path in SKILL_DIR.joinpath("examples").glob("*.md")
-        }
+        actual = {path.name for path in SKILL_DIR.joinpath("examples").glob("*.md")}
 
         self.assertEqual(actual, expected)
 
