@@ -56,19 +56,27 @@
   - `.codex-plugin/plugin.json`
 - Skill 自身 `metadata.version` 按该 Skill 的行为变化独立递增。
 
-## 完成后的自动发布
+## 完成后的发布确认
 
-- 每个验证通过的逻辑变更完成后执行一次发布链路；不得提交或推送中间状态。
-- 发布前确认当前分支是跟踪 `origin/main` 的 `main`，远端没有未整合提交，工作区改动均能明确归属于当前任务；否则停止并报告。
-- 选择并同步版本，重新运行完整门禁，只暂存当前任务文件，检查 staged diff 后创建一个有意义的原子提交。
-- 使用显式目标推送并核对远端提交：
+- 每个逻辑变更实现并验证完成后，不得自动 commit、push 或更新本地 Plugin；先汇总验证结果、拟发布版本、目标远端与分支，以及真实适用的交付动作。
+- 主动向用户提出一次确认，使用以下开头，并只列出真实适用的动作：
+
+  ```text
+  实现和验证已经完成。是否执行以下交付动作？
+  ```
+
+- 本仓库通常列出：Commit 当前任务变更、Push 到 `origin/main`、更新并核验 Claude Code Plugin、更新并核验 Codex Plugin。给出“推荐：全部执行”，同时明确用户可以只授权其中部分动作。
+- 未经用户明确授权，不得在用户回答前执行任何交付动作。用户只授权部分动作时，只执行获准部分；未授权项保持未执行并在最终状态中列出。
+- 获得对应授权后，先确认当前分支是跟踪 `origin/main` 的 `main`，远端没有未整合提交，工作区改动均能明确归属于当前任务；否则停止并报告。
+- Commit 获得授权时，选择并同步版本，重新运行完整门禁，只暂存当前任务文件，检查 staged diff 后创建一个有意义的原子提交。
+- Push 获得授权时，使用显式目标推送并核对远端提交：
 
   ```bash
   git push origin HEAD:refs/heads/main
   git ls-remote origin refs/heads/main
   ```
 
-- 推送成功后刷新正式 Claude Code Plugin，并核验安装版本与关键变更：
+- 更新 Claude Code Plugin 获得授权时，只能在对应提交已到达插件 Marketplace 使用的远端后刷新正式 Plugin，并核验安装版本与关键变更：
 
   ```bash
   claude plugin marketplace update build-goals
@@ -76,7 +84,7 @@
   claude plugin list
   ```
 
-- 随后刷新正式 Codex Plugin，并核验安装版本与关键变更：
+- 更新 Codex Plugin 获得授权时，只能在对应提交已到达插件 Marketplace 使用的远端后刷新正式 Plugin，并核验安装版本与关键变更：
 
   ```bash
   codex plugin marketplace upgrade build-goals --json
@@ -84,5 +92,4 @@
   ```
 
 - 保留两端插件原有 enabled/disabled 状态；不得修改独立的 `build-goals-local` 测试插件，不得把“需要重启”描述为已生效。
-- 任一测试、校验、版本同步、提交、push、远端 SHA 或客户端刷新核验失败时，立即停止后续发布步骤并报告真实状态；禁止 force push、跳过门禁或伪造成功。
-- 用户明确要求不提交、不 push 或不更新插件时，以该次用户指令为准。
+- 任一测试、校验、版本同步、提交、push、远端 SHA 或客户端刷新核验失败时，立即停止剩余已授权动作并报告真实状态；禁止 force push、跳过门禁或伪造成功。

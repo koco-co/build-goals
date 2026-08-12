@@ -105,7 +105,7 @@ class ValidatePluginTests(unittest.TestCase):
         self.assertIn("skills/shape-idea", result.stdout)
         self.assertIn("skills/handoff", result.stdout)
 
-    def test_repository_agent_instructions_are_shared_and_actionable(self) -> None:
+    def test_repository_agent_instructions_require_release_confirmation(self) -> None:
         agents = REPO_ROOT / "AGENTS.md"
         claude = REPO_ROOT / "CLAUDE.md"
 
@@ -115,8 +115,10 @@ class ValidatePluginTests(unittest.TestCase):
 
         instructions = agents.read_text(encoding="utf-8")
         for required in (
-            "每个验证通过的逻辑变更",
-            "不得提交或推送中间状态",
+            "完成后的发布确认",
+            "实现和验证已经完成。是否执行以下交付动作？",
+            "可以只授权其中部分动作",
+            "未经用户明确授权",
             "origin/main",
             "claude plugin marketplace update build-goals",
             "claude plugin update build-goals@build-goals --scope user",
@@ -125,6 +127,51 @@ class ValidatePluginTests(unittest.TestCase):
         ):
             with self.subTest(required=required):
                 self.assertIn(required, instructions)
+        self.assertNotIn("完成后的自动发布", instructions)
+        self.assertNotIn("每个验证通过的逻辑变更完成后执行一次发布链路", instructions)
+
+    def test_build_skills_prompt_for_applicable_release_actions(self) -> None:
+        contracts = {
+            "build-skill": (
+                REPO_ROOT / "skills" / "build-skill" / "SKILL.md",
+                REPO_ROOT
+                / "skills"
+                / "build-skill"
+                / "workflows"
+                / "§06-delivery.md",
+                REPO_ROOT
+                / "skills"
+                / "build-skill"
+                / "templates"
+                / "delivery-report.template.md",
+            ),
+            "build-plugin": (
+                REPO_ROOT / "skills" / "build-plugin" / "SKILL.md",
+                REPO_ROOT
+                / "skills"
+                / "build-plugin"
+                / "workflows"
+                / "§07-delivery.md",
+                REPO_ROOT
+                / "skills"
+                / "build-plugin"
+                / "templates"
+                / "plugin-delivery-report.template.md",
+            ),
+        }
+
+        for name, paths in contracts.items():
+            with self.subTest(skill=name):
+                contract = "\n".join(
+                    path.read_text(encoding="utf-8") for path in paths
+                )
+                self.assertIn("主动询问", contract)
+                self.assertIn("只授权其中部分动作", contract)
+                self.assertIn("不得在用户回答前执行", contract)
+                self.assertIn(
+                    "实现和验证已经完成。是否执行以下交付动作？", contract
+                )
+                self.assertIn("只列出真实适用的动作", contract)
 
     def test_repository_release_versions_are_synchronized(self) -> None:
         claude_manifest = json.loads(
