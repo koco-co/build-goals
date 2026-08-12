@@ -102,10 +102,13 @@ class ValidatePluginTests(unittest.TestCase):
         self.assertIn("skills/build-plugin", result.stdout)
         self.assertIn("skills/build-prd", result.stdout)
         self.assertIn("skills/build-readme", result.stdout)
+        self.assertIn("skills/build-agents-md", result.stdout)
         self.assertIn("skills/shape-idea", result.stdout)
         self.assertIn("skills/handoff", result.stdout)
 
-    def test_repository_agent_instructions_require_release_confirmation(self) -> None:
+    def test_repository_agent_instructions_are_concise_and_project_specific(
+        self,
+    ) -> None:
         agents = REPO_ROOT / "AGENTS.md"
         claude = REPO_ROOT / "CLAUDE.md"
 
@@ -115,20 +118,26 @@ class ValidatePluginTests(unittest.TestCase):
 
         instructions = agents.read_text(encoding="utf-8")
         for required in (
-            "完成后的发布确认",
-            "实现和验证已经完成。是否执行以下交付动作？",
-            "可以只授权其中部分动作",
-            "未经用户明确授权",
-            "origin/main",
-            "claude plugin marketplace update build-goals",
-            "claude plugin update build-goals@build-goals --scope user",
-            "codex plugin marketplace upgrade build-goals --json",
-            "build-goals-local",
+            "项目定位",
+            "工作地图",
+            "关键命令",
+            "项目不变量",
+            "变更与验证",
+            "skills/",
+            "validate_plugin.py",
+            "不得自动 commit、push 或更新本地 Plugin",
         ):
             with self.subTest(required=required):
                 self.assertIn(required, instructions)
-        self.assertNotIn("完成后的自动发布", instructions)
-        self.assertNotIn("每个验证通过的逻辑变更完成后执行一次发布链路", instructions)
+        for excluded in (
+            "## 开始修改前",
+            "## 完成后的发布确认",
+            "claude plugin marketplace update build-goals",
+            "codex plugin marketplace upgrade build-goals --json",
+        ):
+            with self.subTest(excluded=excluded):
+                self.assertNotIn(excluded, instructions)
+        self.assertLessEqual(len(instructions.splitlines()), 120)
 
     def test_build_skills_prompt_for_applicable_release_actions(self) -> None:
         contracts = {
@@ -194,6 +203,7 @@ class ValidatePluginTests(unittest.TestCase):
         self.assertEqual(
             claude_manifest["version"], marketplace["plugins"][0]["version"]
         )
+        self.assertEqual(claude_manifest["version"], "1.5.0")
 
     def test_claude_marketplace_manifest_is_allowed(self) -> None:
         with tempfile.TemporaryDirectory() as temp:

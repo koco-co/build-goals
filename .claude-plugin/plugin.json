@@ -2,8 +2,8 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "build-goals",
   "displayName": "Build Goals",
-  "version": "1.4.0",
-  "description": "Clarify goals and deliver high-quality software projects, Agent Skills, plugins, product PRDs, and GitHub READMEs.",
+  "version": "1.5.0",
+  "description": "Clarify goals and deliver high-quality software projects, Agent Skills, plugins, product PRDs, GitHub READMEs, and project agent instructions.",
   "author": {
     "name": "koco-co",
     "url": "https://github.com/koco-co"
@@ -17,6 +17,7 @@
     "plugin-development",
     "product-requirements",
     "readme-generation",
+    "agents-md",
     "vibe-coding",
     "software-delivery",
     "multi-agent-development",

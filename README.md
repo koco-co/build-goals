@@ -35,6 +35,7 @@
 | [`build-prd`](skills/build-prd/)       | 调研并生成决策完整的产品 <b>PRD</b>                   |
 | [`vibe-coding`](skills/vibe-coding/)   | 从 <b>PRD</b> 或旧项目编排架构、<b>TDD</b>、多 <b>Agent</b> 开发与全链路验收 |
 | [`build-readme`](skills/build-readme/) | 探索项目并创建或更新 <b>GitHub</b> 风格 <b>README</b> |
+| [`build-agents-md`](skills/build-agents-md/) | 初始化或整体重构跨平台 <b>AGENTS.md</b> 与 <b>CLAUDE.md</b> |
 | [`handoff`](skills/handoff/)           | 整理跨会话交接文档并生成可直接复制的接续提示词      |
 
 <p><code>build-prd</code> 支持已有项目的全功能梳理，也能把尚不完整的想法完善为详细 <b>PRD</b>。它会调研当前竞品、活跃开源项目与适用的官方规范，逐项确认产品决策，并生成或规范化更新项目唯一的 <code>docs/PRD需求文档.md</code>。</p>
@@ -42,6 +43,8 @@
 <p><code>vibe-coding</code> 是端到端软件交付总控：它可以实现 <code>build-prd</code> 的确认产物，也可以审查并迁移已有低质量项目。架构方案和任务列表分别经过用户确认后，才会搭建脚手架、组织 <b>TDD</b> 功能切片、按依赖使用多 <b>Agent</b> 与 <b>Git worktrees</b>、创建原子提交，并完成单元、集成、<b>E2E</b>、条件式视觉/交互、安全和正常测试数据验收。</p>
 
 <p><code>build-readme</code> 会先探索代码、命令、测试、<b>CI</b>、文档和资源，提交具体写入预览；用户确认后才创建或更新 <b>README</b>，并分别报告机械检查、<b>GitHub</b> 渲染和未验证项。</p>
+
+<p><code>build-agents-md</code> 会从仓库证据筛选项目特有指令，按应用、库、<b>CLI</b> 或 <b>Monorepo</b> 自适应组织根级与嵌套 <code>AGENTS.md</code>；用户确认完整替换预览后，才以同目录 <code>CLAUDE.md</code> 相对符号链接建立双平台单一来源。</p>
 
 <a id="workflow"></a>
 
@@ -54,6 +57,7 @@ flowchart LR
     B --> D[Plugin]
     B --> E[PRD]
     B --> F[README]
+    B --> M[AGENTS.md]
     E --> G[Vibe Coding]
     G --> H[Architecture Approval]
     H --> I[Task Approval]
@@ -61,6 +65,7 @@ flowchart LR
     C --> K[Validate]
     D --> K
     F --> K
+    M --> K
     J --> K
     K --> L[Handoff]
 ```
@@ -106,6 +111,7 @@ build-goals/
 │   ├── build-prd/
 │   ├── vibe-coding/
 │   ├── build-readme/
+│   ├── build-agents-md/
 │   └── handoff/
 └── tests/
 ```
@@ -158,7 +164,7 @@ python3 scripts/install_skill.py build-skill \
   --scope user
 ```
 
-<p>将 <code>build-skill</code> 替换为 <code>build-plugin</code>、<code>build-prd</code>、<code>vibe-coding</code>、<code>build-readme</code>、<code>shape-idea</code> 或 <code>handoff</code> 即可安装另一个 <b>Skill</b>。目标目录已存在时默认拒绝覆盖；明确确认后添加 <code>--force</code>。</p>
+<p>将 <code>build-skill</code> 替换为 <code>build-plugin</code>、<code>build-prd</code>、<code>vibe-coding</code>、<code>build-readme</code>、<code>build-agents-md</code>、<code>shape-idea</code> 或 <code>handoff</code> 即可安装另一个 <b>Skill</b>。目标目录已存在时默认拒绝覆盖；明确确认后添加 <code>--force</code>。</p>
 
 <a id="validation"></a>
 
@@ -209,6 +215,15 @@ python3 skills/build-readme/scripts/validate_readme.py \
   /path/to/project/README.md \
   --project-root /path/to/project \
   --strict
+```
+
+<p>验证 <code>build-agents-md</code> 创建或重构的跨平台项目指令：</p>
+
+```bash
+python3 skills/build-agents-md/scripts/validate_agents_md.py \
+  /path/to/project \
+  --strict \
+  --require-symlink
 ```
 
 <p>运行全部测试：</p>

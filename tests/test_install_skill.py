@@ -141,6 +141,32 @@ class InstallSkillTests(unittest.TestCase):
                         destination.joinpath("agents", "openai.yaml").is_file()
                     )
 
+    def test_build_agents_md_installs_for_both_platforms(self) -> None:
+        for platform, root_name in (("claude", ".claude"), ("codex", ".agents")):
+            with self.subTest(platform=platform), tempfile.TemporaryDirectory() as temp:
+                home = Path(temp)
+                result = self.run_installer(home, platform, "build-agents-md")
+                self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+                destination = home / root_name / "skills" / "build-agents-md"
+                self.assertTrue(destination.joinpath("SKILL.md").is_file())
+                self.assertTrue(
+                    destination.joinpath(
+                        "scripts", "validate_agents_md.py"
+                    ).is_file()
+                )
+                self.assertTrue(
+                    destination.joinpath(
+                        "examples", "monorepo.example.md"
+                    ).is_file()
+                )
+                if platform == "claude":
+                    self.assertFalse(destination.joinpath("agents").exists())
+                else:
+                    self.assertTrue(
+                        destination.joinpath("agents", "openai.yaml").is_file()
+                    )
+
     def test_dry_run_does_not_create_target_directories(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
             home = Path(temp) / "new-home"
