@@ -11,7 +11,7 @@
 3. 为仅限用户调用的 Skill 增加 `agents/openai.yaml`，并设置对应调用权限；
 4. Claude Code Manifest 与 Codex Manifest 使用相同的 `name`、`version` 和 `skills` 路径；
 5. 平台专属能力保留在各自 Manifest 或适配文件；
-6. 共享文件使用 Plugin 根目录内的相对软链接；
+6. 跨 Skill 运行依赖使用清单声明的普通镜像，并自动检查规范源漂移；
 7. 分别完成平台真实测试。
 
 ## 不推荐

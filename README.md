@@ -82,7 +82,7 @@ flowchart LR
 - 先查明，再设计：先读取需求、仓库与平台约定，再提出方案。
 - 确认后实施：用户确认目录、边界和验收标准前，不修改目标文件。
 - 保护当前工作：最新 <b>HEAD</b>、未提交修改和新增文件都视为用户资产，不回滚、不覆盖。
-- 单一规范源：共享能力使用仓库内相对软链接，不复制多份相同文件。
+- 单一规范源：跨 <b>Skill</b> 运行依赖由清单声明，并以可校验、可同步的普通镜像兼容两端客户端缓存。
 - 确定性优先：已有 <b>CLI</b> → 脚本 → 模板 → <b>Few-shot</b> → 规则 → 提示词。
 - 渐进式读取：主 <code>SKILL.md</code> 只保留路由和主流程，复杂内容按需读取。
 - 验证可复现：静态检查、内容审查、文案审查与真实平台测试分别记录。
@@ -96,6 +96,7 @@ flowchart LR
 build-goals/
 ├── AGENTS.md
 ├── CLAUDE.md -> AGENTS.md
+├── .plugin-shared-files.json
 ├── .agents/
 │   └── plugins/
 │       └── marketplace.json
@@ -121,7 +122,7 @@ build-goals/
 └── tests/
 ```
 
-<p><code>build-plugin</code> 中复用的 <b>Skill</b> 模板、质量规则、校验器、检查清单和 <b>Reviewer Agent</b> 均通过相对软链接指向 <code>build-skill</code>。<code>vibe-coding</code> 同样通过相对软链接复用 <code>build-prd</code> 的 <b>PRD</b> 校验器、<code>build-agents-md</code> 的项目指令校验器和 <code>build-skill</code> 的独立 <b>Reviewer</b>。所有链接必须解析在当前 <b>Plugin</b> 根目录内；<b>CI</b> 会拒绝绝对链接、失效链接和越界链接。</p>
+<p><code>build-plugin</code> 与 <code>vibe-coding</code> 复用的规则、模板、校验器和 <b>Reviewer Agent</b> 在 <code>.plugin-shared-files.json</code> 中声明规范源。仓库保存内容一致的普通镜像，避免 <b>Codex</b> 运行缓存省略嵌套软链接；<code>skills/build-plugin/scripts/sync_shared_files.py</code> 负责显式同步，严格校验会拒绝缺失、软链接或内容漂移。</p>
 
 <a id="quick-start"></a>
 
@@ -178,6 +179,7 @@ python3 scripts/install_skill.py build-skill \
 <p>验证整个双平台 <b>Plugin</b>：</p>
 
 ```bash
+python3 skills/build-plugin/scripts/sync_shared_files.py --root .
 python3 skills/build-plugin/scripts/validate_plugin.py \
   . \
   --platform dual \

@@ -397,13 +397,13 @@ class ValidateSkillTests(unittest.TestCase):
     def test_behavior_changed_skill_versions_are_updated(self) -> None:
         expected = {
             "build-agents-md": 'version: "1.2.0"',
-            "build-plugin": 'version: "1.3.0"',
+            "build-plugin": 'version: "1.3.1"',
             "build-prd": 'version: "1.0.1"',
             "build-readme": 'version: "1.0.1"',
-            "build-skill": 'version: "1.5.0"',
+            "build-skill": 'version: "1.5.1"',
             "handoff": 'version: "1.1.1"',
             "shape-idea": 'version: "1.0.1"',
-            "vibe-coding": 'version: "1.2.0"',
+            "vibe-coding": 'version: "1.2.1"',
         }
 
         for name, version_line in expected.items():

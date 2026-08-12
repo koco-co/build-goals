@@ -11,6 +11,9 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 VALIDATOR = REPO_ROOT / "skills" / "build-plugin" / "scripts" / "validate_plugin.py"
+SYNC_SHARED_FILES = (
+    REPO_ROOT / "skills" / "build-plugin" / "scripts" / "sync_shared_files.py"
+)
 
 VALID_BODY = """
 # Outcome
@@ -106,6 +109,356 @@ class ValidatePluginTests(unittest.TestCase):
         self.assertIn("skills/shape-idea", result.stdout)
         self.assertIn("skills/handoff", result.stdout)
 
+    def test_repository_shared_runtime_files_are_regular_mirrors(self) -> None:
+        contracts = {
+            "skills/build-plugin/checklists/skill-content-review.md": "skills/build-skill/checklists/content-review.md",
+            "skills/build-plugin/checklists/skill-copy-review.md": "skills/build-skill/checklists/copy-review.md",
+            "skills/build-plugin/checklists/skill-design-review.md": "skills/build-skill/checklists/design-review.md",
+            "skills/build-plugin/examples/skill-copy-review.example.md": "skills/build-skill/examples/copy-review.example.md",
+            "skills/build-plugin/prompts/reviewer.agent.md": "skills/build-skill/prompts/reviewer.agent.md",
+            "skills/build-plugin/rules/skill-architecture.md": "skills/build-skill/rules/architecture.md",
+            "skills/build-plugin/rules/skill-frontmatter.md": "skills/build-skill/rules/frontmatter.md",
+            "skills/build-plugin/rules/skill-quality-standard.md": "skills/build-skill/rules/quality-standard.md",
+            "skills/build-plugin/scripts/validate_skill.py": "skills/build-skill/scripts/validate_skill.py",
+            "skills/build-plugin/templates/skill.template.md": "skills/build-skill/templates/skill.template.md",
+            "skills/vibe-coding/prompts/reviewer.agent.md": "skills/build-skill/prompts/reviewer.agent.md",
+            "skills/vibe-coding/scripts/validate_agents_md.py": "skills/build-agents-md/scripts/validate_agents_md.py",
+            "skills/vibe-coding/scripts/validate_prd.py": "skills/build-prd/scripts/validate_prd.py",
+        }
+        manifest = json.loads(
+            REPO_ROOT.joinpath(".plugin-shared-files.json").read_text(encoding="utf-8")
+        )
+        declared = {
+            target: item["source"]
+            for item in manifest["mirrors"]
+            for target in item["targets"]
+        }
+        self.assertEqual(manifest["version"], 1)
+        self.assertEqual(declared, contracts)
+
+        for mirror_name, source_name in contracts.items():
+            with self.subTest(mirror=mirror_name):
+                mirror = REPO_ROOT / mirror_name
+                source = REPO_ROOT / source_name
+                self.assertTrue(mirror.is_file())
+                self.assertFalse(mirror.is_symlink())
+                self.assertEqual(mirror.read_bytes(), source.read_bytes())
+
+    def test_shared_runtime_mirror_drift_fails(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            plugin = self.write_fixture(Path(temp))
+            source = plugin / "shared" / "source.md"
+            mirror = plugin / "shared" / "mirror.md"
+            source.parent.mkdir()
+            source.write_text("canonical\n", encoding="utf-8")
+            mirror.write_text("drifted\n", encoding="utf-8")
+            plugin.joinpath(".plugin-shared-files.json").write_text(
+                json.dumps(
+                    {
+                        "version": 1,
+                        "mirrors": [
+                            {
+                                "source": "shared/source.md",
+                                "targets": ["shared/mirror.md"],
+                            }
+                        ],
+                    },
+                    indent=2,
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+
+            result = self.run_validator(plugin)
+
+            self.assertEqual(result.returncode, 1)
+            self.assertIn("SHARED_MIRROR_DRIFT", result.stdout)
+
+    def test_shared_runtime_symlink_fails(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            plugin = self.write_fixture(Path(temp))
+            source = plugin / "shared" / "source.md"
+            mirror = plugin / "shared" / "mirror.md"
+            source.parent.mkdir()
+            source.write_text("canonical\n", encoding="utf-8")
+            mirror.symlink_to("source.md")
+            plugin.joinpath(".plugin-shared-files.json").write_text(
+                json.dumps(
+                    {
+                        "version": 1,
+                        "mirrors": [
+                            {
+                                "source": "shared/source.md",
+                                "targets": ["shared/mirror.md"],
+                            }
+                        ],
+                    },
+                    indent=2,
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+
+            result = self.run_validator(plugin)
+
+            self.assertEqual(result.returncode, 1)
+            self.assertIn("SHARED_MIRROR_SYMLINK", result.stdout)
+
+    def test_shared_runtime_source_target_overlap_fails_validation(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            plugin = self.write_fixture(Path(temp))
+            first = plugin / "shared" / "first.md"
+            second = plugin / "shared" / "second.md"
+            first.parent.mkdir()
+            first.write_text("first\n", encoding="utf-8")
+            second.write_text("second\n", encoding="utf-8")
+            plugin.joinpath(".plugin-shared-files.json").write_text(
+                json.dumps(
+                    {
+                        "version": 1,
+                        "mirrors": [
+                            {
+                                "source": "shared/second.md",
+                                "targets": ["shared/first.md"],
+                            },
+                            {
+                                "source": "shared/first.md",
+                                "targets": ["shared/second.md"],
+                            },
+                        ],
+                    },
+                    indent=2,
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+
+            result = self.run_validator(plugin)
+
+            self.assertEqual(result.returncode, 1)
+            self.assertIn("SHARED_MIRROR_SOURCE_TARGET_OVERLAP", result.stdout)
+
+    def test_shared_runtime_mirrors_can_be_synchronized_explicitly(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            plugin = Path(temp) / "fixture-plugin"
+            source = plugin / "shared" / "source.md"
+            mirror = plugin / "shared" / "mirror.md"
+            source.parent.mkdir(parents=True)
+            source.write_text("canonical\n", encoding="utf-8")
+            mirror.write_text("drifted\n", encoding="utf-8")
+            plugin.joinpath(".plugin-shared-files.json").write_text(
+                json.dumps(
+                    {
+                        "version": 1,
+                        "mirrors": [
+                            {
+                                "source": "shared/source.md",
+                                "targets": ["shared/mirror.md"],
+                            }
+                        ],
+                    },
+                    indent=2,
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+
+            check_before = subprocess.run(
+                [sys.executable, str(SYNC_SHARED_FILES), "--root", str(plugin)],
+                check=False,
+                text=True,
+                capture_output=True,
+            )
+            synchronized = subprocess.run(
+                [
+                    sys.executable,
+                    str(SYNC_SHARED_FILES),
+                    "--root",
+                    str(plugin),
+                    "--write",
+                ],
+                check=False,
+                text=True,
+                capture_output=True,
+            )
+            check_after = subprocess.run(
+                [sys.executable, str(SYNC_SHARED_FILES), "--root", str(plugin)],
+                check=False,
+                text=True,
+                capture_output=True,
+            )
+
+            self.assertEqual(check_before.returncode, 1)
+            self.assertIn("DRIFT", check_before.stdout)
+            self.assertEqual(
+                synchronized.returncode,
+                0,
+                synchronized.stdout + synchronized.stderr,
+            )
+            self.assertEqual(
+                check_after.returncode,
+                0,
+                check_after.stdout + check_after.stderr,
+            )
+            self.assertEqual(mirror.read_bytes(), source.read_bytes())
+
+    def test_shared_runtime_sync_rejects_directory_target(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            plugin = Path(temp) / "fixture-plugin"
+            source = plugin / "shared" / "source.md"
+            mirror = plugin / "shared" / "mirror.md"
+            source.parent.mkdir(parents=True)
+            source.write_text("canonical\n", encoding="utf-8")
+            mirror.mkdir()
+            plugin.joinpath(".plugin-shared-files.json").write_text(
+                json.dumps(
+                    {
+                        "version": 1,
+                        "mirrors": [
+                            {
+                                "source": "shared/source.md",
+                                "targets": ["shared/mirror.md"],
+                            }
+                        ],
+                    },
+                    indent=2,
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(SYNC_SHARED_FILES),
+                    "--root",
+                    str(plugin),
+                    "--write",
+                ],
+                check=False,
+                text=True,
+                capture_output=True,
+            )
+
+            self.assertEqual(result.returncode, 1)
+            self.assertIn("TARGET", result.stdout)
+            self.assertFalse(mirror.joinpath("source.md").exists())
+
+    def test_shared_runtime_sync_rejects_fifo_target(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            plugin = Path(temp) / "fixture-plugin"
+            source = plugin / "shared" / "source.md"
+            mirror = plugin / "shared" / "mirror.md"
+            source.parent.mkdir(parents=True)
+            source.write_text("canonical\n", encoding="utf-8")
+            os.mkfifo(mirror)
+            plugin.joinpath(".plugin-shared-files.json").write_text(
+                json.dumps(
+                    {
+                        "version": 1,
+                        "mirrors": [
+                            {
+                                "source": "shared/source.md",
+                                "targets": ["shared/mirror.md"],
+                            }
+                        ],
+                    },
+                    indent=2,
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    str(SYNC_SHARED_FILES),
+                    "--root",
+                    str(plugin),
+                    "--write",
+                ],
+                check=False,
+                text=True,
+                capture_output=True,
+                timeout=5,
+            )
+
+            self.assertEqual(result.returncode, 1)
+            self.assertIn("TARGET", result.stdout)
+            self.assertTrue(mirror.exists())
+            self.assertFalse(mirror.is_file())
+
+    def test_shared_runtime_sync_rejects_chains_and_cycles_before_writing(
+        self,
+    ) -> None:
+        variants = {
+            "self": [
+                {
+                    "source": "shared/first.md",
+                    "targets": ["shared/first.md"],
+                },
+            ],
+            "cycle": [
+                {
+                    "source": "shared/second.md",
+                    "targets": ["shared/first.md"],
+                },
+                {
+                    "source": "shared/first.md",
+                    "targets": ["shared/second.md"],
+                },
+            ],
+            "chain": [
+                {
+                    "source": "shared/second.md",
+                    "targets": ["shared/third.md"],
+                },
+                {
+                    "source": "shared/first.md",
+                    "targets": ["shared/second.md"],
+                },
+            ],
+        }
+
+        for name, mirrors in variants.items():
+            with self.subTest(variant=name), tempfile.TemporaryDirectory() as temp:
+                plugin = Path(temp) / "fixture-plugin"
+                shared = plugin / "shared"
+                shared.mkdir(parents=True)
+                original = {
+                    "first.md": b"first\n",
+                    "second.md": b"second\n",
+                    "third.md": b"third\n",
+                }
+                for filename, content in original.items():
+                    shared.joinpath(filename).write_bytes(content)
+                plugin.joinpath(".plugin-shared-files.json").write_text(
+                    json.dumps(
+                        {"version": 1, "mirrors": mirrors},
+                        indent=2,
+                    )
+                    + "\n",
+                    encoding="utf-8",
+                )
+
+                result = subprocess.run(
+                    [
+                        sys.executable,
+                        str(SYNC_SHARED_FILES),
+                        "--root",
+                        str(plugin),
+                        "--write",
+                    ],
+                    check=False,
+                    text=True,
+                    capture_output=True,
+                )
+
+                self.assertEqual(result.returncode, 1)
+                self.assertIn("同时作为规范源和镜像", result.stdout)
+                for filename, content in original.items():
+                    self.assertEqual(shared.joinpath(filename).read_bytes(), content)
+
     def test_repository_agent_instructions_are_concise_and_project_specific(
         self,
     ) -> None:
@@ -145,11 +498,7 @@ class ValidatePluginTests(unittest.TestCase):
         contracts = {
             "build-skill": (
                 REPO_ROOT / "skills" / "build-skill" / "SKILL.md",
-                REPO_ROOT
-                / "skills"
-                / "build-skill"
-                / "workflows"
-                / "§06-delivery.md",
+                REPO_ROOT / "skills" / "build-skill" / "workflows" / "§06-delivery.md",
                 REPO_ROOT
                 / "skills"
                 / "build-skill"
@@ -158,11 +507,7 @@ class ValidatePluginTests(unittest.TestCase):
             ),
             "build-plugin": (
                 REPO_ROOT / "skills" / "build-plugin" / "SKILL.md",
-                REPO_ROOT
-                / "skills"
-                / "build-plugin"
-                / "workflows"
-                / "§07-delivery.md",
+                REPO_ROOT / "skills" / "build-plugin" / "workflows" / "§07-delivery.md",
                 REPO_ROOT
                 / "skills"
                 / "build-plugin"
@@ -173,15 +518,11 @@ class ValidatePluginTests(unittest.TestCase):
 
         for name, paths in contracts.items():
             with self.subTest(skill=name):
-                contract = "\n".join(
-                    path.read_text(encoding="utf-8") for path in paths
-                )
+                contract = "\n".join(path.read_text(encoding="utf-8") for path in paths)
                 self.assertIn("主动询问", contract)
                 self.assertIn("只授权其中部分动作", contract)
                 self.assertIn("不得在用户回答前执行", contract)
-                self.assertIn(
-                    "实现和验证已经完成。是否执行以下交付动作？", contract
-                )
+                self.assertIn("实现和验证已经完成。是否执行以下交付动作？", contract)
                 self.assertIn("只列出真实适用的动作", contract)
                 self.assertIn("独立调用", contract)
                 self.assertIn("受控调用", contract)
@@ -210,7 +551,7 @@ class ValidatePluginTests(unittest.TestCase):
         self.assertEqual(
             claude_manifest["version"], marketplace["plugins"][0]["version"]
         )
-        self.assertEqual(claude_manifest["version"], "1.8.0")
+        self.assertEqual(claude_manifest["version"], "1.8.1")
 
     def test_claude_marketplace_manifest_is_allowed(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
@@ -221,9 +562,7 @@ class ValidatePluginTests(unittest.TestCase):
                     {
                         "name": "fixture-marketplace",
                         "owner": {"name": "fixture"},
-                        "plugins": [
-                            {"name": "fixture-plugin", "source": "./"}
-                        ],
+                        "plugins": [{"name": "fixture-plugin", "source": "./"}],
                     },
                     indent=2,
                 )

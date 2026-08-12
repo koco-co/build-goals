@@ -5,7 +5,7 @@ compatibility: 需要 Python 3.9+、Git、互联网访问及目标项目的构�
 disable-model-invocation: true
 metadata:
   author: koco-co
-  version: "1.2.0"
+  version: "1.2.1"
 ---
 
 # Outcome

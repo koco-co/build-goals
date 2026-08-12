@@ -19,6 +19,11 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Check shared runtime mirrors
+        run: >-
+          python3 skills/build-plugin/scripts/sync_shared_files.py
+          --root .
+
       - name: Validate dual-platform plugin
         run: |
           python3 skills/build-plugin/scripts/validate_plugin.py \

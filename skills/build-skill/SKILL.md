@@ -5,7 +5,7 @@ compatibility: 需要互联网访问和 Python 3.9+ 运行内置静态校验脚�
 disable-model-invocation: true
 metadata:
   author: koco-co
-  version: "1.5.0"
+  version: "1.5.1"
 ---
 
 # Outcome

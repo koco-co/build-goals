@@ -12,7 +12,7 @@
 - `skills/`、`agents/`、`hooks/`、`.mcp.json`、`.app.json`、UI、脚本和测试；
 - Marketplace、安装脚本、CI、版本和发布配置；
 - 现有 CLI、公共模块和可复用校验器；
-- 软链接、子模块、生成文件及其安装后行为。
+- 共享镜像、软链接、子模块、生成文件及其安装后行为。
 
 记录当前可用能力、重复实现、失效路径、兼容接口和潜在破坏性变化。
 
@@ -20,7 +20,7 @@
 
 只核对本次目标平台：
 
-- Claude Code：Manifest、组件目录、命名空间、权限、缓存、软链接、安装和验证；
+- Claude Code：Manifest、组件目录、命名空间、权限、缓存、共享文件、安装和验证；
 - Codex：Manifest、Skills、MCP、Hooks、Marketplace、调用策略和安装表面。
 
 平台规范可能变化，实施前以当前官方文档和本地客户端行为为准。其他 Coding Agent 只记录为后续项。

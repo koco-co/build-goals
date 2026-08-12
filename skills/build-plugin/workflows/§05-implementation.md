@@ -15,16 +15,16 @@
 - 每个组件保持单一职责；
 - 每个外部副作用都有明确入口。
 
-## Phase 3：建立软链接
+## Phase 3：建立共享镜像
 
-只有内容真正相同时才链接。创建链接后逐项检查：
+跨 Skill 运行依赖在共享文件清单中声明规范源和镜像目标。先显式同步，再执行只读检查：
 
 ```bash
-readlink <path>
-test -e <path>
+python3 <build-plugin>/scripts/sync_shared_files.py --root <plugin-root> --write
+python3 <build-plugin>/scripts/sync_shared_files.py --root <plugin-root>
 ```
 
-链接必须是相对路径，解析后仍在 Plugin 根目录，且目标不会在安装或打包时丢失。
+镜像必须是普通文件，并与规范源逐字节一致。确需保留的符号链接仍须使用相对路径、留在 Plugin 根目录内，并在真实安装缓存中复验。
 
 ## Phase 4：写入平台配置
 

@@ -10,7 +10,7 @@ import re
 import sys
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Dict, Iterable, List, Mapping, Optional, Sequence, Set, Tuple, Union
+from typing import Dict, Iterable, List, Mapping, Optional, Sequence, Set, Tuple
 
 SKILLS_VALIDATOR_DIR = Path(__file__).resolve().parent
 if str(SKILLS_VALIDATOR_DIR) not in sys.path:
@@ -470,6 +470,232 @@ def validate_symlinks(plugin_root: Path, issues: List[Issue]) -> None:
             )
 
 
+def shared_file_path(
+    raw_path: object,
+    *,
+    manifest_path: Path,
+    plugin_root: Path,
+    issues: List[Issue],
+    field: str,
+) -> Optional[Path]:
+    if not isinstance(raw_path, str) or not raw_path.strip():
+        add_issue(
+            issues,
+            "error",
+            "SHARED_MIRROR_PATH",
+            manifest_path,
+            f"{field} 必须是非空相对路径。",
+            plugin_root,
+        )
+        return None
+
+    relative = Path(raw_path)
+    if relative.is_absolute() or ".." in relative.parts:
+        add_issue(
+            issues,
+            "error",
+            "SHARED_MIRROR_PATH",
+            manifest_path,
+            f"{field} 必须位于 Plugin 根目录内：{raw_path}",
+            plugin_root,
+        )
+        return None
+
+    candidate = plugin_root / relative
+    try:
+        resolved = candidate.resolve(strict=False)
+    except (OSError, RuntimeError) as exc:
+        add_issue(
+            issues,
+            "error",
+            "SHARED_MIRROR_PATH",
+            manifest_path,
+            f"无法解析 {field} {raw_path}：{exc}",
+            plugin_root,
+        )
+        return None
+    if not is_within(resolved, plugin_root.resolve()):
+        add_issue(
+            issues,
+            "error",
+            "SHARED_MIRROR_PATH",
+            manifest_path,
+            f"{field} 最终目标越过 Plugin 根目录：{raw_path}",
+            plugin_root,
+        )
+        return None
+    return candidate
+
+
+def validate_shared_mirrors(plugin_root: Path, issues: List[Issue]) -> None:
+    manifest_path = plugin_root / ".plugin-shared-files.json"
+    if not manifest_path.exists():
+        return
+
+    data = load_json(manifest_path, plugin_root, issues)
+    if data is None:
+        return
+    if data.get("version") != 1:
+        add_issue(
+            issues,
+            "error",
+            "SHARED_MIRROR_VERSION",
+            manifest_path,
+            "共享文件清单 version 必须为 1。",
+            plugin_root,
+        )
+
+    contracts = data.get("mirrors")
+    if not isinstance(contracts, list) or not contracts:
+        add_issue(
+            issues,
+            "error",
+            "SHARED_MIRROR_CONTRACTS",
+            manifest_path,
+            "共享文件清单 mirrors 必须是非空数组。",
+            plugin_root,
+        )
+        return
+
+    declared_sources: Set[Path] = set()
+    seen_targets: Set[Path] = set()
+    for index, contract in enumerate(contracts):
+        if not isinstance(contract, dict):
+            add_issue(
+                issues,
+                "error",
+                "SHARED_MIRROR_CONTRACT",
+                manifest_path,
+                f"mirrors[{index}] 必须是对象。",
+                plugin_root,
+            )
+            continue
+
+        source = shared_file_path(
+            contract.get("source"),
+            manifest_path=manifest_path,
+            plugin_root=plugin_root,
+            issues=issues,
+            field=f"mirrors[{index}].source",
+        )
+        targets = contract.get("targets")
+        if not isinstance(targets, list) or not targets:
+            add_issue(
+                issues,
+                "error",
+                "SHARED_MIRROR_TARGETS",
+                manifest_path,
+                f"mirrors[{index}].targets 必须是非空数组。",
+                plugin_root,
+            )
+            continue
+        if source is None:
+            continue
+        declared_sources.add(source.absolute())
+
+        target_paths: List[Path] = []
+        for target_index, raw_target in enumerate(targets):
+            target = shared_file_path(
+                raw_target,
+                manifest_path=manifest_path,
+                plugin_root=plugin_root,
+                issues=issues,
+                field=f"mirrors[{index}].targets[{target_index}]",
+            )
+            if target is None:
+                continue
+            normalized = target.absolute()
+            if normalized in seen_targets:
+                add_issue(
+                    issues,
+                    "error",
+                    "SHARED_MIRROR_DUPLICATE",
+                    manifest_path,
+                    f"同一镜像目标不能重复声明：{raw_target}",
+                    plugin_root,
+                )
+                continue
+            seen_targets.add(normalized)
+            target_paths.append(target)
+
+        if source.is_symlink() or not source.is_file():
+            add_issue(
+                issues,
+                "error",
+                "SHARED_SOURCE_FILE",
+                source,
+                "共享文件规范源必须是存在的普通文件。",
+                plugin_root,
+            )
+            continue
+
+        try:
+            source_bytes = source.read_bytes()
+        except OSError as exc:
+            add_issue(
+                issues,
+                "error",
+                "SHARED_SOURCE_READ",
+                source,
+                f"无法读取共享文件规范源：{exc}",
+                plugin_root,
+            )
+            continue
+
+        for target in target_paths:
+            if target.is_symlink():
+                add_issue(
+                    issues,
+                    "error",
+                    "SHARED_MIRROR_SYMLINK",
+                    target,
+                    "跨 Skill 运行依赖必须是普通镜像文件；已验证的 Codex 安装缓存会省略该软链接。",
+                    plugin_root,
+                )
+                continue
+            if not target.is_file():
+                add_issue(
+                    issues,
+                    "error",
+                    "SHARED_MIRROR_MISSING",
+                    target,
+                    "缺少共享文件镜像。",
+                    plugin_root,
+                )
+                continue
+            try:
+                target_bytes = target.read_bytes()
+            except OSError as exc:
+                add_issue(
+                    issues,
+                    "error",
+                    "SHARED_MIRROR_READ",
+                    target,
+                    f"无法读取共享文件镜像：{exc}",
+                    plugin_root,
+                )
+                continue
+            if target_bytes != source_bytes:
+                add_issue(
+                    issues,
+                    "error",
+                    "SHARED_MIRROR_DRIFT",
+                    target,
+                    f"共享文件镜像与规范源 {display_path(source, plugin_root)} 不一致。",
+                    plugin_root,
+                )
+
+    for overlap in sorted(declared_sources & seen_targets):
+        add_issue(
+            issues,
+            "error",
+            "SHARED_MIRROR_SOURCE_TARGET_OVERLAP",
+            overlap,
+            "同一路径不能同时作为共享文件规范源和镜像目标。",
+            plugin_root,
+        )
+
+
 def validate_marketplace(plugin_root: Path, issues: List[Issue]) -> None:
     path = plugin_root / ".agents" / "plugins" / "marketplace.json"
     if not path.exists():
@@ -629,6 +855,7 @@ def validate_plugin(plugin_dir: Path, platform: str = "dual") -> Report:
         return Report(str(plugin_root), platform, issues, skills_checked)
 
     validate_symlinks(plugin_root, issues)
+    validate_shared_mirrors(plugin_root, issues)
 
     codex_result = (None, None, None, set())
     claude_result = (None, None, None, set())
@@ -729,8 +956,7 @@ def print_human(report: Report) -> None:
         )
     else:
         print(
-            f"PASS: 0 error(s), {len(report.warnings)} warning(s) — "
-            f"{report.plugin_dir}"
+            f"PASS: 0 error(s), {len(report.warnings)} warning(s) — {report.plugin_dir}"
         )
 
 

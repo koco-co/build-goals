@@ -1,6 +1,6 @@
 {
   "name": "build-goals",
-  "version": "1.8.0",
+  "version": "1.8.1",
   "description": "A focused toolkit for clarifying goals and delivering verifiable software projects, Agent Skills, plugins, product PRDs, GitHub READMEs, and project agent instructions.",
   "author": {
     "name": "koco-co",

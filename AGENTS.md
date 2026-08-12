@@ -10,8 +10,9 @@
 
 - `skills/<name>/SKILL.md`：Skill 的入口与主流程；详细内容按需放入同目录的 `workflows/`、`rules/`、`templates/`、`examples/` 和 `checklists/`。
 - `skills/build-skill/scripts/validate_skill.py`：检查单个 Skill 的结构和双平台配置。
-- `skills/build-plugin/scripts/validate_plugin.py`：检查 Plugin Manifest、组件、符号链接和版本号。
+- `skills/build-plugin/scripts/validate_plugin.py`：检查 Plugin Manifest、组件、共享文件镜像、符号链接安全和版本号。
 - `scripts/install_skill.py`：将单个 Skill 安装到 Claude Code 或 Codex。
+- `.plugin-shared-files.json`、`skills/build-plugin/scripts/sync_shared_files.py`：声明并显式同步跨 Skill 的普通镜像文件，兼容不会保留嵌套软链接的客户端缓存。
 - `.claude-plugin/`、`.codex-plugin/`、`.agents/plugins/`：三个 Plugin 分发入口；正式版本号维护在 Claude Code 和 Codex 的三个 Manifest 位置。
 - `tests/`：校验器、安装器和仓库约定的回归测试。
 - `README.md`：面向使用者说明能力、安装方法和验证命令，不重复 Skill 的详细流程。
@@ -23,13 +24,15 @@
 - `python3 skills/build-skill/scripts/validate_skill.py skills/build-agents-md --profile dual --plugin-root . --strict`：检查单个 Skill；修改其他 Skill 时替换目标路径。
 - `python3 skills/build-agents-md/scripts/validate_agents_md.py . --strict --require-symlink`：检查项目指令和 `CLAUDE.md` 符号链接。
 - `python3 skills/build-readme/scripts/validate_readme.py README.md --project-root . --strict`：检查 README 结构和本地引用。
+- `python3 skills/build-plugin/scripts/sync_shared_files.py --root .`：只读检查跨 Skill 镜像是否与规范源一致；需要刷新时显式添加 `--write`。
 - `git diff --check`：检查空白和补丁格式问题。
 
 ## 关键约定
 
 - 主 `SKILL.md` 只保留入口和主流程；新增的本地引用必须存在，工作流文件使用 `§NN-name.md` 命名。
 - 调用策略写在平台配置中；目标 Skill 允许模型调用时，按 `skills/build-skill/rules/quality-standard.md` 写清触发条件和排除条件。
-- 仓库内共享文件只使用相对符号链接，且最终目标必须位于当前 Plugin 根目录内。
+- 跨 Skill 运行依赖在 `.plugin-shared-files.json` 中声明，仓库保存普通镜像；修改规范源后显式同步，严格校验必须拒绝缺失、软链接或内容漂移。
+- `CLAUDE.md` 等确需使用的符号链接必须是仓库内相对链接；不得假设 Plugin 客户端缓存会保留嵌套软链接。
 - Claude Code 安装副本保留 Claude Code 支持的 Frontmatter，并移除 `agents/`；Codex 安装副本移除 Claude Code 专用 Frontmatter，并保留 `agents/openai.yaml`。
 - 新增向后兼容能力时递增 Plugin minor 版本，修复时递增 patch 版本；三个正式版本号必须一致。Skill 的 `metadata.version` 独立维护。
 - 静态校验、安装成功和测试发现都不能代替真实 Claude Code/Codex 客户端中的行为验证。
@@ -39,7 +42,7 @@
 | 修改内容 | 至少运行 |
 | --- | --- |
 | 新建或修改 Skill | 先补行为测试，再运行目标 Skill 检查和相关单元测试 |
-| Manifest、平台适配或共享链接 | 双平台 Plugin 检查、安装器测试和完整回归 |
+| Manifest、平台适配或共享文件 | 镜像检查、双平台 Plugin 检查、安装器测试和完整回归 |
 | `AGENTS.md` / `CLAUDE.md` | `validate_agents_md.py --strict --require-symlink`，并检查 Git 中的链接模式 |
 | README | `validate_readme.py`，并核对公开命令与当前仓库一致 |
 | 正式版本 | 核对 `.claude-plugin/plugin.json`、`.claude-plugin/marketplace.json` 和 `.codex-plugin/plugin.json` |

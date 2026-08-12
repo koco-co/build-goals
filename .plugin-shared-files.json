@@ -1,0 +1,56 @@
+{
+  "version": 1,
+  "mirrors": [
+    {
+      "source": "skills/build-skill/checklists/content-review.md",
+      "targets": ["skills/build-plugin/checklists/skill-content-review.md"]
+    },
+    {
+      "source": "skills/build-skill/checklists/copy-review.md",
+      "targets": ["skills/build-plugin/checklists/skill-copy-review.md"]
+    },
+    {
+      "source": "skills/build-skill/checklists/design-review.md",
+      "targets": ["skills/build-plugin/checklists/skill-design-review.md"]
+    },
+    {
+      "source": "skills/build-skill/examples/copy-review.example.md",
+      "targets": ["skills/build-plugin/examples/skill-copy-review.example.md"]
+    },
+    {
+      "source": "skills/build-skill/prompts/reviewer.agent.md",
+      "targets": [
+        "skills/build-plugin/prompts/reviewer.agent.md",
+        "skills/vibe-coding/prompts/reviewer.agent.md"
+      ]
+    },
+    {
+      "source": "skills/build-skill/rules/architecture.md",
+      "targets": ["skills/build-plugin/rules/skill-architecture.md"]
+    },
+    {
+      "source": "skills/build-skill/rules/frontmatter.md",
+      "targets": ["skills/build-plugin/rules/skill-frontmatter.md"]
+    },
+    {
+      "source": "skills/build-skill/rules/quality-standard.md",
+      "targets": ["skills/build-plugin/rules/skill-quality-standard.md"]
+    },
+    {
+      "source": "skills/build-skill/scripts/validate_skill.py",
+      "targets": ["skills/build-plugin/scripts/validate_skill.py"]
+    },
+    {
+      "source": "skills/build-skill/templates/skill.template.md",
+      "targets": ["skills/build-plugin/templates/skill.template.md"]
+    },
+    {
+      "source": "skills/build-agents-md/scripts/validate_agents_md.py",
+      "targets": ["skills/vibe-coding/scripts/validate_agents_md.py"]
+    },
+    {
+      "source": "skills/build-prd/scripts/validate_prd.py",
+      "targets": ["skills/vibe-coding/scripts/validate_prd.py"]
+    }
+  ]
+}

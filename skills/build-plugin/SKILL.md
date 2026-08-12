@@ -5,7 +5,7 @@ compatibility: 需要互联网访问和 Python 3.9+ 运行内置静态校验脚�
 disable-model-invocation: true
 metadata:
   author: koco-co
-  version: "1.3.0"
+  version: "1.3.1"
 ---
 
 # Outcome
@@ -43,7 +43,7 @@ metadata:
    - 完整读取 `workflows/§03-design.md`。
    - 设计前读取 `rules/plugin-architecture.md`、`rules/platform-compatibility.md`、`rules/security-and-permissions.md`。
    - Plugin 包含 Skill 时，同时读取 `rules/skill-architecture.md`、`rules/skill-frontmatter.md` 和 `rules/skill-quality-standard.md`。
-   - 使用 `templates/plugin-design-proposal.template.md` 输出 `tree` 风格目录、组件边界、平台适配、软链接、验证和交付方案。
+   - 使用 `templates/plugin-design-proposal.template.md` 输出 `tree` 风格目录、组件边界、平台适配、共享文件、验证和交付方案。
    - 明确哪些能力属于 Skill、Agent、Hook、MCP、UI、CLI、CI 或 Manifest。
    - 用户确认前不得创建、修改、移动或删除目标文件。
    - 完成条件：用户明确确认实施范围、破坏性变化和验收标准。
@@ -60,7 +60,7 @@ metadata:
 5. 执行
    - 完整读取 `workflows/§05-implementation.md`。
    - 只创建实际需要的组件；不为未来能力创建空目录和占位文件。
-   - 双平台共用内容只维护一份；重复使用的仓库内文件使用相对软链接，链接目标必须留在 Plugin 根目录内。
+   - 双平台共用内容只设一个规范源；跨 Skill 运行依赖使用清单声明的普通镜像，并通过确定性脚本同步和校验。
    - Claude Code 配置写入 `.claude-plugin/`，Codex 配置写入 `.codex-plugin/`；其他组件位于 Plugin 根目录。
    - 确定性转换与校验交给脚本，事件驱动行为交给 Hooks，外部工具和数据接入交给 MCP。
    - 完成条件：已确认组件全部完成，文件引用有效，权限保持最小化，没有未经同意的外部副作用。
@@ -69,14 +69,14 @@ metadata:
    - 完整读取 `workflows/§06-validation.md`。
    - 运行 `scripts/validate_plugin.py`，再运行目标平台官方校验和真实安装或本地加载测试。
    - 使用 `checklists/plugin-design-review.md` 和 `checklists/plugin-semantic-acceptance.md` 完成内容与场景审查。
-   - 至少覆盖 Manifest、组件发现、目标 Skill 的调用策略、软链接、安装、更新、失败路径和平台差异。
+   - 至少覆盖 Manifest、组件发现、目标 Skill 的调用策略、共享镜像、安装缓存、更新、失败路径和平台差异。
    - 无法运行的平台必须标为“未完成真实客户端验证”，不得描述为已通过。
    - 完成条件：静态检查和关键场景均通过，未验证内容和无法继续的原因均已说明。
 
 7. 按调用模式交付并停止
    - 完整读取 `workflows/§07-delivery.md`。
    - 使用 `templates/plugin-delivery-report.template.md` 输出交付报告。
-   - 列出最终目录、平台 Manifest、组件、软链接、命令、结果、版本和发布状态。
+   - 列出最终目录、平台 Manifest、组件、共享镜像与必要链接、命令、结果、版本和发布状态。
    - 独立调用时，只列出真实适用的 commit、push、Marketplace、Claude Code Plugin 与 Codex Plugin 动作，并主动询问用户是否执行；允许全部授权或只授权其中部分动作。
    - 受控调用时不重复询问，也不执行 commit、push、Marketplace、Release 或本地 Plugin 更新；向上层总控返回修改内容、确认依据、验证证据、提交与发布状态、未验证项和恢复条件。
    - 当前 Plugin 交付后停止，不自行开始下一个 Plugin 或其他平台适配。
@@ -91,7 +91,7 @@ metadata:
 - 新增、修改、删除和迁移内容；
 - Claude Code 与 Codex 的 Manifest、调用、安装和验证差异；
 - Skill 子任务及其 `build-skill` 验收结果；
-- 软链接清单及目标；
+- 共享镜像清单、规范源及必要符号链接；
 - 实际运行的命令、结果、失败修复记录；
 - 已验证、未验证，以及无法完成的内容和原因；
 - 版本、Marketplace 或发布状态；
@@ -104,8 +104,9 @@ metadata:
 - 用户确认设计前保持只读；实施确认不自动授权提交、推送、发布、删除、上线或提高权限。
 - 独立调用在实现和验证完成后必须主动询问适用的交付动作；受控调用不得重复询问或执行，由上层总控统一管理。任何模式都不得列出目标仓库或平台并不存在的动作。
 - 引入 MCP、Hooks、可执行脚本、网络访问、认证、遥测或持久化前，明确权限和数据流。
-- 软链接只允许相对路径，并且最终目标必须位于当前 Plugin 根目录内。
-- 不复制 `build-skill` 已经负责的 Skill 规范；通过委派和软链接复用。
+- 跨 Skill 运行依赖不得依赖客户端保留软链接；使用清单声明的普通镜像，并拒绝内容漂移。
+- 必要符号链接只允许相对路径，并且最终目标必须位于当前 Plugin 根目录内。
+- 不另行改写 `build-skill` 已经负责的 Skill 规范；通过委派、规范源和确定性镜像复用。
 - 不把静态文件存在描述为真实安装或调用已经通过。
 - 不为 Claude Code 与 Codex 复制两套相同工作流；只隔离真实的平台差异。
 - 当前不声明其他 Coding Agent 的兼容性。

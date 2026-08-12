@@ -6,7 +6,6 @@ import shutil
 import subprocess
 import sys
 import tempfile
-import textwrap
 import unittest
 from pathlib import Path
 
@@ -114,11 +113,7 @@ class InstallSkillTests(unittest.TestCase):
                     encoding="utf-8",
                 )
                 validator = (
-                    repo
-                    / "skills"
-                    / "build-skill"
-                    / "scripts"
-                    / "validate_skill.py"
+                    repo / "skills" / "build-skill" / "scripts" / "validate_skill.py"
                 )
                 validator.parent.mkdir(parents=True)
                 shutil.copy2(
@@ -137,9 +132,7 @@ class InstallSkillTests(unittest.TestCase):
                     scope="user",
                     home_dir=root / "home",
                 )
-                installed = destination.joinpath("SKILL.md").read_text(
-                    encoding="utf-8"
-                )
+                installed = destination.joinpath("SKILL.md").read_text(encoding="utf-8")
 
                 if invocation_fields:
                     self.assertIn(invocation_fields.strip(), installed)
@@ -162,6 +155,7 @@ class InstallSkillTests(unittest.TestCase):
             self.assertTrue(shared.is_file())
             self.assertFalse(shared.is_symlink())
             for shared_path in (
+                "scripts/sync_shared_files.py",
                 "scripts/validate_skill.py",
                 "rules/skill-frontmatter.md",
                 "checklists/skill-content-review.md",
@@ -172,6 +166,28 @@ class InstallSkillTests(unittest.TestCase):
                     materialized = destination / shared_path
                     self.assertTrue(materialized.is_file())
                     self.assertFalse(materialized.is_symlink())
+
+            for entrypoint in (
+                "sync_shared_files.py",
+                "validate_plugin.py",
+                "validate_skill.py",
+            ):
+                with self.subTest(entrypoint=entrypoint):
+                    help_result = subprocess.run(
+                        [
+                            sys.executable,
+                            str(destination / "scripts" / entrypoint),
+                            "--help",
+                        ],
+                        check=False,
+                        text=True,
+                        capture_output=True,
+                    )
+                    self.assertEqual(
+                        help_result.returncode,
+                        0,
+                        help_result.stdout + help_result.stderr,
+                    )
 
     def test_handoff_codex_install_strips_claude_only_fields(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
@@ -186,19 +202,11 @@ class InstallSkillTests(unittest.TestCase):
 
     def test_codex_copy_strips_all_claude_extensions_and_nested_blocks(self) -> None:
         validator = runpy.run_path(
-            str(
-                REPO_ROOT
-                / "skills"
-                / "build-skill"
-                / "scripts"
-                / "validate_skill.py"
-            )
+            str(REPO_ROOT / "skills" / "build-skill" / "scripts" / "validate_skill.py")
         )
         claude_extensions = validator["CLAUDE_EXTENSION_KEYS"]
         scalar_extensions = sorted(claude_extensions - {"hooks"})
-        extension_lines = "".join(
-            f"{field}: fixture\n" for field in scalar_extensions
-        )
+        extension_lines = "".join(f"{field}: fixture\n" for field in scalar_extensions)
         source = (
             "---\n"
             "name: fixture-skill\n"
@@ -231,13 +239,7 @@ class InstallSkillTests(unittest.TestCase):
 
     def test_installer_portable_fields_match_skill_validator(self) -> None:
         validator = runpy.run_path(
-            str(
-                REPO_ROOT
-                / "skills"
-                / "build-skill"
-                / "scripts"
-                / "validate_skill.py"
-            )
+            str(REPO_ROOT / "skills" / "build-skill" / "scripts" / "validate_skill.py")
         )
         self.assertEqual(
             PORTABLE_FRONTMATTER_FIELDS,
@@ -292,14 +294,10 @@ class InstallSkillTests(unittest.TestCase):
                 destination = home / root_name / "skills" / "build-agents-md"
                 self.assertTrue(destination.joinpath("SKILL.md").is_file())
                 self.assertTrue(
-                    destination.joinpath(
-                        "scripts", "validate_agents_md.py"
-                    ).is_file()
+                    destination.joinpath("scripts", "validate_agents_md.py").is_file()
                 )
                 self.assertTrue(
-                    destination.joinpath(
-                        "examples", "monorepo.example.md"
-                    ).is_file()
+                    destination.joinpath("examples", "monorepo.example.md").is_file()
                 )
                 if platform == "claude":
                     self.assertFalse(destination.joinpath("agents").exists())
