@@ -62,9 +62,17 @@
 - 日志和隐私：
 - 未验证范围：
 
+## 配套 Skill 生命周期
+
+| Skill | 触发证据 | 调用或跳过结果 | 确认依据 | 验证与提交 | 恢复条件/未验证项 |
+| --- | --- | --- | --- | --- | --- |
+| {{Skill}} | {{evidence}} | {{result}} | {{approval}} | {{validation/sha}} | {{recovery/gap}} |
+
 ## 仓库治理
 
-- AGENTS.md / CLAUDE.md：
+- AGENTS.md / CLAUDE.md readiness 状态：
+- 项目指令治理提交与功能基线：
+- 项目指令最终漂移复查：
 - README 与 docs：
 - ignore 与生成物：
 - 工作区状态：

@@ -41,7 +41,7 @@
 
 <p><code>build-skill</code> 会根据调用方式、参数、权限、上下文与硬性环境要求形成 <b>Frontmatter</b> 字段决策矩阵；实现后分别完成内容审查、文案审查、内容回归和适用的独立 <b>Reviewer</b> 审查。</p>
 
-<p><code>vibe-coding</code> 是端到端软件交付总控：它可以实现 <code>build-prd</code> 的确认产物，也可以审查并迁移已有低质量项目。架构方案和任务列表分别经过用户确认后，才会搭建脚手架、组织 <b>TDD</b> 功能切片、按依赖使用多 <b>Agent</b> 与 <b>Git worktrees</b>、创建原子提交，并完成单元、集成、<b>E2E</b>、条件式视觉/交互、安全和正常测试数据验收。</p>
+<p><code>vibe-coding</code> 是端到端软件交付总控：它可以实现 <code>build-prd</code> 的确认产物，也可以审查并迁移已有低质量项目。架构方案和任务列表分别经过用户确认后，才会搭建脚手架；功能开发前会检查项目指令，只有缺失、失效或冲突时才调用 <code>build-agents-md</code>，并在完整内容确认、治理提交 <b>SHA</b> 冻结、既有 <b>worktree</b> 基线登记和 <b>readiness</b> 门禁通过后组织 <b>TDD</b>、多 <b>Agent</b> 与 <b>Git worktrees</b>，最终完成全链路验收。</p>
 
 <p><code>build-readme</code> 会先了解代码、命令、测试、<b>CI</b>、文档和资源并提供具体修改预览；用户确认后才创建或更新 <b>README</b>，并分别报告静态检查、<b>GitHub</b> 渲染和未验证内容。</p>
 
@@ -62,7 +62,11 @@ flowchart LR
     E --> G[Vibe Coding]
     G --> H[Architecture Approval]
     H --> I[Task Approval]
-    I --> J[TDD Agent Team]
+    I --> N[Scaffold]
+    N --> O{Agent Instructions Ready?}
+    O -->|Update required| P[Build AGENTS.md]
+    P --> O
+    O -->|Ready| J[TDD Agent Team]
     C --> K[Validate]
     D --> K
     F --> K
@@ -117,7 +121,7 @@ build-goals/
 └── tests/
 ```
 
-<p><code>build-plugin</code> 中复用的 <b>Skill</b> 模板、质量规则、校验器、检查清单和 <b>Reviewer Agent</b> 均通过相对软链接指向 <code>build-skill</code>。<code>vibe-coding</code> 同样通过相对软链接复用 <code>build-prd</code> 的 <b>PRD</b> 校验器和 <code>build-skill</code> 的独立 <b>Reviewer</b>。所有链接必须解析在当前 <b>Plugin</b> 根目录内；<b>CI</b> 会拒绝绝对链接、失效链接和越界链接。</p>
+<p><code>build-plugin</code> 中复用的 <b>Skill</b> 模板、质量规则、校验器、检查清单和 <b>Reviewer Agent</b> 均通过相对软链接指向 <code>build-skill</code>。<code>vibe-coding</code> 同样通过相对软链接复用 <code>build-prd</code> 的 <b>PRD</b> 校验器、<code>build-agents-md</code> 的项目指令校验器和 <code>build-skill</code> 的独立 <b>Reviewer</b>。所有链接必须解析在当前 <b>Plugin</b> 根目录内；<b>CI</b> 会拒绝绝对链接、失效链接和越界链接。</p>
 
 <a id="quick-start"></a>
 

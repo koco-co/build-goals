@@ -1,0 +1,1 @@
+../../build-agents-md/scripts/validate_agents_md.py

@@ -16,7 +16,7 @@ import sys
 import urllib.parse
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Iterable, List, Optional, Sequence
+from typing import List, Optional, Sequence
 
 IGNORED_DIRECTORIES = {
     ".git",

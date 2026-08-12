@@ -1,6 +1,6 @@
 {
   "name": "build-goals",
-  "version": "1.7.0",
+  "version": "1.8.0",
   "description": "A focused toolkit for clarifying goals and delivering verifiable software projects, Agent Skills, plugins, product PRDs, GitHub READMEs, and project agent instructions.",
   "author": {
     "name": "koco-co",
@@ -38,7 +38,7 @@
       "Use shape-idea to turn a rough idea into a clear scope with fully resolved decisions.",
       "Use build-skill or build-plugin to create a verifiable Agent capability.",
       "Use build-prd to produce a research-backed, fully decided product requirements document.",
-      "Use vibe-coding to implement a confirmed PRD or modernize an existing project through architecture approval, task approval, TDD, multi-agent delivery, and end-to-end validation.",
+      "Use vibe-coding to implement a confirmed PRD or modernize an existing project through architecture approval, task approval, conditional project-instruction readiness, TDD, multi-agent delivery, and end-to-end validation.",
       "Use build-readme to explore a repository and create or update its GitHub README after a confirmed preview.",
       "Use build-agents-md to initialize or fully restructure AGENTS.md and its CLAUDE.md single-source link after a confirmed full preview, or handoff to prepare the next session."
     ],

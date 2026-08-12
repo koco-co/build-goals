@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate vibe-coding architecture, task planning, and delivery evidence."""
+"""Validate vibe-coding architecture, planning, readiness, and delivery evidence."""
 
 from __future__ import annotations
 
@@ -16,25 +16,27 @@ def print_human(report: Report) -> None:
         print(f"{item.severity.upper():7} {item.code:28} {item.path}: {item.message}")
     if report.errors:
         print(
-            f"FAIL: {len(report.errors)} error(s), {len(report.warnings)} warning(s) — "
+            f"FAIL: {len(report.errors)} error(s), {len(report.warnings)} warning(s), "
+            f"{len(report.infos)} info item(s) — "
             f"{report.project_root}"
         )
     else:
         print(
-            f"PASS: 0 error(s), {len(report.warnings)} warning(s) — "
+            f"PASS: 0 error(s), {len(report.warnings)} warning(s), "
+            f"{len(report.infos)} info item(s) — "
             f"{report.project_root}"
         )
 
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="校验 vibe-coding 的架构、任务追踪和交付产物。"
+        description="校验 vibe-coding 的架构、任务追踪、开发就绪和交付产物。"
     )
     parser.add_argument("project_root", type=Path)
     parser.add_argument("--mode", choices=("greenfield", "migration"), required=True)
     parser.add_argument(
         "--phase",
-        choices=("architecture", "plan", "delivery"),
+        choices=("architecture", "plan", "readiness", "delivery"),
         default="delivery",
     )
     parser.add_argument("--require-clean", action="store_true")

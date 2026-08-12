@@ -1,9 +1,11 @@
-"""Validation orchestration for architecture, plan, and delivery phases."""
+"""Validation orchestration for architecture, plan, readiness, and delivery."""
 
 from __future__ import annotations
 
 from pathlib import Path
 from typing import Optional
+
+from .agent_instructions import validate_agent_documents, validate_agent_readiness
 
 from .documents import (
     ARCHITECTURE_HEADINGS,
@@ -19,10 +21,12 @@ from .documents import (
     validate_status,
     validate_substantive_sections,
 )
+from .foundation import validate_foundation_readiness
 from .model import Issue, Report
 from .repository import (
     validate_clean_git,
     validate_completed_worktrees,
+    validate_no_feature_worktrees_before_readiness,
     validate_tracked_secrets,
 )
 from .traceability import validate_report_tasks, validate_tasks, validate_traceability
@@ -81,7 +85,7 @@ def validate_project(
 
     plan_text: Optional[str] = None
     tasks = []
-    if phase in {"plan", "delivery"}:
+    if phase in {"plan", "readiness", "delivery"}:
         plan_path = root / PLAN_PATH
         plan_text = read_required(plan_path, root, issues)
         if plan_text is not None:
@@ -90,7 +94,7 @@ def validate_project(
             )
             validate_substantive_sections(
                 plan_text,
-                ("## 测试数据计划", "## 验收矩阵"),
+                ("## 配套 Skill 计划", "## 测试数据计划", "## 验收矩阵"),
                 plan_path,
                 root,
                 issues,
@@ -110,6 +114,16 @@ def validate_project(
                     issues,
                 )
 
+    if phase in {"readiness", "delivery"} and plan_text is not None:
+        validate_foundation_readiness(root, plan_text, issues)
+        validate_agent_readiness(root, plan_text, issues, phase=phase)
+        validate_agent_documents(root, issues)
+
+    if phase == "readiness":
+        validate_no_feature_worktrees_before_readiness(root, plan_text or "", issues)
+        if require_clean:
+            validate_clean_git(root, issues)
+
     if phase == "delivery":
         report_path = root / REPORT_PATH
         report_text = read_required(report_path, root, issues)
@@ -124,6 +138,7 @@ def validate_project(
                     "## 实际验证",
                     "## 正常测试数据",
                     "## 安全与配置",
+                    "## 配套 Skill 生命周期",
                     "## 已验证",
                     "## 未验证",
                     "## 阻塞",

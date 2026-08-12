@@ -13,32 +13,80 @@ VALIDATOR = REPO_ROOT / "skills" / "vibe-coding" / "scripts" / "validate_deliver
 INSTALLER = REPO_ROOT / "scripts" / "install_skill.py"
 
 
-def doc(title: str, headings: tuple[str, ...], body: str, status: str = "已确认") -> str:
+def doc(
+    title: str, headings: tuple[str, ...], body: str, status: str = "已确认"
+) -> str:
     sections = "\n".join(f"{heading}\n{body}" for heading in headings[1:])
     return f"{title}\n- 文档状态：{status}\n- 更新时间：2026-08-10\n{sections}\n"
 
 
 GREEN_HEADINGS = (
-    "# 架构设计方案", "## 需求与约束", "## 调研与方案比较", "## 目标架构",
-    "## 技术选型", "## 目录与模块边界", "## 接口与数据契约", "## 测试与质量策略",
-    "## 安全与配置", "## 交付与运行", "## 风险与权衡", "## 验收标准",
+    "# 架构设计方案",
+    "## 需求与约束",
+    "## 调研与方案比较",
+    "## 目标架构",
+    "## 技术选型",
+    "## 目录与模块边界",
+    "## 接口与数据契约",
+    "## 测试与质量策略",
+    "## 安全与配置",
+    "## 交付与运行",
+    "## 风险与权衡",
+    "## 验收标准",
 )
 MIGRATION_HEADINGS = (
-    "# 架构迁移方案", "## 当前架构基线", "## 审查发现", "## 外部参考与方案比较",
-    "## 目标架构", "## 迁移差距", "## 分阶段迁移", "## 兼容与回滚",
-    "## 仓库治理", "## 测试与质量策略", "## 安全与配置", "## 风险与验收",
+    "# 架构迁移方案",
+    "## 当前架构基线",
+    "## 审查发现",
+    "## 外部参考与方案比较",
+    "## 目标架构",
+    "## 迁移差距",
+    "## 分阶段迁移",
+    "## 兼容与回滚",
+    "## 仓库治理",
+    "## 测试与质量策略",
+    "## 安全与配置",
+    "## 风险与验收",
 )
 PLAN_HEADINGS = (
-    "# 实施任务清单", "## 执行原则", "## 需求追踪", "## 依赖图",
-    "## Agent 与 Worktree 计划", "## 任务列表", "## 测试数据计划",
-    "## 集成顺序", "## 验收矩阵", "## 提交与回滚",
+    "# 实施任务清单",
+    "## 执行原则",
+    "## 配套 Skill 计划",
+    "## 需求追踪",
+    "## 依赖图",
+    "## Agent 与 Worktree 计划",
+    "## 任务列表",
+    "## 测试数据计划",
+    "## 基础工程就绪",
+    "## 项目指令就绪",
+    "## 集成顺序",
+    "## 验收矩阵",
+    "## 提交与回滚",
 )
 REPORT_HEADINGS = (
-    "# 交付验收报告", "## 完成范围", "## 需求追踪结果", "## 最终架构与目录",
-    "## Agent、Worktree 与提交", "## 实际验证", "## 正常测试数据",
-    "## UI、视觉与交互", "## 安全与配置", "## 仓库治理", "## 已验证",
-    "## 未验证", "## 阻塞", "## 外部动作状态", "## 可复现命令",
+    "# 交付验收报告",
+    "## 完成范围",
+    "## 需求追踪结果",
+    "## 最终架构与目录",
+    "## Agent、Worktree 与提交",
+    "## 实际验证",
+    "## 正常测试数据",
+    "## UI、视觉与交互",
+    "## 安全与配置",
+    "## 配套 Skill 生命周期",
+    "## 仓库治理",
+    "## 已验证",
+    "## 未验证",
+    "## 阻塞",
+    "## 外部动作状态",
+    "## 可复现命令",
 )
+AGENTS_MD = """# Fixture project instructions
+
+## Commands
+
+- `python -m unittest`: run the verified test suite.
+"""
 
 
 class VibeCodingValidatorTests(unittest.TestCase):
@@ -87,9 +135,7 @@ class VibeCodingValidatorTests(unittest.TestCase):
         self, marker: str, status: str = "待开始", commit: str = "待生成"
     ) -> str:
         integration_status = (
-            "已集成到指定集成分支并验证通过。"
-            if status == "已完成"
-            else "尚未集成。"
+            "已集成到指定集成分支并验证通过。" if status == "已完成" else "尚未集成。"
         )
         return textwrap.dedent(
             f"""
@@ -114,7 +160,9 @@ class VibeCodingValidatorTests(unittest.TestCase):
     ) -> None:
         body = "该章节包含完整、可执行且可复核的任务、数据、测试、集成与回滚说明。"
         text = doc(PLAN_HEADINGS[0], PLAN_HEADINGS, body)
-        text = text.replace("## 需求追踪\n" + body, f"## 需求追踪\n{marker} -> TASK-001")
+        text = text.replace(
+            "## 需求追踪\n" + body, f"## 需求追踪\n{marker} -> TASK-001"
+        )
         text = text.replace(
             "## 任务列表\n" + body,
             "## 任务列表\n" + self.task_block(marker, status, commit),
@@ -127,6 +175,80 @@ class VibeCodingValidatorTests(unittest.TestCase):
             doc(REPORT_HEADINGS[0], REPORT_HEADINGS, body, status="已完成"),
             encoding="utf-8",
         )
+
+    def write_agent_instructions(self, root: Path) -> None:
+        root.joinpath("AGENTS.md").write_text(AGENTS_MD, encoding="utf-8")
+        root.joinpath("CLAUDE.md").symlink_to("AGENTS.md")
+
+    def init_git(self, root: Path) -> None:
+        subprocess.run(["git", "init", "-q", str(root)], check=True)
+        subprocess.run(
+            ["git", "-C", str(root), "config", "user.name", "Test"], check=True
+        )
+        subprocess.run(
+            ["git", "-C", str(root), "config", "user.email", "test@example.com"],
+            check=True,
+        )
+
+    def commit_paths(self, root: Path, message: str, *paths: str) -> str:
+        subprocess.run(["git", "-C", str(root), "add", "--", *paths], check=True)
+        subprocess.run(["git", "-C", str(root), "commit", "-qm", message], check=True)
+        return subprocess.check_output(
+            ["git", "-C", str(root), "rev-parse", "HEAD"], text=True
+        ).strip()
+
+    def write_readiness_plan(
+        self,
+        root: Path,
+        marker: str,
+        *,
+        status: str = "已更新并验证",
+        commit: str = "abcdef1",
+        baseline: str = "abcdef1",
+        foundation_commit: str = "N/A（无需变更）",
+        existing_worktrees: str = "N/A（无既有 worktree）",
+    ) -> None:
+        self.write_plan(root, marker)
+        plan = root / "docs" / "实施任务清单.md"
+        text = plan.read_text(encoding="utf-8")
+        foundation = textwrap.dedent(
+            f"""
+            ## 基础工程就绪
+
+            - 状态：已验证
+            - 安装命令：python -m pip install -e .
+            - 安装结果：exit 0，依赖安装成功。
+            - 启动或 Smoke 命令：python -m fixture --help
+            - 启动或 Smoke 结果：exit 0，smoke 通过。
+            - 基础测试命令：python -m unittest
+            - 基础测试结果：exit 0，基础测试通过。
+            - 基础工程提交：{foundation_commit}
+            - 既有 Worktrees：{existing_worktrees}
+            """
+        ).strip()
+        readiness = textwrap.dedent(
+            f"""
+            ## 项目指令就绪
+
+            - 状态：{status}
+            - 触发证据：根项目指令需要初始化或更新。
+            - 内容确认：已确认完整内容和文件操作。
+            - 验证命令：python3 <build-agents-md>/scripts/validate_agents_md.py . --strict --require-symlink
+            - 验证结果：通过。
+            - 治理提交：{commit}
+            - 功能开发基线：{baseline}
+            - 恢复条件：N/A（已就绪）
+            """
+        ).strip()
+        text = text.replace(
+            "## 基础工程就绪\n该章节包含完整、可执行且可复核的任务、数据、测试、集成与回滚说明。",
+            foundation,
+        )
+        text = text.replace(
+            "## 项目指令就绪\n该章节包含完整、可执行且可复核的任务、数据、测试、集成与回滚说明。",
+            readiness,
+        )
+        plan.write_text(text, encoding="utf-8")
 
     def test_greenfield_plan_passes_and_missing_traceability_fails(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
@@ -169,6 +291,720 @@ class VibeCodingValidatorTests(unittest.TestCase):
             self.assertEqual(result.returncode, 1)
             self.assertIn("PLACEHOLDER", result.stdout)
 
+    def test_readiness_requires_agent_instructions_section(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            self.write_architecture(root, "greenfield")
+            self.write_plan(root, "F-001 F-001-AC-01")
+            plan = root / "docs" / "实施任务清单.md"
+            plan.write_text(
+                plan.read_text(encoding="utf-8").replace(
+                    "## 项目指令就绪", "## 项目指令状态"
+                ),
+                encoding="utf-8",
+            )
+
+            result = self.run_validator(root, "greenfield", "readiness")
+
+            self.assertEqual(result.returncode, 1)
+            self.assertIn("AGENT_READINESS_SECTION", result.stdout)
+
+    def test_readiness_requires_foundation_evidence(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            self.write_architecture(root, "greenfield")
+            self.write_plan(root, "F-001 F-001-AC-01")
+
+            result = self.run_validator(root, "greenfield", "readiness")
+
+            self.assertEqual(result.returncode, 1)
+            self.assertIn("FOUNDATION_NOT_READY", result.stdout)
+
+    def test_readiness_rejects_unexecuted_foundation_commands(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            self.write_architecture(root, "greenfield")
+            self.write_readiness_plan(
+                root,
+                "F-001 F-001-AC-01",
+                status="有效沿用",
+                commit="N/A（无需更新）",
+                baseline="当前已确认基线",
+            )
+            self.write_agent_instructions(root)
+            plan = root / "docs" / "实施任务清单.md"
+            plan.write_text(
+                plan.read_text(encoding="utf-8")
+                .replace("- 安装命令：python -m pip install -e .", "- 安装命令：未执行")
+                .replace(
+                    "- 安装结果：exit 0，依赖安装成功。", "- 安装结果：尚无结果。"
+                ),
+                encoding="utf-8",
+            )
+
+            result = self.run_validator(root, "greenfield", "readiness")
+
+            self.assertEqual(result.returncode, 1)
+            self.assertIn("FOUNDATION_COMMAND_REQUIRED", result.stdout)
+            self.assertIn("FOUNDATION_RESULT_NOT_PASSING", result.stdout)
+
+    def test_readiness_rejects_negated_or_unexecuted_evidence(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            self.init_git(root)
+            self.write_agent_instructions(root)
+            governance = self.commit_paths(
+                root,
+                "docs(agent): establish project instructions",
+                "AGENTS.md",
+                "CLAUDE.md",
+            )
+            self.write_architecture(root, "greenfield")
+            self.write_readiness_plan(
+                root,
+                "F-001 F-001-AC-01",
+                commit=governance,
+                baseline="readiness 执行时的当前 HEAD",
+            )
+            plan = root / "docs" / "实施任务清单.md"
+            plan.write_text(
+                plan.read_text(encoding="utf-8")
+                .replace(
+                    "- 安装命令：python -m pip install -e .",
+                    "- 安装命令：未执行，因为环境缺失。",
+                )
+                .replace(
+                    "- 安装结果：exit 0，依赖安装成功。",
+                    "- 安装结果：依赖安装未成功。",
+                )
+                .replace(
+                    "- 验证命令：python3 <build-agents-md>/scripts/validate_agents_md.py . --strict --require-symlink",
+                    "- 验证命令：未执行，因为环境缺失：python3 <build-agents-md>/scripts/validate_agents_md.py . --strict --require-symlink",
+                )
+                .replace("- 内容确认：已确认", "- 内容确认：未经已确认")
+                .replace("- 验证结果：通过。", "- 验证结果：未通过。"),
+                encoding="utf-8",
+            )
+
+            result = self.run_validator(root, "greenfield", "readiness")
+
+            self.assertEqual(result.returncode, 1)
+            self.assertIn("FOUNDATION_COMMAND_REQUIRED", result.stdout)
+            self.assertIn("FOUNDATION_RESULT_NOT_PASSING", result.stdout)
+            self.assertIn("AGENT_VALIDATION_COMMAND", result.stdout)
+            self.assertIn("AGENT_VALIDATION_RESULT", result.stdout)
+            self.assertIn("AGENT_CONTENT_APPROVAL", result.stdout)
+
+    def test_readiness_rejects_unknown_foundation_commit(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            self.init_git(root)
+            subprocess.run(
+                ["git", "-C", str(root), "commit", "--allow-empty", "-qm", "base"],
+                check=True,
+            )
+            self.write_architecture(root, "greenfield")
+            self.write_readiness_plan(
+                root,
+                "F-001 F-001-AC-01",
+                status="有效沿用",
+                commit="N/A（无需更新）",
+                baseline="readiness 执行时的当前 HEAD",
+            )
+            self.write_agent_instructions(root)
+            plan = root / "docs" / "实施任务清单.md"
+            plan.write_text(
+                plan.read_text(encoding="utf-8").replace(
+                    "- 基础工程提交：N/A（无需变更）",
+                    "- 基础工程提交：deadbee",
+                ),
+                encoding="utf-8",
+            )
+
+            result = self.run_validator(root, "greenfield", "readiness")
+
+            self.assertEqual(result.returncode, 1)
+            self.assertIn("FOUNDATION_COMMIT_UNKNOWN", result.stdout)
+
+    def test_readiness_requires_foundation_commit_in_current_head(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            self.init_git(root)
+            subprocess.run(
+                ["git", "-C", str(root), "commit", "--allow-empty", "-qm", "base"],
+                check=True,
+            )
+            primary = subprocess.check_output(
+                ["git", "-C", str(root), "branch", "--show-current"], text=True
+            ).strip()
+            subprocess.run(
+                ["git", "-C", str(root), "switch", "-q", "-c", "side"],
+                check=True,
+            )
+            root.joinpath("foundation.txt").write_text("side\n", encoding="utf-8")
+            foundation = self.commit_paths(
+                root, "chore: unrelated foundation", "foundation.txt"
+            )
+            subprocess.run(
+                ["git", "-C", str(root), "switch", "-q", primary], check=True
+            )
+            self.write_architecture(root, "greenfield")
+            self.write_readiness_plan(
+                root,
+                "F-001 F-001-AC-01",
+                status="有效沿用",
+                commit="N/A（无需更新）",
+                baseline="readiness 执行时的当前 HEAD",
+                foundation_commit=foundation,
+            )
+            self.write_agent_instructions(root)
+
+            result = self.run_validator(root, "greenfield", "readiness")
+
+            self.assertEqual(result.returncode, 1)
+            self.assertIn("FOUNDATION_COMMIT_NOT_IN_HEAD", result.stdout)
+
+    def test_readiness_accepts_verified_existing_agent_instructions(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            self.write_architecture(root, "greenfield")
+            self.write_readiness_plan(
+                root,
+                "F-001 F-001-AC-01",
+                status="有效沿用",
+                commit="N/A（无需更新）",
+                baseline="当前已确认基线",
+            )
+            self.write_agent_instructions(root)
+
+            result = self.run_validator(root, "greenfield", "readiness")
+
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+    def test_readiness_requires_confirmed_agent_instruction_update(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            self.write_architecture(root, "greenfield")
+            self.write_readiness_plan(
+                root,
+                "F-001 F-001-AC-01",
+                status="等待 build-agents-md",
+                commit="未生成",
+                baseline="未建立",
+            )
+
+            result = self.run_validator(root, "greenfield", "readiness")
+
+            self.assertEqual(result.returncode, 1)
+            self.assertIn("AGENT_INSTRUCTIONS_PENDING", result.stdout)
+
+    def test_readiness_requires_governance_commit_in_git_repository(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            subprocess.run(["git", "init", "-q", str(root)], check=True)
+            subprocess.run(
+                ["git", "-C", str(root), "config", "user.name", "Test"], check=True
+            )
+            subprocess.run(
+                ["git", "-C", str(root), "config", "user.email", "test@example.com"],
+                check=True,
+            )
+            self.write_architecture(root, "greenfield")
+            self.write_readiness_plan(root, "F-001 F-001-AC-01")
+            self.write_agent_instructions(root)
+
+            result = self.run_validator(root, "greenfield", "readiness")
+
+            self.assertEqual(result.returncode, 1)
+            self.assertIn("AGENT_GOVERNANCE_COMMIT_UNKNOWN", result.stdout)
+
+    def test_readiness_accepts_frozen_governance_commit_sha(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            self.init_git(root)
+            self.write_agent_instructions(root)
+            governance = self.commit_paths(
+                root,
+                "docs(agent): establish project instructions",
+                "AGENTS.md",
+                "CLAUDE.md",
+            )
+            self.write_architecture(root, "greenfield")
+            self.write_readiness_plan(
+                root,
+                "F-001 F-001-AC-01",
+                commit=governance,
+                baseline="readiness 执行时的当前 HEAD",
+            )
+            self.commit_paths(
+                root,
+                "docs(plan): record implementation readiness",
+                "docs",
+            )
+
+            result = self.run_validator(
+                root, "greenfield", "readiness", "--require-clean"
+            )
+
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+    def test_readiness_requires_governance_commit_in_feature_baseline(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            self.init_git(root)
+            root.joinpath("base.txt").write_text("base\n", encoding="utf-8")
+            baseline = self.commit_paths(root, "base", "base.txt")
+            self.write_agent_instructions(root)
+            governance = self.commit_paths(
+                root,
+                "docs(agent): establish project instructions",
+                "AGENTS.md",
+                "CLAUDE.md",
+            )
+            self.write_architecture(root, "greenfield")
+            self.write_readiness_plan(
+                root,
+                "F-001 F-001-AC-01",
+                commit=governance,
+                baseline=baseline,
+            )
+
+            result = self.run_validator(root, "greenfield", "readiness")
+
+            self.assertEqual(result.returncode, 1)
+            self.assertIn("AGENT_GOVERNANCE_NOT_IN_BASELINE", result.stdout)
+
+    def test_readiness_rejects_governance_commit_without_instruction_change(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            self.init_git(root)
+            self.write_agent_instructions(root)
+            self.commit_paths(
+                root,
+                "docs(agent): establish project instructions",
+                "AGENTS.md",
+                "CLAUDE.md",
+            )
+            root.joinpath("app.txt").write_text("not instructions\n", encoding="utf-8")
+            fake_governance = self.commit_paths(
+                root, "docs(agent): misleading commit", "app.txt"
+            )
+            self.write_architecture(root, "greenfield")
+            self.write_readiness_plan(
+                root,
+                "F-001 F-001-AC-01",
+                commit=fake_governance,
+                baseline="readiness 执行时的当前 HEAD",
+            )
+
+            result = self.run_validator(root, "greenfield", "readiness")
+
+            self.assertEqual(result.returncode, 1)
+            self.assertIn("AGENT_GOVERNANCE_COMMIT_CONTENT", result.stdout)
+
+    def test_readiness_requires_feature_baseline_in_current_head(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            self.init_git(root)
+            self.write_agent_instructions(root)
+            governance = self.commit_paths(
+                root,
+                "docs(agent): establish project instructions",
+                "AGENTS.md",
+                "CLAUDE.md",
+            )
+            primary = subprocess.check_output(
+                ["git", "-C", str(root), "branch", "--show-current"], text=True
+            ).strip()
+            subprocess.run(
+                ["git", "-C", str(root), "switch", "-q", "-c", "side"],
+                check=True,
+            )
+            subprocess.run(
+                ["git", "-C", str(root), "commit", "--allow-empty", "-qm", "side"],
+                check=True,
+            )
+            side_baseline = subprocess.check_output(
+                ["git", "-C", str(root), "rev-parse", "HEAD"], text=True
+            ).strip()
+            subprocess.run(
+                ["git", "-C", str(root), "switch", "-q", primary], check=True
+            )
+            self.write_architecture(root, "greenfield")
+            self.write_readiness_plan(
+                root,
+                "F-001 F-001-AC-01",
+                commit=governance,
+                baseline=side_baseline,
+            )
+
+            result = self.run_validator(root, "greenfield", "readiness")
+
+            self.assertEqual(result.returncode, 1)
+            self.assertIn("AGENT_BASELINE_NOT_IN_CURRENT_HEAD", result.stdout)
+
+    def test_delivery_keeps_governance_sha_frozen_after_feature_commits(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            self.init_git(root)
+            self.write_agent_instructions(root)
+            governance = self.commit_paths(
+                root,
+                "docs(agent): establish project instructions",
+                "AGENTS.md",
+                "CLAUDE.md",
+            )
+            self.write_architecture(root, "greenfield")
+            self.write_readiness_plan(
+                root,
+                "F-001 F-001-AC-01",
+                commit=governance,
+                baseline="readiness 执行时的当前 HEAD",
+            )
+            readiness_baseline = self.commit_paths(
+                root,
+                "docs(plan): record implementation readiness",
+                "docs",
+            )
+
+            marker_rejected = self.run_validator(root, "greenfield", "delivery")
+            self.assertIn("AGENT_FEATURE_BASELINE_UNKNOWN", marker_rejected.stdout)
+
+            plan = root / "docs" / "实施任务清单.md"
+            plan.write_text(
+                plan.read_text(encoding="utf-8").replace(
+                    "- 功能开发基线：readiness 执行时的当前 HEAD",
+                    f"- 功能开发基线：{readiness_baseline}",
+                ),
+                encoding="utf-8",
+            )
+            root.joinpath("app.txt").write_text("feature\n", encoding="utf-8")
+            feature_sha = self.commit_paths(root, "feat: add feature", "app.txt")
+            plan.write_text(
+                plan.read_text(encoding="utf-8")
+                .replace("- 状态：待开始", "- 状态：已完成")
+                .replace("- Commit：待生成", f"- Commit：{feature_sha}")
+                .replace("- 集成状态：尚未集成。", "- 集成状态：已集成。"),
+                encoding="utf-8",
+            )
+            self.write_report(root, "F-001 F-001-AC-01", feature_sha)
+
+            result = self.run_validator(root, "greenfield", "delivery")
+
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+            root.joinpath("AGENTS.md").write_text(
+                AGENTS_MD
+                + "\n- `python -m unittest tests.integration`: run integration tests.\n",
+                encoding="utf-8",
+            )
+            self.commit_paths(
+                root,
+                "docs(agent): unconfirmed instruction drift",
+                "AGENTS.md",
+            )
+
+            drifted = self.run_validator(root, "greenfield", "delivery")
+
+            self.assertEqual(drifted.returncode, 1)
+            self.assertIn("AGENT_INSTRUCTIONS_DRIFT", drifted.stdout)
+
+    def test_readiness_does_not_block_on_agents_length_soft_review(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            self.write_architecture(root, "greenfield")
+            self.write_readiness_plan(
+                root,
+                "F-001 F-001-AC-01",
+                status="有效沿用",
+                commit="N/A（无需更新）",
+                baseline="当前已确认基线",
+            )
+            root.joinpath("AGENTS.md").write_text(
+                "# Long but valid instructions\n"
+                + "\n".join(f"- Rule {index}" for index in range(121)),
+                encoding="utf-8",
+            )
+            root.joinpath("CLAUDE.md").symlink_to("AGENTS.md")
+
+            result = self.run_validator(root, "greenfield", "readiness")
+
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            self.assertIn("AGENTS_LENGTH_SOFT", result.stdout)
+
+    def test_readiness_accepts_valid_nested_agent_instructions(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            self.write_architecture(root, "greenfield")
+            self.write_readiness_plan(
+                root,
+                "F-001 F-001-AC-01",
+                status="有效沿用",
+                commit="N/A（无需更新）",
+                baseline="当前已确认基线",
+            )
+            self.write_agent_instructions(root)
+            nested = root / "services" / "api"
+            nested.mkdir(parents=True)
+            nested.joinpath("AGENTS.md").write_text(
+                "# API instructions\n\n- `python -m unittest tests.api`\n",
+                encoding="utf-8",
+            )
+            nested.joinpath("CLAUDE.md").symlink_to("AGENTS.md")
+
+            result = self.run_validator(root, "greenfield", "readiness")
+
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+    def test_readiness_accepts_nested_only_governance_commit(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            self.init_git(root)
+            self.write_agent_instructions(root)
+            self.commit_paths(
+                root,
+                "docs(agent): establish root instructions",
+                "AGENTS.md",
+                "CLAUDE.md",
+            )
+            nested = root / "services" / "api"
+            nested.mkdir(parents=True)
+            nested.joinpath("AGENTS.md").write_text(
+                "# API instructions\n\n- `python -m unittest tests.api`\n",
+                encoding="utf-8",
+            )
+            nested.joinpath("CLAUDE.md").symlink_to("AGENTS.md")
+            governance = self.commit_paths(
+                root,
+                "docs(agent): establish API instructions",
+                "services/api/AGENTS.md",
+                "services/api/CLAUDE.md",
+            )
+            self.write_architecture(root, "greenfield")
+            self.write_readiness_plan(
+                root,
+                "F-001 F-001-AC-01",
+                commit=governance,
+                baseline="readiness 执行时的当前 HEAD",
+            )
+
+            result = self.run_validator(root, "greenfield", "readiness")
+
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+    def test_readiness_accepts_root_and_nested_governance_commit(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            self.init_git(root)
+            self.write_agent_instructions(root)
+            nested = root / "services" / "api"
+            nested.mkdir(parents=True)
+            nested.joinpath("AGENTS.md").write_text(
+                "# API instructions\n\n- `python -m unittest tests.api`\n",
+                encoding="utf-8",
+            )
+            nested.joinpath("CLAUDE.md").symlink_to("AGENTS.md")
+            governance = self.commit_paths(
+                root,
+                "docs(agent): establish all project instructions",
+                "AGENTS.md",
+                "CLAUDE.md",
+                "services/api/AGENTS.md",
+                "services/api/CLAUDE.md",
+            )
+            self.write_architecture(root, "greenfield")
+            self.write_readiness_plan(
+                root,
+                "F-001 F-001-AC-01",
+                commit=governance,
+                baseline="readiness 执行时的当前 HEAD",
+            )
+
+            result = self.run_validator(root, "greenfield", "readiness")
+
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+    def test_readiness_requires_claude_md_relative_symlink(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            self.write_architecture(root, "greenfield")
+            self.write_readiness_plan(
+                root,
+                "F-001 F-001-AC-01",
+                status="有效沿用",
+                commit="N/A（无需更新）",
+                baseline="当前已确认基线",
+            )
+            root.joinpath("AGENTS.md").write_text(AGENTS_MD, encoding="utf-8")
+            root.joinpath("CLAUDE.md").write_text("@AGENTS.md\n", encoding="utf-8")
+
+            result = self.run_validator(root, "greenfield", "readiness")
+
+            self.assertEqual(result.returncode, 1)
+            self.assertIn("CLAUDE_SYMLINK_REQUIRED", result.stdout)
+
+    def test_readiness_rejects_feature_worktree_created_too_early(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            subprocess.run(["git", "init", "-q", str(root)], check=True)
+            subprocess.run(
+                ["git", "-C", str(root), "config", "user.name", "Test"], check=True
+            )
+            subprocess.run(
+                ["git", "-C", str(root), "config", "user.email", "test@example.com"],
+                check=True,
+            )
+            self.write_architecture(root, "greenfield")
+            self.write_readiness_plan(
+                root,
+                "F-001 F-001-AC-01",
+                status="有效沿用",
+                commit="N/A（无需更新）",
+                baseline="当前 HEAD",
+            )
+            self.write_agent_instructions(root)
+            root.joinpath(".gitignore").write_text(".worktrees/\n", encoding="utf-8")
+            subprocess.run(["git", "-C", str(root), "add", "."], check=True)
+            subprocess.run(
+                ["git", "-C", str(root), "commit", "-qm", "prepare plan"],
+                check=True,
+            )
+            worktree = root / ".worktrees" / "TASK-001"
+            subprocess.run(
+                [
+                    "git",
+                    "-C",
+                    str(root),
+                    "worktree",
+                    "add",
+                    "-q",
+                    "-b",
+                    "feat/task-001",
+                    str(worktree),
+                    "HEAD",
+                ],
+                check=True,
+            )
+
+            result = self.run_validator(root, "greenfield", "readiness")
+
+            self.assertEqual(result.returncode, 1)
+            self.assertIn("FEATURE_WORKTREE_BEFORE_READINESS", result.stdout)
+
+    def test_readiness_allows_only_exact_preexisting_worktree_inventory(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            self.init_git(root)
+            self.write_architecture(root, "greenfield")
+            self.write_readiness_plan(
+                root,
+                "F-001 F-001-AC-01",
+                status="有效沿用",
+                commit="N/A（无需更新）",
+                baseline="readiness 执行时的当前 HEAD",
+            )
+            self.write_agent_instructions(root)
+            root.joinpath(".gitignore").write_text(".worktrees/\n", encoding="utf-8")
+            self.commit_paths(root, "prepare plan", ".")
+            worktree = root / ".worktrees" / "preexisting"
+            subprocess.run(
+                [
+                    "git",
+                    "-C",
+                    str(root),
+                    "worktree",
+                    "add",
+                    "-q",
+                    "-b",
+                    "chore/preexisting",
+                    str(worktree),
+                    "HEAD",
+                ],
+                check=True,
+            )
+            plan = root / "docs" / "实施任务清单.md"
+            plan.write_text(
+                plan.read_text(encoding="utf-8").replace(
+                    "- 既有 Worktrees：N/A（无既有 worktree）",
+                    "- 既有 Worktrees：`.worktrees/preexisting` | "
+                    "`refs/heads/chore/preexisting` | 并行既有任务",
+                ),
+                encoding="utf-8",
+            )
+
+            allowed = self.run_validator(root, "greenfield", "readiness")
+
+            self.assertEqual(allowed.returncode, 0, allowed.stdout + allowed.stderr)
+
+            registered_plan = plan.read_text(encoding="utf-8")
+            plan.write_text(
+                registered_plan.replace(
+                    "`refs/heads/chore/preexisting`", "`refs/heads/TASK-001`"
+                ),
+                encoding="utf-8",
+            )
+            mismatched = self.run_validator(root, "greenfield", "readiness")
+
+            self.assertEqual(mismatched.returncode, 1)
+            self.assertIn("WORKTREE_BASELINE_MISMATCH", mismatched.stdout)
+
+            plan.write_text(
+                registered_plan.replace(
+                    "`.worktrees/preexisting`", "`.worktrees/wrong-path`"
+                ),
+                encoding="utf-8",
+            )
+            wrong_path = self.run_validator(root, "greenfield", "readiness")
+            self.assertEqual(wrong_path.returncode, 1)
+            self.assertIn("FEATURE_WORKTREE_BEFORE_READINESS", wrong_path.stdout)
+            self.assertIn("WORKTREE_BASELINE_MISMATCH", wrong_path.stdout)
+
+            plan.write_text(
+                registered_plan.replace(
+                    "`.worktrees/preexisting` | `refs/heads/chore/preexisting` | 并行既有任务",
+                    "`refs/heads/chore/preexisting`",
+                ),
+                encoding="utf-8",
+            )
+            branch_only = self.run_validator(root, "greenfield", "readiness")
+            self.assertEqual(branch_only.returncode, 1)
+            self.assertIn("WORKTREE_BASELINE_FORMAT", branch_only.stdout)
+            self.assertIn("FEATURE_WORKTREE_BEFORE_READINESS", branch_only.stdout)
+
+    def test_delivery_rechecks_agent_instruction_drift(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            self.init_git(root)
+            self.write_agent_instructions(root)
+            sha = self.commit_paths(
+                root,
+                "docs(agent): establish instructions",
+                "AGENTS.md",
+                "CLAUDE.md",
+            )
+            self.write_architecture(root, "greenfield")
+            self.write_readiness_plan(
+                root, "F-001 F-001-AC-01", commit=sha, baseline=sha
+            )
+            plan = root / "docs" / "实施任务清单.md"
+            plan.write_text(
+                plan.read_text(encoding="utf-8")
+                .replace("- 状态：待开始", "- 状态：已完成")
+                .replace("- Commit：待生成", f"- Commit：{sha}")
+                .replace("- 集成状态：尚未集成。", "- 集成状态：已集成。"),
+                encoding="utf-8",
+            )
+            self.write_report(root, "F-001 F-001-AC-01", sha)
+            root.joinpath("CLAUDE.md").unlink()
+            root.joinpath("CLAUDE.md").symlink_to("WRONG.md")
+
+            result = self.run_validator(root, "greenfield", "delivery")
+
+            self.assertEqual(result.returncode, 1)
+            self.assertIn("CLAUDE_LINK_TARGET", result.stdout)
+
     def test_delivery_checks_real_commit_and_clean_worktree(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
@@ -181,6 +1017,7 @@ class VibeCodingValidatorTests(unittest.TestCase):
                 check=True,
             )
             self.write_architecture(root, "greenfield")
+            self.write_agent_instructions(root)
             (root / "app.txt").write_text("implemented\n", encoding="utf-8")
             subprocess.run(["git", "-C", str(root), "add", "."], check=True)
             subprocess.run(
@@ -190,7 +1027,21 @@ class VibeCodingValidatorTests(unittest.TestCase):
             sha = subprocess.check_output(
                 ["git", "-C", str(root), "rev-parse", "--short", "HEAD"], text=True
             ).strip()
-            self.write_plan(root, "F-001 F-001-AC-01", "已完成", sha)
+            self.write_readiness_plan(
+                root,
+                "F-001 F-001-AC-01",
+                status="有效沿用",
+                commit="N/A（无需更新）",
+                baseline=sha,
+            )
+            plan = root / "docs" / "实施任务清单.md"
+            plan.write_text(
+                plan.read_text(encoding="utf-8")
+                .replace("- 状态：待开始", "- 状态：已完成")
+                .replace("- Commit：待生成", f"- Commit：{sha}")
+                .replace("- 集成状态：尚未集成。", "- 集成状态：已集成。"),
+                encoding="utf-8",
+            )
             self.write_report(root, "F-001 F-001-AC-01", sha)
             subprocess.run(["git", "-C", str(root), "add", "docs"], check=True)
             subprocess.run(
@@ -202,9 +1053,7 @@ class VibeCodingValidatorTests(unittest.TestCase):
             )
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
             plan = root / "docs" / "实施任务清单.md"
-            plan.write_text(
-                plan.read_text().replace(sha, "deadbee"), encoding="utf-8"
-            )
+            plan.write_text(plan.read_text().replace(sha, "deadbee"), encoding="utf-8")
             failed = self.run_validator(root, "greenfield", "delivery")
             self.assertIn("TASK_COMMIT_UNKNOWN", failed.stdout)
 
@@ -220,6 +1069,7 @@ class VibeCodingValidatorTests(unittest.TestCase):
                 check=True,
             )
             self.write_architecture(root, "greenfield")
+            self.write_agent_instructions(root)
             (root / ".gitignore").write_text(".worktrees/\n", encoding="utf-8")
             (root / "app.txt").write_text("implemented\n", encoding="utf-8")
             subprocess.run(["git", "-C", str(root), "add", "."], check=True)
@@ -246,10 +1096,20 @@ class VibeCodingValidatorTests(unittest.TestCase):
                 ],
                 check=True,
             )
-            self.write_plan(root, "F-001 F-001-AC-01", "已完成", sha)
+            self.write_readiness_plan(
+                root,
+                "F-001 F-001-AC-01",
+                status="有效沿用",
+                commit="N/A（无需更新）",
+                baseline=sha,
+            )
             plan = root / "docs" / "实施任务清单.md"
             plan.write_text(
-                plan.read_text().replace(
+                plan.read_text(encoding="utf-8")
+                .replace("- 状态：待开始", "- 状态：已完成")
+                .replace("- Commit：待生成", f"- Commit：{sha}")
+                .replace("- 集成状态：尚未集成。", "- 集成状态：已集成。")
+                .replace(
                     "- Worktree：N/A（串行执行）",
                     "- Worktree：`.worktrees/TASK-001`",
                 ),
@@ -317,6 +1177,148 @@ class VibeCodingValidatorTests(unittest.TestCase):
             )
             self.assertEqual(passed.returncode, 0, passed.stdout + passed.stderr)
 
+    def test_end_to_end_readiness_feature_cleanup_and_instruction_drift(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            self.init_git(root)
+            self.write_architecture(root, "greenfield")
+            root.joinpath("app.txt").write_text("scaffold\n", encoding="utf-8")
+            root.joinpath(".gitignore").write_text(".worktrees/\n", encoding="utf-8")
+            scaffold = self.commit_paths(
+                root,
+                "chore(scaffold): establish verified project foundation",
+                "app.txt",
+                ".gitignore",
+                "docs/架构设计方案.md",
+                "docs/PRD需求文档.md",
+            )
+
+            self.write_agent_instructions(root)
+            nested = root / "services" / "api"
+            nested.mkdir(parents=True)
+            nested.joinpath("AGENTS.md").write_text(
+                "# API instructions\n\n- `python -m unittest tests.api`\n",
+                encoding="utf-8",
+            )
+            nested.joinpath("CLAUDE.md").symlink_to("AGENTS.md")
+            governance = self.commit_paths(
+                root,
+                "docs(agent): establish project instructions",
+                "AGENTS.md",
+                "CLAUDE.md",
+                "services/api/AGENTS.md",
+                "services/api/CLAUDE.md",
+            )
+
+            self.write_readiness_plan(
+                root,
+                "F-001 F-001-AC-01",
+                commit=governance,
+                baseline="readiness 执行时的当前 HEAD",
+                foundation_commit=scaffold,
+            )
+            readiness_record = self.commit_paths(
+                root,
+                "docs(plan): record implementation readiness",
+                "docs/实施任务清单.md",
+            )
+
+            readiness = self.run_validator(
+                root, "greenfield", "readiness", "--require-clean"
+            )
+            self.assertEqual(
+                readiness.returncode, 0, readiness.stdout + readiness.stderr
+            )
+
+            plan = root / "docs" / "实施任务清单.md"
+            plan.write_text(
+                plan.read_text(encoding="utf-8").replace(
+                    "- 功能开发基线：readiness 执行时的当前 HEAD",
+                    f"- 功能开发基线：{readiness_record}",
+                ),
+                encoding="utf-8",
+            )
+            self.commit_paths(
+                root,
+                "docs(plan): freeze readiness baseline",
+                "docs/实施任务清单.md",
+            )
+
+            worktree = root / ".worktrees" / "TASK-001"
+            subprocess.run(
+                [
+                    "git",
+                    "-C",
+                    str(root),
+                    "worktree",
+                    "add",
+                    "-q",
+                    "-b",
+                    "feat/TASK-001",
+                    str(worktree),
+                    "HEAD",
+                ],
+                check=True,
+            )
+            worktree.joinpath("feature.txt").write_text(
+                "implemented\n", encoding="utf-8"
+            )
+            feature = self.commit_paths(
+                worktree,
+                "feat: implement TASK-001",
+                "feature.txt",
+            )
+            subprocess.run(
+                ["git", "-C", str(root), "merge", "--ff-only", "feat/TASK-001"],
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+            subprocess.run(
+                ["git", "-C", str(root), "worktree", "remove", str(worktree)],
+                check=True,
+            )
+            subprocess.run(
+                ["git", "-C", str(root), "branch", "-d", "feat/TASK-001"],
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+
+            plan.write_text(
+                plan.read_text(encoding="utf-8")
+                .replace("- 状态：待开始", "- 状态：已完成")
+                .replace("- Commit：待生成", f"- Commit：{feature}")
+                .replace("- 集成状态：尚未集成。", "- 集成状态：已集成。")
+                .replace(
+                    "- Worktree：N/A（串行执行）",
+                    "- Worktree：`.worktrees/TASK-001`",
+                ),
+                encoding="utf-8",
+            )
+            self.write_report(root, "F-001 F-001-AC-01", feature)
+            self.commit_paths(root, "docs: record delivery", "docs")
+
+            delivery = self.run_validator(
+                root, "greenfield", "delivery", "--require-clean"
+            )
+            self.assertEqual(delivery.returncode, 0, delivery.stdout + delivery.stderr)
+
+            nested.joinpath("AGENTS.md").write_text(
+                "# API instructions\n\n- `python -m unittest tests.api.v2`\n",
+                encoding="utf-8",
+            )
+            self.commit_paths(
+                root,
+                "docs(agent): unconfirmed nested drift",
+                "services/api/AGENTS.md",
+            )
+            drifted = self.run_validator(
+                root, "greenfield", "delivery", "--require-clean"
+            )
+            self.assertEqual(drifted.returncode, 1)
+            self.assertIn("AGENT_INSTRUCTIONS_DRIFT", drifted.stdout)
+
     def test_vibe_coding_installs_for_both_platforms(self) -> None:
         for platform, platform_root in (("claude", ".claude"), ("codex", ".agents")):
             with self.subTest(platform=platform), tempfile.TemporaryDirectory() as temp:
@@ -340,11 +1342,71 @@ class VibeCodingValidatorTests(unittest.TestCase):
                 )
                 self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
                 target = Path(temp) / platform_root / "skills" / "vibe-coding"
-                self.assertTrue(target.joinpath("scripts", "validate_delivery.py").is_file())
+                self.assertTrue(
+                    target.joinpath("scripts", "validate_delivery.py").is_file()
+                )
                 self.assertTrue(target.joinpath("scripts", "validate_prd.py").is_file())
-                self.assertFalse(target.joinpath("scripts", "validate_prd.py").is_symlink())
-                self.assertFalse(target.joinpath("prompts", "reviewer.agent.md").is_symlink())
-                self.assertEqual(target.joinpath("agents").exists(), platform == "codex")
+                self.assertTrue(
+                    target.joinpath("scripts", "validate_agents_md.py").is_file()
+                )
+                self.assertFalse(
+                    target.joinpath("scripts", "validate_prd.py").is_symlink()
+                )
+                self.assertFalse(
+                    target.joinpath("scripts", "validate_agents_md.py").is_symlink()
+                )
+                self.assertFalse(
+                    target.joinpath("prompts", "reviewer.agent.md").is_symlink()
+                )
+                self.assertEqual(
+                    target.joinpath("agents").exists(), platform == "codex"
+                )
+
+                project = Path(temp) / "fixture-project"
+                self.write_architecture(project, "greenfield")
+                self.write_readiness_plan(
+                    project,
+                    "F-001 F-001-AC-01",
+                    status="有效沿用",
+                    commit="N/A（无需更新）",
+                    baseline="N/A（非 Git 项目）",
+                )
+                self.write_agent_instructions(project)
+                installed_readiness = subprocess.run(
+                    [
+                        sys.executable,
+                        str(target / "scripts" / "validate_delivery.py"),
+                        str(project),
+                        "--mode",
+                        "greenfield",
+                        "--phase",
+                        "readiness",
+                        "--strict",
+                    ],
+                    check=False,
+                    text=True,
+                    capture_output=True,
+                )
+                self.assertEqual(
+                    installed_readiness.returncode,
+                    0,
+                    installed_readiness.stdout + installed_readiness.stderr,
+                )
+                installed_agents_help = subprocess.run(
+                    [
+                        sys.executable,
+                        str(target / "scripts" / "validate_agents_md.py"),
+                        "--help",
+                    ],
+                    check=False,
+                    text=True,
+                    capture_output=True,
+                )
+                self.assertEqual(
+                    installed_agents_help.returncode,
+                    0,
+                    installed_agents_help.stdout + installed_agents_help.stderr,
+                )
 
 
 if __name__ == "__main__":

@@ -12,6 +12,8 @@
 - Agent 与 worktree 能力；
 - 质量门禁；
 - 禁止修改范围。
+- 配套 Skill 的初步触发状态；
+- 项目指令初步分类和 readiness 要求。
 
 ## Rules
 
@@ -24,6 +26,7 @@
 - 每个任务预先定义一次 commit 边界。
 - 未确认范围不得偷偷成为任务。
 - 外部环境或用户动作明确列出。
+- `build-agents-md` 需要执行时，把脚手架验证、完整内容确认、治理提交和 readiness 设计为功能 worktree 之前的依赖；有效沿用时记录验证任务，不制造改写提交。
 
 ## Output
 
@@ -55,6 +58,8 @@
 - Done:
 
 ## Integration Order
+## Companion Skill Lifecycle
+## Agent Instruction Readiness
 ## User/Environment Actions
 ## Risks and Stop Conditions
 ```

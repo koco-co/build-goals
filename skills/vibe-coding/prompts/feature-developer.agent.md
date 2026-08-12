@@ -15,10 +15,12 @@
 - 测试数据；
 - 验证命令；
 - commit 格式。
+- 适用的根目录和局部 `AGENTS.md` 路径；
+- readiness 已通过的共同基线与项目指令治理提交。
 
 ## Rules
 
-- 开始前检查当前分支、HEAD、status 和任务所有权。
+- 开始前检查当前分支、HEAD、status 和任务所有权，确认 HEAD 包含共同基线，并读取当前路径适用的全部 `AGENTS.md`。
 - 先写测试并确认正确失败，再实现，再重构。
 - 不修改未分配文件；发现需要时停止并返回主 Agent。
 - 不弱化测试、关闭规则或隐藏失败。
@@ -36,6 +38,7 @@
 
 ## Task
 ## Baseline
+## Agent Instructions Read
 ## Tests Added First
 - command:
 - expected failure:

@@ -35,7 +35,7 @@ python3 scripts/validate_skill.py <skill-dir> --profile <profile> --strict
 
 需要新建或升级 Skill 时：
 
-- 平台支持受控委派：明确调用 `build-skill` 并传递已确认范围；
+- 平台支持受控委派：明确调用 `build-skill` 并传递已确认范围、上层总控、提交所有权和恢复条件；`build-skill` 按受控调用返回，不重复询问 commit、push、安装或 Plugin 更新；
 - 平台不支持嵌套调用：输出可直接交给 `build-skill` 的交接内容，由用户继续调用；
 - 不在本工作流中复制 `build-skill` 的完整实现。
 

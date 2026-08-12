@@ -6,7 +6,9 @@ import os
 import re
 import subprocess
 from pathlib import Path
+from typing import Optional
 
+from .documents import PLAN_PATH, section_body
 from .model import Issue, add_issue
 from .traceability import Task, task_field
 
@@ -114,6 +116,110 @@ def validate_completed_worktrees(
                 root,
             )
             break
+
+
+def _registered_worktrees(root: Path, output: str) -> dict[Path, str]:
+    registered: dict[Path, str] = {}
+    for record in output.strip().split("\n\n"):
+        path: Optional[Path] = None
+        branch = "detached"
+        for line in record.splitlines():
+            if line.startswith("worktree "):
+                path = Path(line[len("worktree ") :]).resolve()
+            elif line.startswith("branch "):
+                branch = line[len("branch ") :].strip()
+        if path is not None and path != root.resolve():
+            registered[path] = branch
+    return registered
+
+
+def _baseline_worktrees(
+    root: Path, plan_text: str, issues: list[Issue]
+) -> dict[Path, str]:
+    plan_path = root / PLAN_PATH
+    body = section_body(plan_text, "## 基础工程就绪")
+    if body is None:
+        return {}
+    match = re.search(r"(?m)^-\s*既有 Worktrees：\s*(.*?)\s*$", body)
+    if match is None:
+        return {}
+    value = match.group(1).strip()
+    if value in {"N/A（无既有 worktree）", "N/A (无既有 worktree)"}:
+        return {}
+
+    baseline: dict[Path, str] = {}
+    for raw_entry in re.split(r"[;；]", value):
+        parts = [piece.strip().strip("`") for piece in raw_entry.split("|")]
+        if len(parts) != 3 or not all(parts):
+            add_issue(
+                issues,
+                "error",
+                "WORKTREE_BASELINE_FORMAT",
+                plan_path,
+                "既有 Worktrees 必须使用“路径 | refs/heads/分支 | 用途”，多项用分号分隔。",
+                root,
+            )
+            continue
+        raw_path, branch, _purpose = parts
+        path = Path(raw_path)
+        if not path.is_absolute():
+            path = root / path
+        baseline[path.resolve()] = branch
+    return baseline
+
+
+def validate_no_feature_worktrees_before_readiness(
+    root: Path, plan_text: str, issues: list[Issue]
+) -> None:
+    """Reject every non-baseline worktree before the readiness gate passes."""
+    if not is_git_repo(root):
+        return
+    result = git_run(root, "worktree", "list", "--porcelain")
+    if result.returncode != 0:
+        add_issue(
+            issues,
+            "error",
+            "GIT_WORKTREE_LIST",
+            root,
+            result.stderr.strip() or "无法枚举 Git worktrees。",
+            root,
+        )
+        return
+
+    registered = _registered_worktrees(root, result.stdout)
+    baseline = _baseline_worktrees(root, plan_text, issues)
+
+    for worktree, branch in registered.items():
+        expected_branch = baseline.get(worktree)
+        if expected_branch is None:
+            add_issue(
+                issues,
+                "error",
+                "FEATURE_WORKTREE_BEFORE_READINESS",
+                worktree,
+                "该 worktree 未登记在 readiness 前的既有 Worktrees 基线中；不得通过任务写 N/A、漏填或只写分支名绕过门禁。",
+                root,
+            )
+        elif expected_branch != branch:
+            add_issue(
+                issues,
+                "error",
+                "WORKTREE_BASELINE_MISMATCH",
+                worktree,
+                f"既有 Worktree 的登记分支为 {expected_branch!r}，实际为 {branch!r}。",
+                root,
+            )
+
+    for worktree, expected_branch in baseline.items():
+        if worktree not in registered:
+            add_issue(
+                issues,
+                "error",
+                "WORKTREE_BASELINE_MISMATCH",
+                root / PLAN_PATH,
+                f"既有 Worktree 清单登记了未注册路径 {worktree}（{expected_branch}）。",
+                root,
+            )
 
 
 def validate_tracked_secrets(root: Path, issues: list[Issue]) -> None:

@@ -396,14 +396,14 @@ class ValidateSkillTests(unittest.TestCase):
 
     def test_behavior_changed_skill_versions_are_updated(self) -> None:
         expected = {
-            "build-agents-md": 'version: "1.1.1"',
-            "build-plugin": 'version: "1.2.0"',
+            "build-agents-md": 'version: "1.2.0"',
+            "build-plugin": 'version: "1.3.0"',
             "build-prd": 'version: "1.0.1"',
             "build-readme": 'version: "1.0.1"',
-            "build-skill": 'version: "1.4.0"',
+            "build-skill": 'version: "1.5.0"',
             "handoff": 'version: "1.1.1"',
             "shape-idea": 'version: "1.0.1"',
-            "vibe-coding": 'version: "1.1.0"',
+            "vibe-coding": 'version: "1.2.0"',
         }
 
         for name, version_line in expected.items():
@@ -412,6 +412,88 @@ class ValidateSkillTests(unittest.TestCase):
                     encoding="utf-8"
                 )
                 self.assertIn(version_line, text)
+
+    def test_vibe_coding_defines_companion_skill_lifecycle(self) -> None:
+        skill_root = REPO_ROOT / "skills" / "vibe-coding"
+        contract = "\n".join(
+            path.read_text(encoding="utf-8")
+            for path in (
+                skill_root / "SKILL.md",
+                skill_root / "rules" / "companion-skills.md",
+                skill_root / "rules" / "orchestration-contract.md",
+            )
+        )
+
+        for name in (
+            "shape-idea",
+            "build-prd",
+            "build-agents-md",
+            "build-skill",
+            "build-plugin",
+            "build-readme",
+            "handoff",
+        ):
+            with self.subTest(skill=name):
+                self.assertIn(name, contract)
+                row = next(
+                    line
+                    for line in contract.splitlines()
+                    if line.startswith(f"| `{name}` |")
+                )
+                cells = [cell.strip() for cell in row.strip("|").split("|")]
+                self.assertEqual(len(cells), 6)
+                self.assertTrue(all(cells))
+        for required in (
+            "触发证据",
+            "调用阶段",
+            "是否阻断",
+            "恢复条件",
+            "可直接复制",
+            "两个全局决策门禁",
+            "按需产物确认",
+            "功能开发前",
+            "已证实",
+            "纯文案",
+            "暂停",
+        ):
+            with self.subTest(required=required):
+                self.assertIn(required, contract)
+
+    def test_build_agents_md_defines_nested_orchestration_contract(self) -> None:
+        skill_root = REPO_ROOT / "skills" / "build-agents-md"
+        contract = "\n".join(
+            path.read_text(encoding="utf-8")
+            for path in (
+                skill_root / "SKILL.md",
+                skill_root / "workflows" / "§05-delivery.md",
+            )
+        )
+
+        self.assertIn("上层总控", contract)
+        self.assertIn("不重复询问", contract)
+        self.assertIn("确认依据", contract)
+        self.assertIn("恢复条件", contract)
+
+    def test_stateful_build_skills_define_independent_and_controlled_delivery(self) -> None:
+        for name, workflow in (
+            ("build-agents-md", "§05-delivery.md"),
+            ("build-skill", "§06-delivery.md"),
+            ("build-plugin", "§07-delivery.md"),
+        ):
+            with self.subTest(skill=name):
+                root = REPO_ROOT / "skills" / name
+                contract = "\n".join(
+                    path.read_text(encoding="utf-8")
+                    for path in (root / "SKILL.md", root / "workflows" / workflow)
+                )
+                self.assertIn("独立调用", contract)
+                self.assertIn("受控调用", contract)
+                self.assertIn("不重复询问", contract)
+                self.assertIn("上层总控", contract)
+                self.assertIn("确认依据", contract)
+                self.assertIn("验证", contract)
+                self.assertIn("未验证", contract)
+                self.assertIn("恢复条件", contract)
 
 
 if __name__ == "__main__":

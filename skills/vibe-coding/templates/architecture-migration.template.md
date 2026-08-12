@@ -82,6 +82,7 @@ flowchart LR
 - 格式、Lint、类型、测试、pre-commit、CI：
 - Prompt、Skill、Agent、Hook、MCP：
 - AGENTS.md / CLAUDE.md：
+- 配套 Skill 生命周期与 readiness：
 - README 与 docs：
 - ignore 与生成物：
 - 环境变量与秘密：

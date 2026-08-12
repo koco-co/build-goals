@@ -65,6 +65,8 @@
 - AGENTS.md、CLAUDE.md、README、忽略文件和环境变量说明与事实一致；
 - 不存在已跟踪秘密、临时构建物、调试日志和未知生成文件。
 
+项目指令最终复查必须区分阻断问题和一般建议。断链、错误目标、已证实失效的命令、目录或安全边界冲突、必要局部规则缺失、秘密或危险操作属于阻断项，重新调用 `build-agents-md` 并取得完整内容确认。纯精简、非关键背景和未证实的潜在过时只记录建议，不静默重写。
+
 ## Phase 6: 独立复核与最终校验
 
 调用独立 Reviewer，并按项目类型调用 UI 和 Security Reviewer。所有 Blocking Finding 修复后重跑。
@@ -80,6 +82,6 @@ python3 <vibe-coding>/scripts/validate_delivery.py \
   --strict
 ```
 
-该门禁会枚举 Git worktrees；任务清单中已完成且已集成的任务如果仍登记着对应 worktree，将以 `COMPLETED_WORKTREE_REMAINS` 失败。阻塞、存在独有提交或未纳入本轮任务清单的 worktree 必须保留并在报告中解释，不得为通过校验而强制删除。
+该门禁会再次运行项目指令结构校验并枚举 Git worktrees；任务清单中已完成且已集成的任务如果仍登记着对应 worktree，将以 `COMPLETED_WORKTREE_REMAINS` 失败。阻塞、存在独有提交或未纳入本轮任务清单的 worktree 必须保留并在报告中解释，不得为通过校验而强制删除。
 
 无法完成真实客户端、外部服务或生产等价验证时，标记为未验证，并说明缺少的证据和影响。

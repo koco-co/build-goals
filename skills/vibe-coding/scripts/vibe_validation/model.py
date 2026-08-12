@@ -29,6 +29,10 @@ class Report:
     def warnings(self) -> list[Issue]:
         return [item for item in self.issues if item.severity == "warning"]
 
+    @property
+    def infos(self) -> list[Issue]:
+        return [item for item in self.issues if item.severity == "info"]
+
     def to_dict(self) -> dict[str, object]:
         return {
             "project_root": self.project_root,
@@ -37,6 +41,7 @@ class Report:
             "status": "pass" if not self.errors else "fail",
             "error_count": len(self.errors),
             "warning_count": len(self.warnings),
+            "info_count": len(self.infos),
             "issues": [asdict(item) for item in self.issues],
         }
 

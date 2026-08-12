@@ -141,7 +141,7 @@ class ValidatePluginTests(unittest.TestCase):
                 self.assertNotIn(excluded, instructions)
         self.assertLessEqual(len(instructions.splitlines()), 120)
 
-    def test_build_skills_prompt_for_applicable_release_actions(self) -> None:
+    def test_build_skills_route_release_actions_by_invocation_mode(self) -> None:
         contracts = {
             "build-skill": (
                 REPO_ROOT / "skills" / "build-skill" / "SKILL.md",
@@ -183,6 +183,11 @@ class ValidatePluginTests(unittest.TestCase):
                     "实现和验证已经完成。是否执行以下交付动作？", contract
                 )
                 self.assertIn("只列出真实适用的动作", contract)
+                self.assertIn("独立调用", contract)
+                self.assertIn("受控调用", contract)
+                self.assertIn("不重复询问", contract)
+                self.assertIn("上层总控", contract)
+                self.assertIn("恢复条件", contract)
 
     def test_repository_release_versions_are_synchronized(self) -> None:
         claude_manifest = json.loads(
@@ -205,7 +210,7 @@ class ValidatePluginTests(unittest.TestCase):
         self.assertEqual(
             claude_manifest["version"], marketplace["plugins"][0]["version"]
         )
-        self.assertEqual(claude_manifest["version"], "1.7.0")
+        self.assertEqual(claude_manifest["version"], "1.8.0")
 
     def test_claude_marketplace_manifest_is_allowed(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
