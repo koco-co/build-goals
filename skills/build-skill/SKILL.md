@@ -1,25 +1,24 @@
 ---
 name: build-skill
 description: 从零设计、实现和验证通用 Skill 或项目级定制 Skill，也用于审查并重构已有低质量 Skill。
-compatibility: 当前适配 Claude Code 与 Codex；运行内置机械校验需要 Python 3.9 或更高版本。
+compatibility: 当前适配 Claude Code 与 Codex；运行内置静态校验需要 Python 3.9 或更高版本。
 disable-model-invocation: true
 metadata:
   author: koco-co
-  version: "1.2.0"
+  version: "1.3.0"
 ---
 
 # Outcome
 
-将一个明确的 Skill 需求转化为结构精简、行为可靠、能够真实运行和验证，并适配目标 Agent 平台的完整实现。
+把明确的 Skill 需求转化为结构精简、行为可靠、能够实际运行和验证，并适配目标 Agent 平台的完整实现。
 
 ## Routing
 
-- 用户明确调用 `build-skill` 并要求新建通用 Skill 时，执行“通用 Skill”分支。
-- 用户明确调用 `build-skill` 并提供目标项目时，执行“项目级定制 Skill”分支，先探索项目再设计接入方式。
-- 用户明确调用 `build-skill` 并提供已有 Skill 时，执行“审查与升级”分支，先建立现状基线再提出变更。
+- 新建通用 Skill 时，执行“通用 Skill”分支。
+- 为指定项目创建 Skill 时，执行“项目级定制 Skill”分支，先了解项目再设计接入方式。
+- 修改已有 Skill 时，执行“审查与升级”分支，先记录当前行为再提出改进方案。
 - 用户要求构建、打包、安装、迁移或发布 Plugin 时，转交 `build-plugin`；本 Skill 只处理其中需要新建或升级的 Skill。
 - 用户只要求润色提示词、编写普通文档或处理与 Skill 无关的任务时，不进入本 Skill。
-- 无法确认是否为显式调用时，不推断触发；要求用户明确调用 `build-skill`。
 
 ## Steps
 
@@ -44,7 +43,7 @@ metadata:
    - 完整读取 `workflows/§03-design.md`。
    - 设计前读取 `rules/architecture.md`、`rules/quality-standard.md` 和 `rules/platform-compatibility.md`。
    - 使用 `templates/design-proposal.template.md` 组织方案；需要参考粒度时，按 Skill 类型读取对应示例。
-   - 输出 `tree` 风格目录、文件职责、按需读取关系、机械校验、语义验收、平台适配和 Hooks/CLI 归属建议。
+   - 输出 `tree` 风格目录、文件职责、按需读取关系、静态校验、内容审查、平台适配和 Hooks/CLI 归属建议。
    - 设计必须解释为何保留每个目录；不为形式完整创建空目录或占位文件。
    - 设计完成后只请求一次实施确认。用户确认前不得创建、修改、移动或删除目标文件。
    - 完成条件：用户明确确认实施范围和验收标准。
@@ -53,7 +52,7 @@ metadata:
    - 完整读取 `workflows/§04-implementation.md`。
    - 使用 `templates/skill.template.md` 作为 `SKILL.md` 的结构基线，不得删除其中的核心章节。
    - 优先复用仓库已有 CLI、校验器、测试和公共能力；只有确有缺口时才新增 Skill 内脚本。
-   - 将确定性处理交给代码，将固定结构交给模板，将输出范式交给 Few-shot，将不可机械判断的要求交给规则和清单。
+   - 将确定性处理交给代码，将固定结构交给模板，将输出范式交给少样本示例，将无法静态判断的要求交给规则和清单。
    - 保持单一规范源；平台差异集中在 Manifest、适配文件或安装过程，不复制两套核心工作流。
    - 多 Agent 提示文件必须使用 `<name>.agent.md`，不得继续创建 `*.prompt.md`。
    - 只修改已确认范围内的文件，不留下空文件、空目录或无真实用途的占位内容。
@@ -62,11 +61,11 @@ metadata:
 5. 验证
    - 完整读取 `workflows/§05-validation.md`。
    - 先运行目标仓库已有检查；没有等价能力时，运行 `scripts/validate_skill.py` 或本次实现提供的校验入口。
-   - 使用 `checklists/design-review.md` 检查设计落实情况，再使用 `checklists/semantic-acceptance.md` 完成语义与场景验收。
-   - 至少验证显式触发、负向不触发、新建通用 Skill、新建项目级 Skill、升级已有 Skill、确认门禁和失败路径。
+   - 使用 `checklists/design-review.md` 检查设计实现情况，再使用 `checklists/semantic-acceptance.md` 完成内容与场景审查。
+   - 根据目标 Skill 的调用配置验证对应触发方式，并覆盖新建通用 Skill、新建项目级 Skill、升级已有 Skill、确认步骤和失败路径。
    - 能够实际运行的平台必须进行真实验证；只能静态检查的平台必须标记为“未完成真实运行验证”。
    - 发现失败时，修复后重新运行受影响检查，不得用文字说明替代验证。
-   - 完成条件：机械检查通过，关键场景通过，剩余未验证项和阻塞项均已明确记录。
+   - 完成条件：静态检查和关键场景均通过，未验证内容和无法继续的原因均已记录。
 
 6. 交付、请求发布确认并停止
    - 完整读取 `workflows/§06-delivery.md`。
@@ -87,7 +86,7 @@ metadata:
 - Claude Code、Codex 或其他目标平台的适配差异；
 - 实际执行的校验命令、场景、结果和失败修复记录；
 - 外部来源与许可证信息；未使用外部来源时明确说明；
-- 已验证、未验证和阻塞项；
+- 已验证、未验证，以及无法完成的内容和原因；
 - 下一步状态、真实适用的交付动作及用户授权状态，并在当前 Skill 完成后停止。
 
 ## Guardrails
@@ -97,7 +96,7 @@ metadata:
 - 实现和验证完成后必须主动询问适用的交付动作；不得在用户回答前执行，也不得把独立 Skill 或普通项目虚构成可更新的 Plugin。
 - 遇到删除、覆盖稳定接口、迁移目录、改变触发行为、执行外部副作用或提高权限时，取得对应范围的明确授权。
 - 不制造问题、不重复询问、不虚构调研结论，不声称执行了未运行的命令或未完成的平台验证。
-- 可机械判断的要求由 CLI、脚本、测试或结构化校验承担；模型判断只处理语义和场景层面的问题。
+- 可静态判断的要求由 CLI、脚本、测试或结构化校验承担；模型只处理内容和场景层面的问题。
 - 规则冲突时，优先保护数据与权限，其次遵循用户明确约束、目标仓库约定和平台官方契约。
 - 发现任务不属于 Skill 构建或升级时及时退出本流程，不把本 Skill 扩张为通用任务代理。
 

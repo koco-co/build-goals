@@ -27,7 +27,7 @@ my-plugin/
 - Skill 核心文件不复制；
 - Claude Code 使用命名空间调用；
 - Codex 使用 `$skill-name`；
-- 仅限显式调用的 Skill 同时配置 Claude Frontmatter 与 Codex policy；
+- 仅限用户调用的 Skill 同时配置 Claude Frontmatter 与 Codex policy；
 - 先校验每个 Skill，再校验整个 Plugin。
 
 ## 验收

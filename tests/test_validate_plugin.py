@@ -118,11 +118,12 @@ class ValidatePluginTests(unittest.TestCase):
 
         instructions = agents.read_text(encoding="utf-8")
         for required in (
-            "项目定位",
-            "工作地图",
-            "关键命令",
-            "项目不变量",
-            "变更与验证",
+            "项目概览",
+            "仓库结构",
+            "常用命令",
+            "关键约定",
+            "验证流程",
+            "提交与发布",
             "skills/",
             "validate_plugin.py",
             "不得自动 commit、push 或更新本地 Plugin",
@@ -134,6 +135,7 @@ class ValidatePluginTests(unittest.TestCase):
             "## 完成后的发布确认",
             "claude plugin marketplace update build-goals",
             "codex plugin marketplace upgrade build-goals --json",
+            "所有 Skill 仅允许显式调用",
         ):
             with self.subTest(excluded=excluded):
                 self.assertNotIn(excluded, instructions)
@@ -203,7 +205,7 @@ class ValidatePluginTests(unittest.TestCase):
         self.assertEqual(
             claude_manifest["version"], marketplace["plugins"][0]["version"]
         )
-        self.assertEqual(claude_manifest["version"], "1.5.0")
+        self.assertEqual(claude_manifest["version"], "1.6.0")
 
     def test_claude_marketplace_manifest_is_allowed(self) -> None:
         with tempfile.TemporaryDirectory() as temp:

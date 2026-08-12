@@ -250,6 +250,46 @@ class ValidateSkillTests(unittest.TestCase):
             skill_md,
         )
 
+    def test_shipped_user_only_skills_do_not_repeat_invocation_policy(self) -> None:
+        redundant_phrases = (
+            "用户明确调用",
+            "普通请求不得自动触发",
+            "普通问答、评审或实现请求不得自动触发",
+            "无法确认是否为显式调用",
+            "显式调用只授权",
+        )
+
+        for skill_md in sorted(REPO_ROOT.glob("skills/*/SKILL.md")):
+            text = skill_md.read_text(encoding="utf-8")
+            self.assertIn("disable-model-invocation: true", text)
+            for phrase in redundant_phrases:
+                with self.subTest(skill=skill_md.parent.name, phrase=phrase):
+                    self.assertNotIn(phrase, text)
+
+    def test_build_skill_defines_conditional_invocation_copy_rules(self) -> None:
+        quality = REPO_ROOT.joinpath(
+            "skills", "build-skill", "rules", "quality-standard.md"
+        ).read_text(encoding="utf-8")
+
+        self.assertIn("仅限用户调用的 Skill", quality)
+        self.assertIn("不在正文重复说明调用权限", quality)
+        self.assertIn("允许模型调用的 Skill", quality)
+        self.assertIn("`description` 或 `when_to_use`", quality)
+        self.assertIn("触发条件、排除条件", quality)
+
+    def test_behavior_changed_skill_versions_are_updated(self) -> None:
+        expected = {
+            "build-agents-md": 'version: "1.1.0"',
+            "build-skill": 'version: "1.3.0"',
+        }
+
+        for name, version_line in expected.items():
+            with self.subTest(skill=name):
+                text = REPO_ROOT.joinpath("skills", name, "SKILL.md").read_text(
+                    encoding="utf-8"
+                )
+                self.assertIn(version_line, text)
+
 
 if __name__ == "__main__":
     unittest.main()

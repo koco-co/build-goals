@@ -18,14 +18,14 @@
 - 本地加载：`claude --plugin-dir <plugin-root>`；
 - Marketplace 安装：`claude plugin marketplace add <owner>/<repo>@<ref>`，再执行 `claude plugin install <plugin-name>@<marketplace-name>`；
 - 官方校验：`claude plugin validate <plugin-root> --strict`；
-- 仅限显式调用的 Skill 使用 `disable-model-invocation: true`。
+- 仅限用户调用的 Skill 使用 `disable-model-invocation: true`；允许模型调用时不设置该字段，并在 `description` 或 `when_to_use` 中写清触发条件和排除条件。
 
 ## Codex
 
 - Manifest：`.codex-plugin/plugin.json`；
 - Skills：Plugin 根目录 `skills/`；
 - 调用：`$<skill-name>`；
-- 调用策略：`agents/openai.yaml` 中 `allow_implicit_invocation: false`；
+- 调用权限：仅限用户调用时，在 `agents/openai.yaml` 中设置 `allow_implicit_invocation: false`；允许模型调用时使用默认值或设为 `true`，并写清触发条件和排除条件；
 - 仓库 Marketplace：`.agents/plugins/marketplace.json`；
 - Manifest 组件路径以 `./` 开头，并相对 Plugin 根目录解析。
 

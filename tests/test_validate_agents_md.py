@@ -243,14 +243,53 @@ class BuildAgentsMdContractTests(unittest.TestCase):
 
         self.assertIn("disable-model-invocation: true", skill_md)
         self.assertIn("整体重构", contract)
-        self.assertIn("完整替换预览", contract)
-        self.assertIn("项目特有信息准入", contract)
+        self.assertIn("完整内容预览", contract)
+        self.assertIn("内容取舍原则", contract)
+        self.assertIn("何时添加子目录指令", contract)
+        self.assertIn("命令验证状态", contract)
         self.assertIn("嵌套 `AGENTS.md`", contract)
         self.assertIn("CLAUDE.md", contract)
         self.assertIn("@AGENTS.md", contract)
         self.assertIn("来源已确认、运行未验证", contract)
         self.assertIn("不得在用户确认预览前写入", contract)
         self.assertIn("不得创建项目级 `docs/`", contract)
+
+        for awkward in (
+            "完整替换预览",
+            "项目特有信息准入",
+            "嵌套准入",
+            "项目事实集",
+            "完成门槛",
+        ):
+            with self.subTest(awkward=awkward):
+                self.assertNotIn(awkward, contract)
+
+    def test_templates_and_examples_use_natural_section_names(self) -> None:
+        authored_content = "\n".join(
+            path.read_text(encoding="utf-8")
+            for directory in ("templates", "examples")
+            for path in sorted(SKILL_DIR.joinpath(directory).glob("*.md"))
+        )
+
+        for heading in (
+            "## 项目概览",
+            "## 仓库结构",
+            "## 常用命令",
+            "## 关键约定",
+            "## 验证流程",
+        ):
+            with self.subTest(heading=heading):
+                self.assertIn(heading, authored_content)
+        for old_heading in (
+            "## 项目定位",
+            "## 工作地图",
+            "## 关键命令",
+            "## 项目不变量",
+            "## 变更与验证",
+            "## 交付边界",
+        ):
+            with self.subTest(old_heading=old_heading):
+                self.assertNotIn(old_heading, authored_content)
 
     def test_skill_has_three_distinct_examples(self) -> None:
         expected = {

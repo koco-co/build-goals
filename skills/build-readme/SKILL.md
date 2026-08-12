@@ -1,6 +1,6 @@
 ---
 name: build-readme
-description: 新建或更新项目 README.md；先完整探索仓库并提交写入预览，确认后生成可验证的 GitHub 风格文档、图表与可选插图。
+description: 新建或更新项目 README.md；先完整了解仓库并提供修改预览，确认后生成可验证的 GitHub 风格文档、图表与可选插图。
 compatibility: 当前适配 Claude Code 与 Codex；运行内置校验器需要 Python 3.9+。
 disable-model-invocation: true
 metadata:
@@ -27,7 +27,7 @@ metadata:
    - 读取现有 README、代码入口、Manifest、包配置、CLI、测试、CI、文档、许可证和资源目录。
    - 完成条件：功能、安装、使用、验证、限制和现有文档体系均有仓库证据。
 
-2. 提交写入预览
+2. 提供修改预览
    - 完整读取 `workflows/§02-preview.md`。
    - 使用 `templates/readme-preview.template.md` 列出内容、视觉组件、同步文件、外部动作和验收方式。
    - 完成条件：用户能够在任何写入发生前判断 README 将包含什么并明确确认。
@@ -35,12 +35,12 @@ metadata:
 3. 编写或更新
    - 仅在用户确认后完整读取 `workflows/§03-authoring.md`、`rules/github-style.md` 和 `rules/evidence-and-content.md`。
    - 需要输出粒度参考时读取 `examples/readme.example.md`，不得复制示例中的项目事实。
-   - 完成条件：确认范围内的 README 与资源全部落地，现有真实内容得到保留或有理由地重组。
+   - 完成条件：确认范围内的 README 与资源已完成写入，现有真实内容得到保留或有理由地重组。
 
 4. 验证
    - 完整读取 `workflows/§04-validation.md` 并运行 `scripts/validate_readme.py`。
    - 再使用 `checklists/semantic-acceptance.md` 检查内容真实性、可读性和视觉必要性。
-   - 完成条件：机械检查、项目检查、远程或渲染检查及未验证项分别记录。
+   - 完成条件：静态检查、项目检查、远程或渲染检查及未验证内容分别记录。
 
 5. 交付
    - 完整读取 `workflows/§05-delivery.md`。

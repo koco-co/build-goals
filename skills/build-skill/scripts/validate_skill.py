@@ -641,7 +641,7 @@ def validate_openai_adapter(
                 "error",
                 "OPENAI_ADAPTER_REQUIRED",
                 adapter,
-                "双平台显式调用 Skill 必须提供 agents/openai.yaml。",
+                "双平台仅限用户调用的 Skill 必须提供 agents/openai.yaml。",
                 skill_dir,
             )
         return
@@ -686,7 +686,7 @@ def validate_openai_adapter(
             "error",
             "MANUAL_POLICY_MISMATCH",
             adapter,
-            "Claude Code 已设置仅显式调用时，Codex 也必须设置 allow_implicit_invocation: false。",
+            "Claude Code 已设置仅限用户调用时，Codex 也必须设置 allow_implicit_invocation: false。",
             skill_dir,
         )
 

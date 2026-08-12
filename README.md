@@ -21,7 +21,6 @@
 
 - 当前适配 <b>Claude Code</b> 与 <b>Codex</b>。
 - 其他 <b>Coding Agent</b> 尚未声明兼容；新增平台前会先核对真实能力与契约。
-- 所有 <b>Skill</b> 仅限用户显式调用，普通提示词润色、一般编码和文档任务不会自动进入这些工作流。
 
 <a id="capabilities"></a>
 
@@ -42,9 +41,9 @@
 
 <p><code>vibe-coding</code> 是端到端软件交付总控：它可以实现 <code>build-prd</code> 的确认产物，也可以审查并迁移已有低质量项目。架构方案和任务列表分别经过用户确认后，才会搭建脚手架、组织 <b>TDD</b> 功能切片、按依赖使用多 <b>Agent</b> 与 <b>Git worktrees</b>、创建原子提交，并完成单元、集成、<b>E2E</b>、条件式视觉/交互、安全和正常测试数据验收。</p>
 
-<p><code>build-readme</code> 会先探索代码、命令、测试、<b>CI</b>、文档和资源，提交具体写入预览；用户确认后才创建或更新 <b>README</b>，并分别报告机械检查、<b>GitHub</b> 渲染和未验证项。</p>
+<p><code>build-readme</code> 会先了解代码、命令、测试、<b>CI</b>、文档和资源并提供具体修改预览；用户确认后才创建或更新 <b>README</b>，并分别报告静态检查、<b>GitHub</b> 渲染和未验证内容。</p>
 
-<p><code>build-agents-md</code> 会从仓库证据筛选项目特有指令，按应用、库、<b>CLI</b> 或 <b>Monorepo</b> 自适应组织根级与嵌套 <code>AGENTS.md</code>；用户确认完整替换预览后，才以同目录 <code>CLAUDE.md</code> 相对符号链接建立双平台单一来源。</p>
+<p><code>build-agents-md</code> 会根据仓库证据筛选项目特有指令，并按应用、库、<b>CLI</b> 或 <b>Monorepo</b> 的实际结构组织根目录和子目录 <code>AGENTS.md</code>；用户确认完整内容预览后，才创建同目录 <code>CLAUDE.md</code> 相对符号链接，供两个平台共用正文。</p>
 
 <a id="workflow"></a>
 
@@ -80,7 +79,7 @@ flowchart LR
 - 单一规范源：共享能力使用仓库内相对软链接，不复制多份相同文件。
 - 确定性优先：已有 <b>CLI</b> → 脚本 → 模板 → <b>Few-shot</b> → 规则 → 提示词。
 - 渐进式读取：主 <code>SKILL.md</code> 只保留路由和主流程，复杂内容按需读取。
-- 验证可复现：机械检查、语义验收与真实平台测试分别记录。
+- 验证可复现：静态检查、内容审查与真实平台测试分别记录。
 - 平台差异隔离：<b>Claude Code</b> 与 <b>Codex</b> 的 <b>Manifest</b>、调用策略和平台扩展分别配置。
 
 <a id="structure"></a>

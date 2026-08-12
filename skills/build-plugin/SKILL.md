@@ -1,7 +1,7 @@
 ---
 name: build-plugin
 description: 创建或改造 Claude Code、Codex 等 Agent Plugin，组织 Skills、Agents、Hooks、MCP、UI 与发布配置；Plugin 中的新建或升级 Skill 必须遵循 build-skill 的同一规范。
-compatibility: 目前仅适配 Claude Code 与 Codex；机械校验需 Python 3.9+。
+compatibility: 目前仅适配 Claude Code 与 Codex；静态校验需 Python 3.9+。
 disable-model-invocation: true
 metadata:
   author: koco-co
@@ -14,13 +14,12 @@ metadata:
 
 ## Routing
 
-- 用户明确调用 `build-plugin` 并要求从零构建 Plugin 时，执行“新建 Plugin”分支。
+- 从零构建 Plugin 时，执行“新建 Plugin”分支。
 - 用户提供已有 Plugin 并要求完善、修复或升级时，执行“审查与升级”分支。
 - 用户要求把现有 Skills、Hooks、Agents 或配置仓库改造成 Plugin 时，执行“仓库迁移”分支。
 - 用户要求同时支持 Claude Code 与 Codex 时，执行“双平台 Plugin”分支，核心组件只维护一份，Manifest 与平台适配分别管理。
-- Plugin 需要新建或升级 Skill 时，转交 `build-skill`；平台不支持 Skill 间受控委派时，输出明确交接内容并要求用户显式调用。
+- Plugin 需要新建或升级 Skill 时，转交 `build-skill`；平台不支持 Skill 间受控委派时，生成完整交接提示，由用户继续调用对应 Skill。
 - 用户只要求编写单个 Skill 且没有插件打包、安装或分发需求时，转交 `build-skill`。
-- 无法确认是否为显式调用时，不推断触发；要求用户明确调用 `build-plugin`。
 
 ## Steps
 
@@ -62,15 +61,15 @@ metadata:
    - 双平台共用内容只维护一份；重复使用的仓库内文件使用相对软链接，链接目标必须留在 Plugin 根目录内。
    - Claude Code 配置写入 `.claude-plugin/`，Codex 配置写入 `.codex-plugin/`；其他组件位于 Plugin 根目录。
    - 确定性转换与校验交给脚本，事件驱动行为交给 Hooks，外部工具和数据接入交给 MCP。
-   - 完成条件：已确认组件全部落地，路径闭合，权限最小化，没有未经同意的外部副作用。
+   - 完成条件：已确认组件全部完成，文件引用有效，权限保持最小化，没有未经同意的外部副作用。
 
 6. 验证
    - 完整读取 `workflows/§06-validation.md`。
    - 运行 `scripts/validate_plugin.py`，再运行目标平台官方校验和真实安装或本地加载测试。
-   - 使用 `checklists/plugin-design-review.md` 和 `checklists/plugin-semantic-acceptance.md` 完成语义与场景验收。
-   - 至少覆盖 Manifest、组件发现、显式调用、负向不触发、软链接、安装、更新、失败路径和平台差异。
+   - 使用 `checklists/plugin-design-review.md` 和 `checklists/plugin-semantic-acceptance.md` 完成内容与场景审查。
+   - 至少覆盖 Manifest、组件发现、目标 Skill 的调用策略、软链接、安装、更新、失败路径和平台差异。
    - 无法运行的平台必须标为“未完成真实客户端验证”，不得描述为已通过。
-   - 完成条件：机械检查通过，关键场景通过，未验证与阻塞项明确。
+   - 完成条件：静态检查和关键场景均通过，未验证内容和无法继续的原因均已说明。
 
 7. 交付、请求发布确认并停止
    - 完整读取 `workflows/§07-delivery.md`。
@@ -92,7 +91,7 @@ metadata:
 - Skill 子任务及其 `build-skill` 验收结果；
 - 软链接清单及目标；
 - 实际运行的命令、结果、失败修复记录；
-- 已验证、未验证和阻塞项；
+- 已验证、未验证，以及无法完成的内容和原因；
 - 版本、Marketplace 或发布状态；
 - 真实适用的交付动作及用户授权状态；
 - 提问后停止。

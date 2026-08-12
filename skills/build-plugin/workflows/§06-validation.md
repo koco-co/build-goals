@@ -1,6 +1,6 @@
 # Plugin 验证
 
-## Phase 1：仓库级机械检查
+## Phase 1：仓库级静态检查
 
 运行：
 
@@ -27,15 +27,15 @@ claude plugin validate <plugin-root> --strict
 claude --plugin-dir <plugin-root>
 ```
 
-进入后验证命名空间调用、负向不触发和 `/reload-plugins`。
+进入后验证命名空间调用、目标 Skill 的调用权限和 `/reload-plugins`。
 
 Codex：
 
 - 验证 `.codex-plugin/plugin.json`；
 - 验证 Marketplace 能解析并列出 Plugin；
 - 在支持 Plugin 的客户端完成安装；
-- 显式调用每个 Skill；
-- 检查 `allow_implicit_invocation: false`。
+- 按每个 Skill 的设计验证用户调用与模型调用权限；
+- 检查 `agents/openai.yaml` 中的调用配置。
 
 ## Phase 3：场景验收
 
@@ -48,9 +48,9 @@ Codex：
 5. Skill 委派；
 6. Manifest 路径错误；
 7. 失效或越界软链接；
-8. 用户确认门禁；
+8. 用户确认步骤；
 9. 安装、更新和失败回滚；
-10. 未显式调用时不进入构建 Skill。
+10. 每个 Skill 的实际调用行为与平台配置一致。
 
 ## Phase 4：结果分类
 
@@ -59,7 +59,7 @@ Codex：
 - 已验证；
 - 静态检查通过但未真实运行；
 - 未验证；
-- 阻塞；
+- 无法完成的内容和原因；
 - 失败后已修复并复验。
 
-完成条件：所有机械检查通过，关键路径有实际结果，未运行的平台没有被描述为已通过。
+完成条件：所有静态检查通过，关键路径有实际结果，未运行的平台没有被描述为已通过。
