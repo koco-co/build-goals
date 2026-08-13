@@ -34,15 +34,10 @@ def _features(path: Path) -> set[str]:
 
 def _manifest_contract(snapshot: PackageSnapshot) -> dict[str, Any]:
     """Return source-owned manifest data without local import provenance."""
-
-    return {
-        key: value for key, value in snapshot.manifest.items() if key != "import"
-    }
+    return {key: value for key, value in snapshot.manifest.items() if key != "import"}
 
 
-def compare_snapshots(
-    source: PackageSnapshot, existing: PackageSnapshot | None
-) -> dict[str, Any]:
+def compare_snapshots(source: PackageSnapshot, existing: PackageSnapshot | None) -> dict[str, Any]:
     if existing is None:
         changed_files: list[str] = []
         removed_files: list[str] = []
@@ -54,9 +49,7 @@ def compare_snapshots(
         added_files = sorted(source_names - existing_names)
         removed_files = sorted(existing_names - source_names)
         changed_files = sorted(
-            name
-            for name in source_names & existing_names
-            if source.files[name] != existing.files[name]
+            name for name in source_names & existing_names if source.files[name] != existing.files[name]
         )
         manifest_changed = _manifest_contract(source) != _manifest_contract(existing)
         if manifest_changed:
@@ -64,9 +57,7 @@ def compare_snapshots(
             changed_files.sort()
 
     source_domains = {item.domain_id: item for item in source.domains}
-    existing_domains = (
-        {item.domain_id: item for item in existing.domains} if existing else {}
-    )
+    existing_domains = {item.domain_id: item for item in existing.domains} if existing else {}
     changed_domains: set[str] = set(source_domains) ^ set(existing_domains)
     for domain_id in set(source_domains) & set(existing_domains):
         if source_domains[domain_id] != existing_domains[domain_id]:
@@ -105,19 +96,24 @@ def compare_snapshots(
 def _record_import(package: Path, source: PackageSnapshot) -> None:
     manifest_path = package / MANIFEST_NAME
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    source_contract = source.manifest.get("source")
+    source_project = "unknown"
+    source_revision = "unknown"
+    if isinstance(source_contract, dict):
+        if isinstance(source_contract.get("project"), str) and source_contract["project"].strip():
+            source_project = source_contract["project"]
+        if isinstance(source_contract.get("revision"), str) and source_contract["revision"].strip():
+            source_revision = source_contract["revision"]
     manifest["import"] = {
-        "source": str(source.root.resolve()),
+        "source_project": source_project,
+        "source_revision": source_revision,
         "imported_at": datetime.now(timezone.utc).isoformat(),
         "source_manifest_sha256": sha256_file(source.root / MANIFEST_NAME),
     }
-    manifest_path.write_text(
-        json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
-    )
+    manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
-def _prepare_snapshot(
-    source: PackageSnapshot, docs: Path
-) -> tuple[Path, tempfile.TemporaryDirectory[str]]:
+def _prepare_snapshot(source: PackageSnapshot, docs: Path) -> tuple[Path, tempfile.TemporaryDirectory[str]]:
     holder = tempfile.TemporaryDirectory(prefix=".requirements-import-", dir=docs)
     staged = Path(holder.name) / "产品需求"
     shutil.copytree(source.root, staged, symlinks=True)
@@ -130,9 +126,7 @@ def _prepare_snapshot(
     return staged, holder
 
 
-def _write_snapshot(
-    source: PackageSnapshot, target_project: Path, *, replace: bool
-) -> None:
+def _write_snapshot(source: PackageSnapshot, target_project: Path, *, replace: bool) -> None:
     docs = target_project / "docs"
     docs.mkdir(parents=True, exist_ok=True)
     target = target_project / PACKAGE_DIR
@@ -172,17 +166,11 @@ def _print_human(payload: dict[str, Any]) -> None:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(
-        description="校验并将外部 docs/产品需求/ 复制为目标项目的本地快照。"
-    )
+    parser = argparse.ArgumentParser(description="校验并将外部 docs/产品需求/ 复制为目标项目的本地快照。")
     parser.add_argument("source", type=Path, help="来源项目或产品需求包路径")
     parser.add_argument("target_project", type=Path, help="目标项目根目录")
     parser.add_argument("--write", action="store_true", help="实际写入；默认只比较")
-    parser.add_argument(
-        "--replace",
-        action="store_true",
-        help="替换已有快照；仅在用户确认差异后与 --write 同时使用",
-    )
+    parser.add_argument("--replace", action="store_true", help="替换已有快照；仅在用户确认差异后与 --write 同时使用")
     parser.add_argument("--json", action="store_true", help="输出 JSON")
     return parser
 
@@ -194,10 +182,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     target_package = target_project / PACKAGE_DIR
     errors: list[dict[str, str]] = []
     if source is None:
-        errors.extend(
-            {"code": issue.code, "message": issue.message}
-            for issue in source_report.issues
-        )
+        errors.extend({"code": issue.code, "message": issue.message} for issue in source_report.issues)
         payload: dict[str, Any] = {
             "source": str(args.source.expanduser().resolve(strict=False)),
             "target": str(target_package),
@@ -220,10 +205,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             errors.append(
                 {
                     "code": "TARGET_INVALID",
-                    "message": "; ".join(
-                        f"{item.code}: {item.message}"
-                        for item in existing_report.issues
-                    ),
+                    "message": "; ".join(f"{item.code}: {item.message}" for item in existing_report.issues),
                 }
             )
     changes = compare_snapshots(source, existing)
@@ -232,9 +214,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         errors.append({"code": "REPLACE_REQUIRES_WRITE", "message": "--replace 必须与 --write 同时使用。"})
     elif args.write and target_package.exists() and not args.replace and changes["has_changes"]:
         errors.append({"code": "TARGET_EXISTS", "message": "目标已有不同需求快照；必须先确认差异再显式替换。"})
-    elif args.write and not errors and not (
-        existing is not None and not changes["has_changes"]
-    ):
+    elif args.write and not errors and not (existing is not None and not changes["has_changes"]):
         try:
             _write_snapshot(source, target_project, replace=args.replace)
             written = True

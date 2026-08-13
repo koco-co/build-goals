@@ -72,10 +72,16 @@ FEATURE_RE = re.compile(r"(?m)^###\s+(F-\d{3})\s+(.+?)\s*$")
 AC_RE = re.compile(r"`(F-\d{3}-AC-\d{2})`")
 SAMPLE_REF_RE = re.compile(r"`([A-Z][A-Z0-9-]*SAMPLE[A-Z0-9-]*|SAMPLE-[A-Z0-9-]+)`")
 DATE_RE = re.compile(r"\d{4}-\d{2}-\d{2}")
-SEMVER_RE = re.compile(r"0|[1-9]\d*\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)")
+SEMVER_RE = re.compile(
+    r"^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)"
+    r"(?:-((?:0|[1-9]\d*|\d*[A-Za-z-][0-9A-Za-z-]*)"
+    r"(?:\.(?:0|[1-9]\d*|\d*[A-Za-z-][0-9A-Za-z-]*))*))?"
+    r"(?:\+([0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*))?$"
+)
 PACKAGE_ID_RE = re.compile(r"[a-z0-9](?:[a-z0-9-]{0,62}[a-z0-9])?")
 SHA256_RE = re.compile(r"[0-9a-f]{64}")
 URL_RE = re.compile(r"https://[^\s|]+")
+WINDOWS_ABSOLUTE_RE = re.compile(r"^[A-Za-z]:[\\/]")
 
 UNRESOLVED_RE = re.compile(
     r"\b(?:TODO|TBD|TBC|FIXME)\b"
@@ -159,27 +165,16 @@ def _is_legacy_prd(path: Path) -> bool:
 
 
 def resolve_package_root(target: Path) -> tuple[Path, list[Issue]]:
-    """Resolve a project root, package root, or the package's PRD entry file."""
-
     expanded = target.expanduser()
     issues: list[Issue] = []
 
     def reject_link(path: Path) -> tuple[Path, list[Issue]]:
-        add_issue(
-            issues,
-            "NON_REGULAR_FILE",
-            "docs/产品需求/ 必须是目标项目内的真实目录，不能是符号链接。",
-        )
+        add_issue(issues, "NON_REGULAR_FILE", "docs/产品需求/ 必须是目标项目内的真实目录，不能是符号链接。")
         return path.absolute(), issues
 
     if _is_legacy_prd(expanded):
-        add_issue(
-            issues,
-            "LEGACY_OUTPUT_PATH",
-            "旧路径 docs/PRD需求文档.md 已停用；请迁移到 docs/产品需求/。",
-        )
+        add_issue(issues, "LEGACY_OUTPUT_PATH", "旧路径 docs/PRD需求文档.md 已停用；请迁移到 docs/产品需求/。")
         return expanded.resolve(strict=False), issues
-
     if expanded.name == PRD_NAME and expanded.parent.name == "产品需求":
         if expanded.parent.is_symlink():
             return reject_link(expanded.parent)
@@ -193,12 +188,7 @@ def resolve_package_root(target: Path) -> tuple[Path, list[Issue]]:
         return reject_link(candidate)
     if candidate.is_dir() or (expanded.is_dir() and (expanded / "docs").exists()):
         return candidate.resolve(strict=False), issues
-
-    add_issue(
-        issues,
-        "OUTPUT_PATH",
-        "目标必须是项目根目录、docs/产品需求/，或其中的 PRD需求文档.md。",
-    )
+    add_issue(issues, "OUTPUT_PATH", "目标必须是项目根目录、docs/产品需求/，或其中的 PRD需求文档.md。")
     return expanded.resolve(strict=False), issues
 
 
@@ -210,15 +200,8 @@ def sha256_file(path: Path) -> str:
     return digest.hexdigest()
 
 
-def read_json_yaml(
-    path: Path,
-    package: Path,
-    issues: list[Issue],
-    *,
-    code: str,
-) -> Optional[dict[str, Any]]:
+def read_json_yaml(path: Path, package: Path, issues: list[Issue], *, code: str) -> Optional[dict[str, Any]]:
     """Read the dependency-free JSON representation accepted by YAML 1.2."""
-
     if path.is_symlink() or not path.is_file():
         add_issue(
             issues,
@@ -229,11 +212,7 @@ def read_json_yaml(
     try:
         value = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, UnicodeError, json.JSONDecodeError) as exc:
-        add_issue(
-            issues,
-            code,
-            f"{_display(package, path)} 必须使用 YAML 1.2 兼容的 JSON 对象格式：{exc}",
-        )
+        add_issue(issues, code, f"{_display(package, path)} 必须使用 YAML 1.2 兼容的 JSON 对象格式：{exc}")
         return None
     if not isinstance(value, dict):
         add_issue(issues, code, f"{_display(package, path)} 顶层必须是对象。")
@@ -258,6 +237,10 @@ def _nonempty_list(value: Any) -> bool:
     return isinstance(value, list) and bool(value) and all(_nonempty_string(x) for x in value)
 
 
+def _source_is_portable(value: str) -> bool:
+    return not Path(value).is_absolute() and WINDOWS_ABSOLUTE_RE.match(value) is None
+
+
 def _validate_manifest(
     manifest: dict[str, Any], package: Path, issues: list[Issue]
 ) -> tuple[list[DomainContract], dict[str, str]]:
@@ -269,7 +252,7 @@ def _validate_manifest(
         add_issue(issues, "PACKAGE_ID", "package_id 必须是稳定的小写连字符标识。")
     package_version = manifest.get("package_version")
     if not isinstance(package_version, str) or SEMVER_RE.fullmatch(package_version) is None:
-        add_issue(issues, "PACKAGE_VERSION", "package_version 必须使用 SemVer。")
+        add_issue(issues, "PACKAGE_VERSION", "package_version 必须使用完整 SemVer，例如 0.1.0、1.2.3-rc.1 或 1.2.3+build.5。")
     if manifest.get("status") != "confirmed":
         add_issue(issues, "PACKAGE_STATUS", "只有 status=confirmed 的需求包可以实施。")
 
@@ -285,10 +268,10 @@ def _validate_manifest(
         add_issue(issues, "GENERATED_AT", "generated_at 必须是 YYYY-MM-DD 日期。")
 
     source = manifest.get("source")
-    if not isinstance(source, dict) or not all(
-        _nonempty_string(source.get(key)) for key in ("project", "revision")
-    ):
+    if not isinstance(source, dict) or not all(_nonempty_string(source.get(key)) for key in ("project", "revision")):
         add_issue(issues, "SOURCE", "source 必须记录 project 和 revision。")
+    elif not _source_is_portable(str(source["project"])):
+        add_issue(issues, "SOURCE_PORTABILITY", "source.project 必须使用仓库标识、仓库 URL 或产品想法标识，不能保存宿主机绝对路径。")
 
     domains_raw = manifest.get("domains")
     if not isinstance(domains_raw, list) or not domains_raw:
@@ -325,25 +308,13 @@ def _validate_manifest(
             add_issue(issues, "DOMAIN_EXAMPLES_PATH", f"{domain_id} 的样例文件必须位于 行为样例/*.yaml。")
             continue
         if requirements.stem != str(name) or examples.stem != str(name):
-            add_issue(
-                issues,
-                "DOMAIN_FILE_NAME",
-                f"{domain_id} 的需求与行为样例文件名必须都与功能域名称 {name!r} 一致。",
-            )
+            add_issue(issues, "DOMAIN_FILE_NAME", f"{domain_id} 的需求与行为样例文件名必须都与功能域名称 {name!r} 一致。")
         if not isinstance(dependencies, list) or not all(isinstance(x, str) for x in dependencies):
             add_issue(issues, "DOMAIN_DEPENDENCY", f"{domain_id}.dependencies 必须是字符串数组。")
             dependencies = []
         if domain_id in dependencies:
             add_issue(issues, "DOMAIN_DEPENDENCY", f"{domain_id} 不能依赖自身。")
-        domains.append(
-            DomainContract(
-                domain_id,
-                str(name),
-                requirements,
-                examples,
-                tuple(str(x) for x in dependencies),
-            )
-        )
+        domains.append(DomainContract(domain_id, str(name), requirements, examples, tuple(str(x) for x in dependencies)))
 
     external_raw = manifest.get("external_dependencies", [])
     external: dict[str, str] = {}
@@ -367,11 +338,7 @@ def _validate_manifest(
     for domain in domains:
         for dependency in domain.dependencies:
             if dependency not in domain_ids and dependency not in external:
-                add_issue(
-                    issues,
-                    "DOMAIN_DEPENDENCY",
-                    f"{domain.domain_id} 的依赖 {dependency} 既不在包内，也没有外部契约。",
-                )
+                add_issue(issues, "DOMAIN_DEPENDENCY", f"{domain.domain_id} 的依赖 {dependency} 既不在包内，也没有外部契约。")
 
     graph = {item.domain_id: [x for x in item.dependencies if x in domain_ids] for item in domains}
     visiting: set[str] = set()
@@ -446,9 +413,7 @@ def _walk_package_files(package: Path, issues: list[Issue]) -> set[str]:
     return actual
 
 
-def _validate_declared_files(
-    package: Path, declared: dict[str, str], actual: set[str], issues: list[Issue]
-) -> None:
+def _validate_declared_files(package: Path, declared: dict[str, str], actual: set[str], issues: list[Issue]) -> None:
     for extra in sorted(actual - set(declared)):
         add_issue(issues, "UNDECLARED_FILE", f"需求包存在未声明文件：{extra}。")
     for missing in sorted(set(declared) - actual):
@@ -481,9 +446,7 @@ def _read_markdown(path: Path, package: Path, issues: list[Issue]) -> Optional[s
     return text
 
 
-def _validate_heading_order(
-    text: str, headings: Iterable[str], label: str, issues: list[Issue]
-) -> None:
+def _validate_heading_order(text: str, headings: Iterable[str], label: str, issues: list[Issue]) -> None:
     positions: list[int] = []
     headings_tuple = tuple(headings)
     for heading in headings_tuple:
@@ -500,36 +463,15 @@ def _validate_heading_order(
 
 def _validate_prohibited(text: str, label: str, issues: list[Issue]) -> None:
     for match in UNRESOLVED_RE.finditer(text):
-        add_issue(
-            issues,
-            "UNRESOLVED_CONTENT",
-            f"{label} 发现未确定内容：{match.group(0)!r}。",
-            text=text,
-            offset=match.start(),
-        )
+        add_issue(issues, "UNRESOLVED_CONTENT", f"{label} 发现未确定内容：{match.group(0)!r}。", text=text, offset=match.start())
     for match in PLACEHOLDER_RE.finditer(text):
-        add_issue(
-            issues,
-            "PLACEHOLDER_CONTENT",
-            f"{label} 存在模板占位内容。",
-            text=text,
-            offset=match.start(),
-        )
+        add_issue(issues, "PLACEHOLDER_CONTENT", f"{label} 存在模板占位内容。", text=text, offset=match.start())
     for match in INTERNAL_IMPLEMENTATION_HEADING_RE.finditer(text):
-        add_issue(
-            issues,
-            "INTERNAL_IMPLEMENTATION_SECTION",
-            f"{label} 不得包含内部实现章节：{match.group(0).strip()}。",
-            text=text,
-            offset=match.start(),
-        )
+        add_issue(issues, "INTERNAL_IMPLEMENTATION_SECTION", f"{label} 不得包含内部实现章节：{match.group(0).strip()}。", text=text, offset=match.start())
 
 
 def _has_columns(section: str, columns: Iterable[str]) -> bool:
-    return any(
-        line.lstrip().startswith("|") and all(column in line for column in columns)
-        for line in section.splitlines()
-    )
+    return any(line.lstrip().startswith("|") and all(column in line for column in columns) for line in section.splitlines())
 
 
 def _subsection(section: str, heading: str) -> str:
@@ -541,9 +483,7 @@ def _subsection(section: str, heading: str) -> str:
     return tail[: next_heading.start()] if next_heading else tail
 
 
-def _validate_root_prd(
-    text: str, manifest: dict[str, Any], package: Path, issues: list[Issue]
-) -> None:
+def _validate_root_prd(text: str, manifest: dict[str, Any], package: Path, issues: list[Issue]) -> None:
     label = PRD_NAME
     if len(re.findall(r"(?m)^# PRD需求文档\s*$", text)) != 1:
         add_issue(issues, "TITLE", "PRD需求文档.md 必须有唯一主标题。")
@@ -555,9 +495,7 @@ def _validate_root_prd(
         "需求包类型": "完整" if manifest.get("package_type") == "full" else "阶段",
     }
     for key, expected in metadata.items():
-        if not isinstance(expected, str) or not re.search(
-            rf"(?m)^- {re.escape(key)}：{re.escape(expected)}\s*$", text
-        ):
+        if not isinstance(expected, str) or not re.search(rf"(?m)^- {re.escape(key)}：{re.escape(expected)}\s*$", text):
             add_issue(issues, "PACKAGE_METADATA", f"PRD 总入口的 {key} 与清单不一致。")
     _validate_heading_order(text, ROOT_HEADINGS, label, issues)
     _validate_prohibited(text, label, issues)
@@ -682,9 +620,11 @@ def _validate_samples(
             add_issue(issues, "SAMPLE_KIND", f"{sample_id} 的 kind 无效：{kind!r}。")
         else:
             kinds_by_feature[feature_id].add(str(kind))
-        for key in ("user_input", "expected_output"):
-            if not _nonempty_string(sample.get(key)):
-                add_issue(issues, "SAMPLE_FIELD", f"{sample_id} 缺少有效 {key}。")
+
+        if "user_input" not in sample:
+            add_issue(issues, "SAMPLE_FIELD", f"{sample_id} 缺少 user_input；该字段必须保存真实输入值，空字符串或 null 等边界值也应原样保留。")
+        if not _nonempty_string(sample.get("expected_output")):
+            add_issue(issues, "SAMPLE_FIELD", f"{sample_id} 缺少有效 expected_output。")
         for key, code in (
             ("starting_state", "SAMPLE_STARTING_STATE"),
             ("expected_behavior", "SAMPLE_BEHAVIOR"),
@@ -694,14 +634,8 @@ def _validate_samples(
             if not _nonempty_list(sample.get(key)):
                 add_issue(issues, code, f"{sample_id} 的 {key} 必须是非空字符串数组。")
         output_contract = sample.get("output_contract")
-        if not isinstance(output_contract, dict) or not all(
-            _nonempty_list(output_contract.get(key)) for key in ("exact", "semantic", "runtime")
-        ):
-            add_issue(
-                issues,
-                "OUTPUT_CONTRACT",
-                f"{sample_id} 必须分别声明 exact、semantic 和 runtime 输出约束。",
-            )
+        if not isinstance(output_contract, dict) or not all(_nonempty_list(output_contract.get(key)) for key in ("exact", "semantic", "runtime")):
+            add_issue(issues, "OUTPUT_CONTRACT", f"{sample_id} 必须分别声明 exact、semantic 和 runtime 输出约束。")
         if sample.get("sensitive_data") not in {"none", "sanitized"}:
             add_issue(issues, "SENSITIVE_DATA", f"{sample_id} 必须声明敏感数据为空或已脱敏。")
 
@@ -716,11 +650,7 @@ def _validate_samples(
         referenced = refs_by_feature.get(feature, set())
         actual = sample_ids_by_feature.get(feature, set())
         if referenced != actual:
-            add_issue(
-                issues,
-                "SAMPLE_REFERENCE",
-                f"{feature} 的文档引用与样例文件不一致：引用={sorted(referenced)}，实际={sorted(actual)}。",
-            )
+            add_issue(issues, "SAMPLE_REFERENCE", f"{feature} 的文档引用与样例文件不一致：引用={sorted(referenced)}，实际={sorted(actual)}。")
     return sample_ids_by_feature
 
 
@@ -793,11 +723,7 @@ def _validate_research(text: str, issues: list[Issue]) -> None:
         if valid:
             counts[source_type] += 1
     requirements = {"竞品": 2, "开源项目": 2, "官方规范": 1}
-    missing = [
-        f"{kind} {counts[kind]}/{minimum}"
-        for kind, minimum in requirements.items()
-        if counts[kind] < minimum
-    ]
+    missing = [f"{kind} {counts[kind]}/{minimum}" for kind, minimum in requirements.items() if counts[kind] < minimum]
     if missing:
         add_issue(issues, "RESEARCH_COVERAGE", "调研来源未达到最低覆盖：" + "，".join(missing) + "。")
 
@@ -828,22 +754,11 @@ def validate_requirement_package(target: Path) -> Report:
         domain_text = _read_markdown(package / domain.requirements, package, issues)
         if domain_text is None:
             continue
-        features, refs = _validate_domain_markdown(
-            domain_text, domain, global_features, global_acceptance, issues
-        )
-        sample_data = read_json_yaml(
-            package / domain.examples, package, issues, code="SAMPLE_FORMAT"
-        )
+        features, refs = _validate_domain_markdown(domain_text, domain, global_features, global_acceptance, issues)
+        sample_data = read_json_yaml(package / domain.examples, package, issues, code="SAMPLE_FORMAT")
         if sample_data is None:
             continue
-        per_feature = _validate_samples(
-            sample_data,
-            domain,
-            features,
-            refs,
-            global_samples,
-            issues,
-        )
+        per_feature = _validate_samples(sample_data, domain, features, refs, global_samples, issues)
         samples_by_domain[domain.domain_id] = set().union(*per_feature.values()) if per_feature else set()
 
     index = read_json_yaml(package / BEHAVIOR_INDEX, package, issues, code="BEHAVIOR_INDEX_FORMAT")
@@ -874,7 +789,6 @@ def load_validated_snapshot(target: Path) -> tuple[PackageSnapshot | None, Repor
 
 def validate_prd(path: Path) -> Report:
     """Compatibility alias for callers; validation now covers the complete package."""
-
     return validate_requirement_package(path)
 
 
@@ -889,14 +803,8 @@ def print_human(report: Report) -> None:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(
-        description="校验 docs/产品需求/ 下的完整或正式阶段需求包。"
-    )
-    parser.add_argument(
-        "target",
-        type=Path,
-        help="项目根目录、docs/产品需求/，或 docs/产品需求/PRD需求文档.md",
-    )
+    parser = argparse.ArgumentParser(description="校验 docs/产品需求/ 下的完整或正式阶段需求包。")
+    parser.add_argument("target", type=Path, help="项目根目录、docs/产品需求/，或 docs/产品需求/PRD需求文档.md")
     parser.add_argument("--strict", action="store_true", help="启用完整契约校验")
     parser.add_argument("--json", action="store_true", help="输出 JSON 报告")
     return parser

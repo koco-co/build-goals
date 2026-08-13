@@ -43,6 +43,8 @@ from .repository import (
 )
 from .traceability import validate_report_tasks, validate_tasks, validate_traceability
 
+MIGRATION_FINDINGS_PATH = Path("docs/架构迁移/审查发现.yaml")
+
 
 def _validate_document(
     text: str,
@@ -74,13 +76,18 @@ def _load_requirements(
     if snapshot is None:
         return None, None
 
-    source_parts = [
-        (snapshot.root / "PRD需求文档.md").read_text(encoding="utf-8")
-    ]
+    source_parts = [(snapshot.root / "PRD需求文档.md").read_text(encoding="utf-8")]
     source_parts.extend(
         (snapshot.root / domain.requirements).read_text(encoding="utf-8")
         for domain in snapshot.domains
     )
+    source_parts.extend(
+        (snapshot.root / domain.examples).read_text(encoding="utf-8")
+        for domain in snapshot.domains
+    )
+    behavior_index = snapshot.root / "行为样例" / "产品行为样例集.yaml"
+    if behavior_index.is_file():
+        source_parts.append(behavior_index.read_text(encoding="utf-8"))
     return snapshot, "\n\n".join(source_parts)
 
 
@@ -98,14 +105,7 @@ def _read_domain_documents(
         text = read_required(path, root, issues)
         if text is None:
             continue
-        _validate_document(
-            text,
-            path,
-            (f"# {title_prefix}{path.stem}", *headings),
-            status,
-            root,
-            issues,
-        )
+        _validate_document(text, path, (f"# {title_prefix}{path.stem}", *headings), status, root, issues)
         documents.append((path, text))
     return documents
 
@@ -143,9 +143,7 @@ def validate_project(
             root,
             issues,
         )
-        validate_route_metadata(
-            architecture_text, mode, architecture_path, root, issues
-        )
+        validate_route_metadata(architecture_text, mode, architecture_path, root, issues)
         validate_substantive_sections(
             architecture_text,
             ("## 目标架构", "## 测试与质量策略", "## 安全与配置"),
@@ -159,7 +157,7 @@ def validate_project(
         domain_names = [domain.name for domain in snapshot.domains]
     else:
         domain_names = discover_domain_names(architecture_domain_dir, root, issues)
-    architecture_domains = _read_domain_documents(
+    _read_domain_documents(
         architecture_domain_dir,
         domain_names,
         "功能域架构：",
@@ -170,9 +168,8 @@ def validate_project(
     )
 
     if mode == "migration":
-        source_parts = [architecture_text] if architecture_text is not None else []
-        source_parts.extend(text for _path, text in architecture_domains)
-        source_text = "\n\n".join(source_parts) if source_parts else None
+        findings_path = root / MIGRATION_FINDINGS_PATH
+        source_text = read_required(findings_path, root, issues)
     else:
         source_text = requirement_source
 
@@ -183,9 +180,7 @@ def validate_project(
         plan_path = root / PLAN_PATH
         plan_text = read_required(plan_path, root, issues)
         if plan_text is not None:
-            _validate_document(
-                plan_text, plan_path, PLAN_HEADINGS, "已确认", root, issues
-            )
+            _validate_document(plan_text, plan_path, PLAN_HEADINGS, "已确认", root, issues)
             validate_substantive_sections(
                 plan_text,
                 ("## 配套 Skill 计划", "## 测试数据计划", "## 验收矩阵"),
@@ -206,9 +201,7 @@ def validate_project(
         domain_plan_text = "\n\n".join(text for _path, text in plan_domains)
         if domain_plan_text:
             task_path = plan_domains[0][0] if len(plan_domains) == 1 else root / PLAN_DOMAIN_DIR
-            tasks = validate_tasks(
-                domain_plan_text, task_path, root, issues, phase == "delivery"
-            )
+            tasks = validate_tasks(domain_plan_text, task_path, root, issues, phase == "delivery")
         trace_plan_text = domain_plan_text or None
         if source_text is not None and trace_plan_text:
             validate_traceability(
@@ -236,9 +229,7 @@ def validate_project(
         report_path = root / REPORT_PATH
         report_text = read_required(report_path, root, issues)
         if report_text is not None:
-            _validate_document(
-                report_text, report_path, REPORT_HEADINGS, "已完成", root, issues
-            )
+            _validate_document(report_text, report_path, REPORT_HEADINGS, "已完成", root, issues)
             validate_substantive_sections(
                 report_text,
                 (

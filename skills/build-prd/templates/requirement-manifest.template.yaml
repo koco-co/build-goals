@@ -6,8 +6,13 @@
   "package_type": "{{full-or-stage}}",
   "generated_at": "{{YYYY-MM-DD}}",
   "source": {
-    "project": "{{来源项目绝对路径或产品想法标识}}",
+    "project": "{{仓库标识、仓库 URL 或产品想法标识；不要写宿主机绝对路径}}",
     "revision": "{{commit-sha 或已确认输入版本}}"
+  },
+  "stage": {
+    "included_scope": "{{package_type=stage 时填写本阶段包含范围；full 时删除整个 stage 对象}}",
+    "deferred_scope": "{{package_type=stage 时填写明确延后范围}}",
+    "acceptance": "{{package_type=stage 时填写本阶段独立验收条件}}"
   },
   "domains": [
     {
