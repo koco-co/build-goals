@@ -33,12 +33,16 @@ class Report:
     def infos(self) -> list[Issue]:
         return [item for item in self.issues if item.severity == "info"]
 
-    def to_dict(self) -> dict[str, object]:
+    def failed(self, *, strict: bool = False) -> bool:
+        return bool(self.errors or (strict and self.warnings))
+
+    def to_dict(self, *, strict: bool = False) -> dict[str, object]:
         return {
             "project_root": self.project_root,
             "mode": self.mode,
             "phase": self.phase,
-            "status": "pass" if not self.errors else "fail",
+            "status": "fail" if self.failed(strict=strict) else "pass",
+            "strict": strict,
             "error_count": len(self.errors),
             "warning_count": len(self.warnings),
             "info_count": len(self.infos),

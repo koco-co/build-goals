@@ -11,21 +11,15 @@ from typing import Optional, Sequence
 from vibe_validation import Report, validate_project
 
 
-def print_human(report: Report) -> None:
+def print_human(report: Report, *, strict: bool = False) -> None:
     for item in report.issues:
         print(f"{item.severity.upper():7} {item.code:28} {item.path}: {item.message}")
-    if report.errors:
-        print(
-            f"FAIL: {len(report.errors)} error(s), {len(report.warnings)} warning(s), "
-            f"{len(report.infos)} info item(s) — "
-            f"{report.project_root}"
-        )
-    else:
-        print(
-            f"PASS: 0 error(s), {len(report.warnings)} warning(s), "
-            f"{len(report.infos)} info item(s) — "
-            f"{report.project_root}"
-        )
+    failed = report.failed(strict=strict)
+    prefix = "FAIL" if failed else "PASS"
+    print(
+        f"{prefix}: {len(report.errors)} error(s), {len(report.warnings)} warning(s), "
+        f"{len(report.infos)} info item(s) — {report.project_root}"
+    )
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -59,10 +53,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         require_clean=args.require_clean,
     )
     if args.json:
-        print(json.dumps(report.to_dict(), ensure_ascii=False, indent=2))
+        print(json.dumps(report.to_dict(strict=args.strict), ensure_ascii=False, indent=2))
     else:
-        print_human(report)
-    return int(bool(report.errors or (args.strict and report.warnings)))
+        print_human(report, strict=args.strict)
+    return int(report.failed(strict=args.strict))
 
 
 if __name__ == "__main__":

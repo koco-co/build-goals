@@ -68,7 +68,7 @@ DOMAIN_PRD = """# 功能域：任务管理
 
 ## 用户能力与旅程
 
-普通用户从任务页创建任务，在列表中确认其状态，并可将未完成任务标记为完成。
+普通用户从任务页进入创建流程，提交后查看任务状态并继续操作。
 
 ## 功能详细设计
 
@@ -134,192 +134,34 @@ DOMAIN_PRD = """# 功能域：任务管理
 
 - `F-001-AC-01` Given 用户位于任务页，When 输入“预约牙医”并点击“创建”，Then 列表顶部显示状态为“未完成”的“预约牙医”，并提示“任务已创建”。
 - `F-001-AC-02` Given 任务名称为空，When 用户点击“创建”，Then 显示“请输入任务名称”并聚焦输入框。
-
-### F-002 完成任务
-
-#### 作用与目标
-
-让用户把已完成的事项明确标记为完成，并在列表中看到最终状态。
-
-#### 适用角色、入口与前置条件
-
-普通用户从任务列表操作目标任务；目标任务必须已经存在。
-
-#### 用户输入契约
-
-| 输入项 | 提供者 | 必填 | 格式与范围 | 默认值 | 校验规则 | 正确示例 | 错误示例 |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| 目标任务 | 普通用户 | 是 | 已存在任务标识或可唯一识别名称 | 无 | 必须唯一定位任务 | 预约牙医 | 不存在的任务 |
-
-#### 用户交互与追问
-
-1. 用户在列表中选择任务并执行“完成”。
-2. 目标不明确时只追问需要完成哪一项任务。
-3. 操作完成后保留任务并更新状态，不从列表静默删除。
-
-#### 状态与提示文案
-
-| 状态 | 触发条件 | 最终文案 | 后续动作 |
-| --- | --- | --- | --- |
-| 完成成功 | 未完成任务更新成功 | “任务已完成” | 保持当前列表位置 |
-| 任务不存在 | 无法定位目标任务 | “未找到该任务” | 保留列表并允许重新选择 |
-
-#### 输出契约
-
-| 输出内容 | 呈现形式 | 触发条件 | 固定结构 | 语义要求 | 运行时可变内容 | 完整示例 |
-| --- | --- | --- | --- | --- | --- | --- |
-| 完成状态 | 列表项状态与提示 | 完成成功 | 原任务名称和“已完成”状态 | 明确任务已完成 | 完成时间允许变化 | 预约牙医 · 已完成 |
-
-#### 对外契约
-
-任务名称保持不变，完成状态对用户可见；内部持久化字段和事件实现不属于需求。
-
-#### 异常、边界与恢复
-
-重复完成已完成任务时保持已完成状态并给出幂等反馈；目标不存在时不得创建替代任务。
-
-#### 产品质量要求
-
-完成操作后 1 秒内显示更新后的状态或可执行的失败反馈。
-
-#### 设计依据
-
-完成操作直接作用于列表项，避免用户进入额外编辑页面。
-
-#### 行为样例
-
-- `SAMPLE-TASK-005`：完成已存在的未完成任务。
-- `SAMPLE-TASK-006`：未提供目标任务时追问。
-- `SAMPLE-TASK-007`：目标任务不存在。
-- `SAMPLE-TASK-008`：重复完成已完成任务的幂等边界。
-
-#### 验收标准
-
-- `F-002-AC-01` Given “预约牙医”状态为未完成，When 用户将其标记为完成，Then 原列表项显示“已完成”并提示“任务已完成”。
-- `F-002-AC-02` Given 用户没有指定目标任务，When 请求完成任务，Then 产品只追问需要完成哪一项任务。
 """
 
 
-def _sample(
-    sample_id: str,
-    feature_id: str,
-    kind: str,
-    user_input: Any,
-    *,
-    starting_state: list[str],
-    expected_behavior: list[str],
-    expected_output: str,
-    assertions: list[str],
-    forbidden: list[str],
-) -> dict[str, Any]:
+def _sample(sample_id: str, kind: str, user_input: Any) -> dict[str, Any]:
     return {
         "id": sample_id,
-        "feature_id": feature_id,
+        "feature_id": "F-001",
         "kind": kind,
         "user_input": user_input,
-        "starting_state": starting_state,
-        "expected_behavior": expected_behavior,
-        "expected_output": expected_output,
+        "starting_state": ["用户已进入任务页"],
+        "expected_behavior": ["按照输入契约处理", "返回用户可理解的结果"],
+        "expected_output": "显示任务结果或可执行的恢复提示。",
         "output_contract": {
             "exact": ["固定字段名、状态值和最终提示文案"],
             "semantic": ["解释必须覆盖结果、原因和下一步动作"],
             "runtime": ["运行时生成的 ID、日期和耗时允许变化"],
         },
-        "assertions": assertions,
-        "forbidden": forbidden,
+        "assertions": ["结果与 F-001 验收标准一致"],
+        "forbidden": ["不得把内部实现或未验证状态描述为用户结果"],
         "sensitive_data": "none",
     }
 
 
 DEFAULT_SAMPLES = [
-    _sample(
-        "SAMPLE-TASK-001",
-        "F-001",
-        "normal",
-        "预约牙医",
-        starting_state=["用户已进入任务页"],
-        expected_behavior=["校验名称", "创建任务并显示结果"],
-        expected_output="列表顶部显示预约牙医且状态为未完成，并提示任务已创建。",
-        assertions=["满足 F-001-AC-01"],
-        forbidden=["不得只返回内部 ID"],
-    ),
-    _sample(
-        "SAMPLE-TASK-002",
-        "F-001",
-        "clarification",
-        "帮我创建一个任务",
-        starting_state=["用户尚未提供任务名称"],
-        expected_behavior=["只追问缺失的任务名称"],
-        expected_output="询问任务名称。",
-        assertions=["信息不足时没有创建任务"],
-        forbidden=["不得猜测任务名称"],
-    ),
-    _sample(
-        "SAMPLE-TASK-003",
-        "F-001",
-        "invalid",
-        "",
-        starting_state=["用户已进入任务页"],
-        expected_behavior=["拒绝空名称并保留输入位置"],
-        expected_output="显示请输入任务名称并聚焦输入框。",
-        assertions=["满足 F-001-AC-02"],
-        forbidden=["不得创建空名称任务"],
-    ),
-    _sample(
-        "SAMPLE-TASK-004",
-        "F-001",
-        "boundary",
-        "任" * 80,
-        starting_state=["用户已进入任务页"],
-        expected_behavior=["接受 80 字符上限输入并原样创建"],
-        expected_output="任务创建成功且名称保持完整 80 个字符。",
-        assertions=["user_input 的实际长度等于 80"],
-        forbidden=["不得截断任务名称", "不得错误提示长度超限"],
-    ),
-    _sample(
-        "SAMPLE-TASK-005",
-        "F-002",
-        "normal",
-        {"task": "预约牙医", "action": "complete"},
-        starting_state=["预约牙医存在且状态为未完成"],
-        expected_behavior=["定位任务并更新为已完成"],
-        expected_output="预约牙医显示已完成，并提示任务已完成。",
-        assertions=["满足 F-002-AC-01"],
-        forbidden=["不得删除原任务"],
-    ),
-    _sample(
-        "SAMPLE-TASK-006",
-        "F-002",
-        "clarification",
-        {"action": "complete"},
-        starting_state=["列表中存在多个任务"],
-        expected_behavior=["只追问需要完成哪一项任务"],
-        expected_output="询问要完成哪一项任务。",
-        assertions=["满足 F-002-AC-02"],
-        forbidden=["不得任意选择一个任务"],
-    ),
-    _sample(
-        "SAMPLE-TASK-007",
-        "F-002",
-        "invalid",
-        {"task": "不存在的任务", "action": "complete"},
-        starting_state=["列表中没有该名称任务"],
-        expected_behavior=["拒绝更新并保留列表"],
-        expected_output="显示未找到该任务。",
-        assertions=["没有修改其他任务"],
-        forbidden=["不得创建替代任务"],
-    ),
-    _sample(
-        "SAMPLE-TASK-008",
-        "F-002",
-        "boundary",
-        {"task": "预约牙医", "action": "complete"},
-        starting_state=["预约牙医已经是已完成状态"],
-        expected_behavior=["保持已完成状态并返回幂等反馈"],
-        expected_output="预约牙医仍显示已完成且不产生重复任务。",
-        assertions=["重复完成不会改变任务数量"],
-        forbidden=["不得恢复为未完成", "不得新增重复任务"],
-    ),
+    _sample("SAMPLE-TASK-001", "normal", "预约牙医"),
+    _sample("SAMPLE-TASK-002", "clarification", "帮我创建一个任务"),
+    _sample("SAMPLE-TASK-003", "invalid", ""),
+    _sample("SAMPLE-TASK-004", "boundary", "任" * 80),
 ]
 
 
@@ -329,7 +171,9 @@ def _sha256(path: Path) -> str:
 
 def write_json_yaml(path: Path, value: Any) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(value, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    path.write_text(
+        json.dumps(value, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    )
 
 
 def write_requirement_package(
@@ -359,7 +203,11 @@ def write_requirement_package(
     active_samples = samples if samples is not None else DEFAULT_SAMPLES
     write_json_yaml(
         behavior,
-        {"schema_version": "1.0", "domain_id": "task-management", "samples": active_samples},
+        {
+            "schema_version": "1.0",
+            "domain_id": "task-management",
+            "samples": active_samples,
+        },
     )
     write_json_yaml(
         index,

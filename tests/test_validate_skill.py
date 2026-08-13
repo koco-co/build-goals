@@ -398,12 +398,12 @@ class ValidateSkillTests(unittest.TestCase):
         expected = {
             "build-agents-md": 'version: "1.2.0"',
             "build-plugin": 'version: "1.3.1"',
-            "build-prd": 'version: "1.1.0"',
+            "build-prd": 'version: "1.1.1"',
             "build-readme": 'version: "1.0.1"',
             "build-skill": 'version: "1.5.1"',
-            "handoff": 'version: "1.1.1"',
+            "handoff": 'version: "1.1.2"',
             "shape-idea": 'version: "1.0.1"',
-            "vibe-coding": 'version: "1.3.0"',
+            "vibe-coding": 'version: "1.3.1"',
         }
 
         for name, version_line in expected.items():
