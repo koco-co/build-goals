@@ -258,6 +258,11 @@ class InstallSkillTests(unittest.TestCase):
                 self.assertTrue(
                     destination.joinpath("scripts", "validate_prd.py").is_file()
                 )
+                self.assertTrue(
+                    destination.joinpath(
+                        "scripts", "validate_checkpoint.py"
+                    ).is_file()
+                )
                 if platform == "claude":
                     self.assertFalse(destination.joinpath("agents").exists())
                 else:

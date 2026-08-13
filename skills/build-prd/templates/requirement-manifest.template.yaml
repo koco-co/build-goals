@@ -1,0 +1,41 @@
+{
+  "schema_version": "1.0",
+  "package_id": "{{package-id}}",
+  "package_version": "{{SemVer}}",
+  "status": "confirmed",
+  "package_type": "{{full-or-stage}}",
+  "generated_at": "{{YYYY-MM-DD}}",
+  "source": {
+    "project": "{{来源项目绝对路径或产品想法标识}}",
+    "revision": "{{commit-sha 或已确认输入版本}}"
+  },
+  "domains": [
+    {
+      "id": "{{domain-id}}",
+      "name": "{{功能域名称}}",
+      "status": "confirmed",
+      "requirements": "功能域/{{功能域名称}}.md",
+      "examples": "行为样例/{{功能域名称}}.yaml",
+      "dependencies": []
+    }
+  ],
+  "external_dependencies": [],
+  "files": [
+    {
+      "path": "PRD需求文档.md",
+      "sha256": "{{64 位小写 SHA-256}}"
+    },
+    {
+      "path": "功能域/{{功能域名称}}.md",
+      "sha256": "{{64 位小写 SHA-256}}"
+    },
+    {
+      "path": "行为样例/产品行为样例集.yaml",
+      "sha256": "{{64 位小写 SHA-256}}"
+    },
+    {
+      "path": "行为样例/{{功能域名称}}.yaml",
+      "sha256": "{{64 位小写 SHA-256}}"
+    }
+  ]
+}

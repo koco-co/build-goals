@@ -1,0 +1,41 @@
+{
+  "schema_version": "1.0",
+  "package_id": "task-product",
+  "package_version": "1.0.0",
+  "status": "confirmed",
+  "package_type": "full",
+  "generated_at": "2026-08-13",
+  "source": {
+    "project": "build-prd example",
+    "revision": "shipped-example"
+  },
+  "domains": [
+    {
+      "id": "task",
+      "name": "任务管理",
+      "status": "confirmed",
+      "requirements": "功能域/任务管理.md",
+      "examples": "行为样例/任务管理.yaml",
+      "dependencies": []
+    }
+  ],
+  "external_dependencies": [],
+  "files": [
+    {
+      "path": "PRD需求文档.md",
+      "sha256": "016e0515ef515ac720cf772eefa76a8efc3c570e79c695a62f84a2925136e0f7"
+    },
+    {
+      "path": "功能域/任务管理.md",
+      "sha256": "e74e54e6a1d3790c7989e646132d1165c1b27c890ecc354dca06f77882ec8507"
+    },
+    {
+      "path": "行为样例/产品行为样例集.yaml",
+      "sha256": "9de1a0ba742f9ee02b61efa11ae40f0642650a7875537f1629ce9e41a7c53a61"
+    },
+    {
+      "path": "行为样例/任务管理.yaml",
+      "sha256": "85d1ea3852d0dbaffea74117fe777bcc8fb6a0920cc97e8e87140b6263880684"
+    }
+  ]
+}

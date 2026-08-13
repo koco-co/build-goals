@@ -1,0 +1,74 @@
+{
+  "schema_version": "1.0",
+  "domain_id": "task",
+  "samples": [
+    {
+      "id": "SAMPLE-TASK-001",
+      "feature_id": "F-001",
+      "kind": "normal",
+      "user_input": "创建任务：预约牙医",
+      "starting_state": ["用户已进入任务页"],
+      "expected_behavior": ["校验名称", "创建任务并显示结果"],
+      "expected_output": "列表顶部显示“预约牙医 · 未完成”，并提示“任务已创建”。",
+      "output_contract": {
+        "exact": ["任务名称、未完成状态和成功文案"],
+        "semantic": ["解释任务已经创建"],
+        "runtime": ["创建时间和内部 ID 允许变化"]
+      },
+      "assertions": ["满足 F-001-AC-01"],
+      "forbidden": ["不得只返回内部 ID"],
+      "sensitive_data": "none"
+    },
+    {
+      "id": "SAMPLE-TASK-002",
+      "feature_id": "F-001",
+      "kind": "clarification",
+      "user_input": "帮我创建一个任务",
+      "starting_state": ["用户尚未提供任务名称"],
+      "expected_behavior": ["只追问缺失的任务名称"],
+      "expected_output": "询问“任务名称是什么？”",
+      "output_contract": {
+        "exact": ["追问对象必须是任务名称"],
+        "semantic": ["问题必须让用户知道应补充什么"],
+        "runtime": ["无运行时变量"]
+      },
+      "assertions": ["没有在信息不足时创建任务"],
+      "forbidden": ["不得猜测任务名称"],
+      "sensitive_data": "none"
+    },
+    {
+      "id": "SAMPLE-TASK-003",
+      "feature_id": "F-001",
+      "kind": "invalid",
+      "user_input": "创建一个空名称任务",
+      "starting_state": ["用户已进入任务页"],
+      "expected_behavior": ["拒绝空名称并保留输入位置"],
+      "expected_output": "显示“请输入任务名称”并聚焦任务名称输入框。",
+      "output_contract": {
+        "exact": ["错误文案和焦点位置"],
+        "semantic": ["说明缺少任务名称"],
+        "runtime": ["无运行时变量"]
+      },
+      "assertions": ["满足 F-001-AC-02"],
+      "forbidden": ["不得创建空名称任务"],
+      "sensitive_data": "none"
+    },
+    {
+      "id": "SAMPLE-TASK-004",
+      "feature_id": "F-001",
+      "kind": "boundary",
+      "user_input": "创建一个正好 80 个字符的任务",
+      "starting_state": ["用户已进入任务页"],
+      "expected_behavior": ["接受上限内输入并创建任务"],
+      "expected_output": "任务创建成功，名称保持 80 个字符。",
+      "output_contract": {
+        "exact": ["任务名称不得被截断"],
+        "semantic": ["说明任务创建成功"],
+        "runtime": ["创建时间和内部 ID 允许变化"]
+      },
+      "assertions": ["80 个字符属于有效边界"],
+      "forbidden": ["不得错误提示长度超限"],
+      "sensitive_data": "none"
+    }
+  ]
+}

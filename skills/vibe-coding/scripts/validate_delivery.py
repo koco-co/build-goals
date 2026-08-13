@@ -33,7 +33,12 @@ def build_parser() -> argparse.ArgumentParser:
         description="校验 vibe-coding 的架构、任务追踪、开发就绪和交付产物。"
     )
     parser.add_argument("project_root", type=Path)
-    parser.add_argument("--mode", choices=("greenfield", "migration"), required=True)
+    parser.add_argument(
+        "--mode",
+        choices=("greenfield", "continuation", "migration"),
+        required=True,
+        help="内部校验路线：新项目、现有项目续建或架构/技术栈迁移。",
+    )
     parser.add_argument(
         "--phase",
         choices=("architecture", "plan", "readiness", "delivery"),

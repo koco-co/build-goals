@@ -176,7 +176,7 @@ def validate_traceability(
     root: Path,
     issues: list[Issue],
 ) -> None:
-    if mode == "greenfield":
+    if mode in {"greenfield", "continuation"}:
         identifiers = sorted(
             set(FUNCTION_RE.findall(source_text)) | set(AC_RE.findall(source_text))
         )

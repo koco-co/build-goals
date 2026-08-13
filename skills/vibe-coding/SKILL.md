@@ -1,124 +1,119 @@
 ---
 name: vibe-coding
-description: 依据 docs/PRD需求文档.md 从零设计并实现项目，或审查并迁移已有项目；经过架构与任务两个全局决策门禁，按生命周期调用配套 Skills，在项目指令就绪后以 TDD、多 Agent 和可选 Git worktrees 完成功能开发、原子提交与全链路验收。
-compatibility: 需要 Python 3.9+、Git、互联网访问及目标项目的构建与测试工具。
+description: 依据已确认的 docs/产品需求/ 需求包新建项目、按用户指定范围参考旧项目、续建现有项目，或实施现有项目的架构与技术栈迁移；经过架构方案和整体实施路线两次全局确认，以 TDD、多 Agent 和可选 Git worktrees 按功能域交付并完成全链路验收。
+compatibility: 需要 Python 3.9+、Git、互联网访问、目标项目构建与测试工具；多 Agent 或 worktree 不可用时支持串行降级。
 disable-model-invocation: true
 metadata:
   author: koco-co
-  version: "1.2.1"
+  version: "1.3.0"
 ---
 
 # Outcome
 
-将已经确认的产品需求或已有低质量项目，转化为架构清晰、实现完整、测试充分、可独立回滚并具有可复核交付证据的软件项目。
+把已确认、可复制的产品需求包转化为架构清晰、实现完整、测试充分、可独立回滚且证据可复核的软件项目；或在用户明确选择时，以现有项目为基线完成续建、架构升级或技术栈迁移。
 
 ## Routing
 
-- 当前项目存在已确认的 `docs/PRD需求文档.md`，且用户要求实现该 PRD 时，执行“PRD 驱动的新建或续建项目”分支。
-- 用户要求审查并现代化改造已有项目时，执行“已有项目架构审查与迁移”分支；先建立当前基线，再提出迁移方案。
-- PRD 驱动分支缺少有效 `docs/PRD需求文档.md` 时，转交 `build-prd`；PRD 完成前不自行推断产品需求。
-- 项目需要新增或升级 Agent Skill、Plugin、README 或项目指令时，按 `rules/companion-skills.md` 分别调用 `build-skill`、`build-plugin`、`build-readme` 或 `build-agents-md`。
-- 项目指令缺失、链接异常或与真实工程事实冲突时，必须在功能开发前完成 `build-agents-md`；无法受控调用时暂停并输出可直接复制的交接提示。
-- 只要求澄清想法时转交 `shape-idea`；只要求整理会话交接时转交 `handoff`。
-- 普通代码修改、单点 Bug 修复、单个文档编写或没有完整项目交付目标的任务，不进入本 Skill。
+根据用户的自然语言意图选择以下一条路线，不根据“目录里恰好存在旧代码”擅自决定：
+
+1. 新项目，只按需求实现：只使用已确认需求包设计新项目，不读取旧项目实现。
+2. 新项目，参考旧项目的指定部分：需求包仍是产品行为权威输入；只读 Agent 仅检查用户授权的旧项目内容，提取行为、输入、输出和证据，不复制旧架构或整段代码。
+3. 现有项目，按需求续建：以当前项目事实和已确认需求包共同确定差距，在现有工程上实现。
+4. 现有项目，架构或技术栈迁移：以旧项目完整基线、用户确认的迁移目标和公开契约为依据制定迁移方案。
+
+用户已经明确“新建”“续建”“参考哪些内容”“升级架构”或“迁移技术栈”时直接路由。只有描述确实可对应多条路线且会改变结果时，才询问一个路线问题并给出推荐。
+
+- 路线 1–3 必须使用通过严格校验的完整需求包，或边界闭合且已确认的正式阶段包；`.build-goals/build-prd/` 过程检查点不能实施。
+- 需求包缺失、未确认、哈希漂移或行为样例不完整时，转交 `build-prd`；不能用旧代码或零散描述替代。
+- 普通代码修改、单点 Bug、单个文档或没有完整项目交付目标的任务不进入本 Skill。
 
 ## Steps
 
-1. 建立只读基线并选择路线
+1. 建立只读基线、选择路线并固定需求快照
    - 完整读取 `workflows/§01-baseline-and-routing.md`。
-   - 读取 Git 当前分支、HEAD、工作区状态、已有 worktrees、项目规则、文档、代码、测试、CI 和配置。
-   - 将当前 HEAD、未提交修改和用户新增文件视为必须保护的工作，不执行 reset、clean、强制 checkout、历史改写或无证据覆盖。
-   - PRD 驱动分支先执行 `scripts/validate_prd.py`；已有项目分支先完成全仓事实盘点。
-   - 完成条件：目标路线、输入产物、当前状态、现有用户修改、可用工具和无法继续的原因均已明确。
+   - 保护当前 HEAD、未提交修改、已有 worktrees 和用户新增文件，不执行破坏性清理或历史改写。
+   - 路线 1–3 先校验来源需求包；来源不在目标项目时，使用 `scripts/import_requirements.py` 比较并复制到 `docs/产品需求/`，不得建立符号链接或运行时引用。
+   - 已有快照不会自动更新。发现来源版本变化时先报告受影响功能域、功能和文件，用户明确确认后才替换。
 
-2. 调研并提出架构方案
-   - PRD 驱动分支完整读取 `workflows/§02-greenfield-architecture.md`。
-   - 已有项目分支完整读取 `workflows/§03-migration-audit.md`。
-   - 调研前读取 `rules/modern-engineering.md`、`rules/repository-audit.md`、`rules/orchestration-contract.md` 和 `rules/companion-skills.md`。
-   - 使用多个只读 Agent 并行调研官方规范、当前稳定工具链、竞品、活跃开源项目、项目现状、安全和测试策略。
-   - 输出至少两个可行方案、明确权衡、推荐方案、目标目录树、模块边界、数据与接口契约、质量策略和迁移风险。
-   - 只在对话中提交架构方案；用户确认前不写入架构文档，也不修改项目代码。
-   - 完成条件：用户明确确认推荐架构、实施边界和关键权衡。
+2. 调研并确认架构方案
+   - 路线 1–3 完整读取 `workflows/§02-requirements-architecture.md`；路线 4 读取 `workflows/§03-migration-audit.md`。
+   - 路线 2 只读 Agent 只能访问用户授权范围，并只返回行为、输入、输出、公开契约和证据摘要；无 Agent 能力时由主 Agent 串行执行同样限制并明确降级。
+   - 调研当前官方规范、稳定工具链、活跃开源项目、安全和测试策略，提出至少两个可行方案、权衡与推荐。
+   - 先在对话中提交全局架构方案。用户第一次确认前，不写架构文档、不修改代码。
 
-3. 写入架构文档并安排实施任务
+3. 写入架构文档并确认整体实施路线
    - 完整读取 `workflows/§04-plan-and-approval.md`。
-   - 新建或续建项目使用 `templates/architecture-design.template.md` 写入 `docs/架构设计方案.md`。
-   - 迁移项目使用 `templates/architecture-migration.template.md` 写入 `docs/架构迁移方案.md`。
-   - 使用 `templates/implementation-plan.template.md` 生成按功能切片、需求可追踪、依赖明确、测试先行、可独立提交和回滚的任务方案。
-   - 先在对话中提交任务方案；用户第二次确认前不写入 `docs/实施任务清单.md`，也不搭建脚手架。
-   - 用户确认后写入任务清单，并运行 `scripts/validate_delivery.py` 的 plan 阶段校验。
-   - 完成条件：架构文档和任务清单均标记为已确认，每个需求与验收项都有任务、测试和提交边界。
+   - 路线 1–3 写入 `docs/架构设计/`；路线 4 写入 `docs/架构迁移/`。全局文档记录共同架构与依赖，每个功能域在 `功能域/<功能域>.md` 记录本域边界、契约和验证。
+   - 写入 `docs/实施任务/`：全局清单记录依赖图、基础工程、Agent/worktree 与集成顺序；每个功能域文件记录实际任务、测试、提交和回滚边界。
+   - 在对话中提交整体实施路线、依赖顺序、并行边界和验证策略。用户第二次确认前不搭建脚手架、不修改业务代码。
+   - 第二次确认覆盖已列出的全部功能域任务；后续不逐域重复确认，除非出现会改变产品行为、公开契约、数据、权限、部署拓扑或整体路线的实质变化。
 
 4. 构建脚手架并通过项目指令就绪门禁
    - 完整读取 `workflows/§05-scaffold-and-worktrees.md`。
-   - 按 `rules/modern-engineering.md` 选择当前稳定且与项目约束匹配的工具链，不为追求新颖而引入无必要复杂度。
    - 建立最小可运行骨架、依赖管理、格式化、Lint、类型检查、测试入口、CI、环境变量示例、忽略规则和正常测试数据基础。
-   - 脚手架必须通过适用检查，再形成一个可独立回滚的本地提交。
-   - 依据已验证的真实命令复查项目指令；需要创建或更新时调用 `build-agents-md`，在完整内容确认后写入、严格验证，并由总控形成只含项目指令的独立治理提交、回填明确 SHA。
-   - 在任务清单记录安装、启动或 smoke、基础测试的实际证据和既有 worktree 基线，再运行 `scripts/validate_delivery.py --phase readiness --strict`；通过前不得创建功能 worktree 或调起功能 Agent。
-   - 只有 readiness 通过后，才根据依赖图为无依赖且文件所有权不重叠的任务创建独立 worktree；有依赖的任务保持串行。
-   - 完成条件：干净环境可以安装、启动并运行第一组测试，项目指令有效且位于功能开发共同基线，任务与 worktree 映射已经冻结。
+   - 脚手架通过适用检查后形成可回滚的本地提交。
+   - 检查项目指令；缺失、链接异常或与真实工程事实冲突时，在功能开发前调用 `build-agents-md`，确认完整内容、严格验证并形成独立治理提交。
+   - 在全局实施任务清单记录安装、启动或 smoke、基础测试、治理提交和既有 worktree 基线；readiness 严格校验通过前不得创建功能 worktree 或调起功能 Agent。
 
-5. 调起 Agent 开发团队并按功能交付
-   - 完整读取 `workflows/§06-feature-delivery.md`。
-   - 读取 `rules/worktree-and-commits.md` 与 `rules/tdd-and-quality-gates.md`。
-   - 每个 Agent 开始前读取其作用域内的 `AGENTS.md`；只领取一个可独立验证的功能切片，先写失败测试，再实现最小代码，随后重构并运行该切片要求的全部质量检查。
-   - 每个功能单元通过验收后创建一次本地 Git commit；提交必须包含任务与需求追踪信息，不混入其他任务。
-   - 并行任务通过 worktree 隔离；集成由唯一的 Integration Manager 按依赖顺序进入已确认的集成分支，并在每次集成后重跑受影响检查。
-   - 任务提交已集成、检查通过、worktree 干净且不存在未集成独有改动时，立即自动移除该 worktree 和本地任务分支；不把已完成 worktree 留到最终交付再批量清理。
-   - 平台没有 Subagent 或 worktree 能力时，以角色隔离的串行方式执行，并在交付中明确降级情况。
-   - 完成条件：所有确认任务均已实现、集成并关联到唯一提交，没有遗漏需求、未说明的范围漂移或已完成但仍残留的任务 worktree。
+5. 按功能域组织 Agent 并交付
+   - 完整读取 `workflows/§06-feature-delivery.md`、`rules/worktree-and-commits.md` 和 `rules/tdd-and-quality-gates.md`。
+   - 每次只加载全局索引、当前功能域文档和当前域直接依赖的已确认契约，不把整个旧项目、全部需求包或所有已完成域重复塞给功能 Agent。
+   - 每个 Agent 只领取一个可独立验证的任务：先写失败测试，再实现最小代码，重构并运行本任务质量检查。
+   - 无依赖且文件所有权不重叠的任务可以在独立 worktree 并行；有依赖的任务按确认顺序串行。
+   - 每个功能域完成后更新本域任务与交付文件并自动进入下一域，不再询问“是否继续”。
+   - 任务提交已集成、检查通过、worktree 干净且无独有改动时，立即移除本次任务 worktree 和本地任务分支。
 
-6. 完成全链路验证
-   - 完整读取 `workflows/§07-validation.md`。
-   - 读取 `rules/acceptance-standard.md`，使用 `checklists/final-acceptance.md` 完成内容与场景审查。
-   - 运行格式化、Lint、类型检查、构建、单元测试、集成测试和端到端测试；有前端或可视界面时，再执行视觉、响应式、无障碍和组件交互验证。
-   - 使用真实可复现的正常测试数据验证平台流程，并清理调试数据、脏数据、占位文案、PRD 原文和用户口述文案。
-   - 检查安全密钥、环境变量、权限、依赖、日志、错误处理、文档与运行入口，并复查项目指令是否发生已证实的失效或冲突。
-   - 运行 `scripts/validate_delivery.py` 的 delivery 阶段严格校验；已完成并集成的任务仍残留已注册 worktree 时必须失败，修复后重跑。
-   - 完成条件：所有适用质量检查通过，未验证内容和无法完成的原因都有准确证据，不把静态存在描述为真实功能已通过。
+6. 完成跨域与全链路验证
+   - 完整读取 `workflows/§07-validation.md` 和 `rules/acceptance-standard.md`。
+   - 每个功能域先完成本域验证；全部域完成后必须执行跨域用户旅程、直接依赖契约和端到端回归。
+   - 运行适用的格式化、Lint、类型、构建、单元、集成和端到端测试；有界面时再做视觉、响应式、无障碍与交互验证。
+   - 使用可重复、可清理的正常测试数据，检查安全、配置、权限、日志、错误处理、运行入口和项目指令漂移。
+   - 运行 delivery 阶段严格校验；静态存在、安装成功或测试发现不能代替真实产品行为验收。
 
-7. 交付并停止
+7. 写交付文档并停止
    - 完整读取 `workflows/§08-delivery.md`。
-   - 使用 `templates/delivery-report.template.md` 写入 `docs/交付验收报告.md`。
-   - 更新 `docs/实施任务清单.md` 中的状态、测试证据和 commit SHA，再执行最终校验。
-   - 全部任务验收通过后，若集成分支不同于受保护主分支，先报告最终 diff 与验证证据并请求一次明确合并授权；获准后本地合并、重跑最终校验，再清理集成 worktree 和本地集成分支。
-   - 按配套 Skill 生命周期完成 README、项目指令和交接处理；不在本 Skill 中复制其他 Skill 的构建流程。
-   - 完成条件：用户能够定位全部产物、提交和验证证据，并能明确判断哪些已经验证、哪些尚未验证、哪些无法完成。
+   - 全局报告写入 `docs/交付验收/交付验收报告.md`，每个功能域证据写入 `docs/交付验收/功能域/<功能域>.md`。
+   - 更新 `docs/实施任务/` 中的任务状态、验证证据、集成状态和 commit SHA，执行最终严格校验。
+   - 受保护主分支合并、push、发布、部署或本地 Plugin 更新仍需分别取得明确授权。
 
 ## Delivery
 
-- PRD 驱动分支交付 `docs/架构设计方案.md`、`docs/实施任务清单.md`、`docs/交付验收报告.md`、实现代码、测试数据与功能提交。
-- 迁移分支交付 `docs/架构迁移方案.md`、`docs/实施任务清单.md`、`docs/交付验收报告.md`、迁移代码、测试数据与阶段提交。
-- 最终回复列出需求追踪结果、最终目录、Agent 与 worktree 分工、提交清单、实际运行命令、测试结果、界面验证、安全检查和剩余限制。
-- 分别说明已验证内容、未验证内容和无法完成的原因，并区分静态检查、真实用户流程、视觉验证和外部环境限制。
-- 不自动 push、发布、部署或开始下一个项目。
-- 实现和验证完成后，由总控一次询问当前任务适用的 commit、push、发布、部署或本地 Plugin 更新动作；子 Skill 不重复询问。
+```text
+docs/
+├── 产品需求/
+├── 架构设计/
+│   ├── 架构设计方案.md
+│   └── 功能域/<功能域>.md
+├── 架构迁移/
+│   ├── 架构迁移方案.md
+│   └── 功能域/<功能域>.md
+├── 实施任务/
+│   ├── 实施任务清单.md
+│   └── 功能域/<功能域>.md
+└── 交付验收/
+    ├── 交付验收报告.md
+    └── 功能域/<功能域>.md
+```
+
+- 路线 1–3 使用 `架构设计/`，路线 4 使用 `架构迁移/`；不适用的另一目录不要求创建。
+- 大小项目使用同一结构；小项目只有一个功能域文件。
+- 旧的 `docs/架构设计方案.md`、`docs/架构迁移方案.md`、`docs/实施任务清单.md`、`docs/交付验收报告.md` 只做一次性迁移，不长期兼容或双写。
+- 最终回复列出路线、需求快照、功能域追踪、最终目录、Agent/worktree 分工、提交、实际命令、测试结果、界面验证、安全检查和剩余限制。
 
 ## Guardrails
 
-- 当前仓库内容和未提交修改均属于用户资产；不回滚、不覆盖、不删除、不丢弃，不使用 `git reset --hard`、`git clean`、强制 checkout、rebase 改写共享历史或 force push。
-- 用户确认架构前保持项目只读；用户确认任务清单前不搭建脚手架或修改业务代码。
-- 用户确认实施任务清单后，视为授权在确认范围内创建本地分支、worktree 和本地 commit；不包含 push、合并受保护分支、发布、部署、外部数据写入或权限提升。
-- 任务确认不授权写入用户尚未看过的完整产物；配套 Skill 的按需内容确认仍须完成。
-- 任务清单确认同时授权清理本次任务创建且已安全集成的干净 worktree 和本地任务分支；脏 worktree、未集成独有提交、未知 worktree 或会话开始前已存在的 worktree 不自动删除。
-- 任何会改变产品范围、公开接口、持久化数据、认证授权、兼容性或部署拓扑的偏离，都必须回到设计或任务确认阶段。
-- 多 Agent 只接收完成任务所需的最小上下文，不向外部服务发送私有代码、凭据、用户数据或未公开文档。
-- 测试不得破坏生产数据；真实测试数据必须位于隔离环境，可重复创建并有明确清理策略。
-- 现代化不等于盲目升级；必须依据官方支持、项目约束、维护活跃度、迁移成本和可验证收益选择工具。
+- 用户确认架构前保持项目只读；用户确认整体实施路线前不搭建脚手架或修改业务代码。
+- 第二次全局确认授权在确认范围内创建本地分支、worktree 和本地 commit，但不授权 push、合并受保护分支、发布、部署、外部数据写入或权限提升。
+- 路线 1 不读取旧项目；路线 2 只读取用户指定范围；路线 3–4 可以读取当前项目，但仍只向功能 Agent 提供完成任务所需的最小上下文。
+- 需求包默认约束外部可观察行为，不强迫复制旧项目内部实现。只有用户确认的目标变化才能改变命令、路径、格式、公开 API、文件或用户流程。
+- 任何会改变产品范围、公开契约、持久化数据、认证授权、兼容性或部署拓扑的偏离，都必须回到全局方案确认。
+- 测试不得破坏生产数据；不得上传私有代码、凭据、用户数据或未公开文档。
 - 不以注释、README、假数据、跳过测试、降低断言或隐藏失败代替功能实现。
-- 无法安全合并用户现有改动、缺少必要访问条件或关键验收不能执行时，停止在最小阻塞点并给出可复核证据。
 
 ## References
 
-- 建立基线和选择路线时，完整读取 `workflows/§01-baseline-and-routing.md`。
-- PRD 驱动架构设计时，完整读取 `workflows/§02-greenfield-architecture.md`。
-- 已有项目审查与迁移时，完整读取 `workflows/§03-migration-audit.md`。
-- 架构确认后编排任务时，完整读取 `workflows/§04-plan-and-approval.md`。
-- 搭建脚手架、准备项目指令和创建 worktrees 时，完整读取 `workflows/§05-scaffold-and-worktrees.md` 与 `rules/companion-skills.md`。
-- 功能开发与集成时，完整读取 `workflows/§06-feature-delivery.md`。
-- 验证时，完整读取 `workflows/§07-validation.md`、`rules/tdd-and-quality-gates.md`、`rules/acceptance-standard.md` 和 `checklists/final-acceptance.md`。
-- 交付时，完整读取 `workflows/§08-delivery.md` 和 `templates/delivery-report.template.md`。
-- 组织 Agent 团队前，读取 `rules/orchestration-contract.md`；每个角色只读取 prompts 目录中与其职责对应的 Agent 文件。
-- 评审架构时使用 `checklists/architecture-acceptance.md`；开始编码前使用 `checklists/implementation-readiness.md`。
-- 需要输出粒度参考时，按路线读取 `examples/greenfield-plan.example.md` 或 `examples/migration-plan.example.md`。
+- 路由、基线与需求快照读取 `workflows/§01-baseline-and-routing.md`。
+- 路线 1–3 架构设计读取 `workflows/§02-requirements-architecture.md`；路线 4 读取 `workflows/§03-migration-audit.md`。
+- 全局方案确认、目录族与任务编排读取 `workflows/§04-plan-and-approval.md`。
+- readiness、功能开发、验证和交付依次读取 `workflows/§05-scaffold-and-worktrees.md` 至 `§08-delivery.md`。
+- 组织 Agent 前读取 `rules/orchestration-contract.md` 和所需角色 prompt；只给角色与当前任务直接相关的内容。

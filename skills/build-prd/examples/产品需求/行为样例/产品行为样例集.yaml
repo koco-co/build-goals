@@ -1,0 +1,16 @@
+{
+  "schema_version": "1.0",
+  "package_id": "task-product",
+  "domains": [
+    {
+      "id": "task",
+      "file": "任务管理.yaml",
+      "sample_ids": [
+        "SAMPLE-TASK-001",
+        "SAMPLE-TASK-002",
+        "SAMPLE-TASK-003",
+        "SAMPLE-TASK-004"
+      ]
+    }
+  ]
+}

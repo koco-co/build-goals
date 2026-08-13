@@ -1,0 +1,44 @@
+{
+  "schema_version": "1.0",
+  "domain_id": "{{domain-id}}",
+  "name": "{{功能域名称}}",
+  "status": "confirmed",
+  "confirmed_at": "{{ISO-8601 时间}}",
+  "dependencies": [],
+  "summary": "{{用户确认的功能域范围与目标}}",
+  "features": [
+    {
+      "id": "F-001",
+      "name": "{{功能名称}}",
+      "user_inputs": [
+        "{{代表性用户输入与边界}}"
+      ],
+      "interactions": [
+        "{{追问、反馈、恢复和最终文案}}"
+      ],
+      "outputs": {
+        "exact": [
+          "{{固定结构}}"
+        ],
+        "semantic": [
+          "{{语义要求}}"
+        ],
+        "runtime": [
+          "{{运行时可变信息}}"
+        ]
+      },
+      "external_contracts": [
+        "{{需要保持的公开契约}}"
+      ],
+      "forbidden": [
+        "{{禁止结果}}"
+      ],
+      "acceptance": [
+        "{{Given/When/Then 验收结果}}"
+      ]
+    }
+  ],
+  "evidence": [
+    "{{项目事实、用户决定或公开来源引用}}"
+  ]
+}

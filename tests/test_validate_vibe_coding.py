@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import os
 import subprocess
 import sys
@@ -8,9 +9,20 @@ import textwrap
 import unittest
 from pathlib import Path
 
+from tests.requirements_fixture import write_requirement_package
+
 REPO_ROOT = Path(__file__).resolve().parents[1]
 VALIDATOR = REPO_ROOT / "skills" / "vibe-coding" / "scripts" / "validate_delivery.py"
 INSTALLER = REPO_ROOT / "scripts" / "install_skill.py"
+
+ARCHITECTURE_DESIGN = Path("docs/架构设计/架构设计方案.md")
+ARCHITECTURE_MIGRATION = Path("docs/架构迁移/架构迁移方案.md")
+DOMAIN_ARCHITECTURE_DESIGN = Path("docs/架构设计/功能域/任务管理.md")
+DOMAIN_ARCHITECTURE_MIGRATION = Path("docs/架构迁移/功能域/任务管理.md")
+GLOBAL_PLAN = Path("docs/实施任务/实施任务清单.md")
+DOMAIN_PLAN = Path("docs/实施任务/功能域/任务管理.md")
+GLOBAL_REPORT = Path("docs/交付验收/交付验收报告.md")
+DOMAIN_REPORT = Path("docs/交付验收/功能域/任务管理.md")
 
 
 def doc(
@@ -81,6 +93,31 @@ REPORT_HEADINGS = (
     "## 外部动作状态",
     "## 可复现命令",
 )
+DOMAIN_ARCHITECTURE_HEADINGS = (
+    "# 功能域架构：任务管理",
+    "## 功能域边界",
+    "## 需求映射",
+    "## 组件与依赖",
+    "## 接口与数据契约",
+    "## 验证策略",
+    "## 风险与回退",
+)
+DOMAIN_PLAN_HEADINGS = (
+    "# 功能域实施任务：任务管理",
+    "## 功能域目标",
+    "## 输入与依赖",
+    "## 任务列表",
+    "## 功能域验证",
+    "## 集成与回滚",
+)
+DOMAIN_REPORT_HEADINGS = (
+    "# 功能域交付验收：任务管理",
+    "## 完成范围",
+    "## 需求与任务追踪",
+    "## 实际验证",
+    "## 未验证与阻塞",
+    "## 集成结果",
+)
 AGENTS_MD = """# Fixture project instructions
 
 ## Commands
@@ -90,6 +127,12 @@ AGENTS_MD = """# Fixture project instructions
 
 
 class VibeCodingValidatorTests(unittest.TestCase):
+    @staticmethod
+    def expanded_marker(marker: str) -> str:
+        if "F-001-AC-01" in marker and "F-001-AC-02" not in marker:
+            return marker + " F-001-AC-02"
+        return marker
+
     def run_validator(
         self, root: Path, mode: str, phase: str, *extra: str
     ) -> subprocess.CompletedProcess[str]:
@@ -111,25 +154,61 @@ class VibeCodingValidatorTests(unittest.TestCase):
         )
 
     def write_architecture(self, root: Path, mode: str) -> None:
-        docs = root / "docs"
-        docs.mkdir(parents=True, exist_ok=True)
-        marker = "F-001 F-001-AC-01" if mode == "greenfield" else "AUD-001"
-        headings = GREEN_HEADINGS if mode == "greenfield" else MIGRATION_HEADINGS
-        filename = "架构设计方案.md" if mode == "greenfield" else "架构迁移方案.md"
-        docs.joinpath(filename).write_text(
+        requirements_mode = mode in {"greenfield", "continuation"}
+        if requirements_mode:
+            write_requirement_package(root)
+        marker = "F-001 F-001-AC-01" if requirements_mode else "AUD-001"
+        headings = GREEN_HEADINGS if requirements_mode else MIGRATION_HEADINGS
+        architecture = (
+            root / ARCHITECTURE_DESIGN
+            if requirements_mode
+            else root / ARCHITECTURE_MIGRATION
+        )
+        route = {
+            "greenfield": (
+                "- 项目路线：新项目\n"
+                "- 旧项目参考：不参考\n"
+                "- 允许参考范围：N/A（不参考旧项目）\n"
+                "- 需求快照：`docs/产品需求/需求包清单.yaml`\n"
+            ),
+            "continuation": (
+                "- 项目路线：现有项目续建\n"
+                "- 旧项目参考：当前项目\n"
+                "- 允许参考范围：当前项目中与已确认需求直接相关的内容\n"
+                "- 需求快照：`docs/产品需求/需求包清单.yaml`\n"
+            ),
+            "migration": (
+                "- 项目路线：现有项目架构或技术栈迁移\n"
+                "- 旧项目参考：当前项目\n"
+                "- 允许参考范围：用户确认的迁移基线\n"
+            ),
+        }[mode]
+        architecture.parent.mkdir(parents=True, exist_ok=True)
+        architecture.write_text(
             doc(
                 headings[0],
                 headings,
                 f"{marker}：该章节包含足够具体的架构、测试、安全和回滚证据。",
+            ).replace(
+                "- 更新时间：2026-08-10\n",
+                "- 更新时间：2026-08-10\n" + route,
             ),
             encoding="utf-8",
         )
-        if mode == "greenfield":
-            docs.joinpath("PRD需求文档.md").write_text(
-                "# PRD需求文档\n- 文档状态：已确认\n## 功能详细设计\n"
-                "### F-001 账号创建\n#### 验收标准\n- `F-001-AC-01` 创建账号成功。\n",
-                encoding="utf-8",
-            )
+        domain_architecture = (
+            root / DOMAIN_ARCHITECTURE_DESIGN
+            if requirements_mode
+            else root / DOMAIN_ARCHITECTURE_MIGRATION
+        )
+        domain_architecture.parent.mkdir(parents=True, exist_ok=True)
+        domain_architecture.write_text(
+            doc(
+                DOMAIN_ARCHITECTURE_HEADINGS[0],
+                DOMAIN_ARCHITECTURE_HEADINGS,
+                f"{marker}：任务管理域包含可执行的边界、契约、验证与回退说明。",
+            ),
+            encoding="utf-8",
+        )
 
     def task_block(
         self, marker: str, status: str = "待开始", commit: str = "待生成"
@@ -156,6 +235,7 @@ class VibeCodingValidatorTests(unittest.TestCase):
     def write_plan(
         self, root: Path, marker: str, status: str = "待开始", commit: str = "待生成"
     ) -> None:
+        marker = self.expanded_marker(marker)
         body = "该章节包含完整、可执行且可复核的任务、数据、测试、集成与回滚说明。"
         text = doc(PLAN_HEADINGS[0], PLAN_HEADINGS, body)
         text = text.replace(
@@ -163,14 +243,41 @@ class VibeCodingValidatorTests(unittest.TestCase):
         )
         text = text.replace(
             "## 任务列表\n" + body,
+            "## 任务列表\n任务管理域任务见 `功能域/任务管理.md`。",
+        )
+        global_plan = root / GLOBAL_PLAN
+        global_plan.parent.mkdir(parents=True, exist_ok=True)
+        global_plan.write_text(text, encoding="utf-8")
+
+        domain_body = "该功能域包含完整、可执行且可复核的输入、任务、验证和集成说明。"
+        domain_text = doc(
+            DOMAIN_PLAN_HEADINGS[0], DOMAIN_PLAN_HEADINGS, domain_body
+        ).replace(
+            "## 任务列表\n" + domain_body,
             "## 任务列表\n" + self.task_block(marker, status, commit),
         )
-        (root / "docs" / "实施任务清单.md").write_text(text, encoding="utf-8")
+        domain_plan = root / DOMAIN_PLAN
+        domain_plan.parent.mkdir(parents=True, exist_ok=True)
+        domain_plan.write_text(domain_text, encoding="utf-8")
 
     def write_report(self, root: Path, marker: str, commit: str) -> None:
+        marker = self.expanded_marker(marker)
         body = f"{marker}、TASK-001 与 commit {commit} 已由真实命令和测试证据完成验证。"
-        (root / "docs" / "交付验收报告.md").write_text(
+        global_report = root / GLOBAL_REPORT
+        global_report.parent.mkdir(parents=True, exist_ok=True)
+        global_report.write_text(
             doc(REPORT_HEADINGS[0], REPORT_HEADINGS, body, status="已完成"),
+            encoding="utf-8",
+        )
+        domain_report = root / DOMAIN_REPORT
+        domain_report.parent.mkdir(parents=True, exist_ok=True)
+        domain_report.write_text(
+            doc(
+                DOMAIN_REPORT_HEADINGS[0],
+                DOMAIN_REPORT_HEADINGS,
+                body,
+                status="已完成",
+            ),
             encoding="utf-8",
         )
 
@@ -207,7 +314,7 @@ class VibeCodingValidatorTests(unittest.TestCase):
         existing_worktrees: str = "N/A（无既有 worktree）",
     ) -> None:
         self.write_plan(root, marker)
-        plan = root / "docs" / "实施任务清单.md"
+        plan = root / GLOBAL_PLAN
         text = plan.read_text(encoding="utf-8")
         foundation = textwrap.dedent(f"""
             ## 基础工程就绪
@@ -251,7 +358,7 @@ class VibeCodingValidatorTests(unittest.TestCase):
             self.write_plan(root, "F-001 F-001-AC-01")
             passed = self.run_validator(root, "greenfield", "plan")
             self.assertEqual(passed.returncode, 0, passed.stdout + passed.stderr)
-            plan = root / "docs" / "实施任务清单.md"
+            plan = root / DOMAIN_PLAN
             plan.write_text(
                 plan.read_text().replace("F-001-AC-01", "F-001-AC-99"),
                 encoding="utf-8",
@@ -260,6 +367,76 @@ class VibeCodingValidatorTests(unittest.TestCase):
             self.assertEqual(failed.returncode, 1)
             self.assertIn("PRD_TRACEABILITY", failed.stdout)
 
+    def test_existing_project_continuation_uses_confirmed_requirement_package(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            self.write_architecture(root, "continuation")
+            self.write_plan(root, "F-001 F-001-AC-01")
+
+            result = self.run_validator(root, "continuation", "plan")
+
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+    def test_unconfirmed_requirement_package_is_not_implementable(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            self.write_architecture(root, "greenfield")
+            manifest_path = root / "docs" / "产品需求" / "需求包清单.yaml"
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            manifest["status"] = "in_progress"
+            manifest_path.write_text(
+                json.dumps(manifest, ensure_ascii=False, indent=2) + "\n",
+                encoding="utf-8",
+            )
+
+            result = self.run_validator(root, "greenfield", "architecture")
+
+            self.assertEqual(result.returncode, 1)
+            self.assertIn("REQUIREMENTS_PACKAGE", result.stdout)
+            self.assertIn("PACKAGE_STATUS", result.stdout)
+
+    def test_new_project_reference_requires_an_explicit_allowed_scope(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            self.write_architecture(root, "greenfield")
+            path = root / ARCHITECTURE_DESIGN
+            text = path.read_text(encoding="utf-8").replace(
+                "- 旧项目参考：不参考\n- 允许参考范围：N/A（不参考旧项目）",
+                "- 旧项目参考：按用户指定范围\n- 允许参考范围：旧项目的公开 CLI 输入输出",
+            )
+            path.write_text(text, encoding="utf-8")
+            passed = self.run_validator(root, "greenfield", "architecture")
+            self.assertEqual(passed.returncode, 0, passed.stdout + passed.stderr)
+
+            path.write_text(
+                text.replace(
+                    "- 允许参考范围：旧项目的公开 CLI 输入输出",
+                    "- 允许参考范围：",
+                ),
+                encoding="utf-8",
+            )
+            failed = self.run_validator(root, "greenfield", "architecture")
+            self.assertEqual(failed.returncode, 1)
+            self.assertIn("REFERENCE_SCOPE", failed.stdout)
+
+    def test_legacy_root_documents_and_missing_domain_documents_are_rejected(
+        self,
+    ) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            self.write_architecture(root, "greenfield")
+            legacy = root / "docs" / "架构设计方案.md"
+            legacy.write_text("# legacy\n", encoding="utf-8")
+            (root / DOMAIN_ARCHITECTURE_DESIGN).unlink()
+
+            result = self.run_validator(root, "greenfield", "architecture")
+
+            self.assertEqual(result.returncode, 1)
+            self.assertIn("LEGACY_DOCUMENT_PATH", result.stdout)
+            self.assertIn("DOMAIN_DOCUMENT_REQUIRED", result.stdout)
+
     def test_migration_plan_requires_audit_traceability(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
@@ -267,7 +444,7 @@ class VibeCodingValidatorTests(unittest.TestCase):
             self.write_plan(root, "AUD-001")
             passed = self.run_validator(root, "migration", "plan")
             self.assertEqual(passed.returncode, 0, passed.stdout + passed.stderr)
-            plan = root / "docs" / "实施任务清单.md"
+            plan = root / DOMAIN_PLAN
             plan.write_text(
                 plan.read_text().replace("AUD-001", "AUD-999"),
                 encoding="utf-8",
@@ -279,7 +456,7 @@ class VibeCodingValidatorTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
             self.write_architecture(root, "greenfield")
-            path = root / "docs" / "架构设计方案.md"
+            path = root / ARCHITECTURE_DESIGN
             path.write_text(path.read_text() + "\nTODO\n", encoding="utf-8")
             result = self.run_validator(root, "greenfield", "architecture")
             self.assertEqual(result.returncode, 1)
@@ -290,7 +467,7 @@ class VibeCodingValidatorTests(unittest.TestCase):
             root = Path(temp)
             self.write_architecture(root, "greenfield")
             self.write_plan(root, "F-001 F-001-AC-01")
-            plan = root / "docs" / "实施任务清单.md"
+            plan = root / GLOBAL_PLAN
             plan.write_text(
                 plan.read_text(encoding="utf-8").replace(
                     "## 项目指令就绪", "## 项目指令状态"
@@ -326,7 +503,7 @@ class VibeCodingValidatorTests(unittest.TestCase):
                 baseline="当前已确认基线",
             )
             self.write_agent_instructions(root)
-            plan = root / "docs" / "实施任务清单.md"
+            plan = root / GLOBAL_PLAN
             plan.write_text(
                 plan.read_text(encoding="utf-8")
                 .replace("- 安装命令：python -m pip install -e .", "- 安装命令：未执行")
@@ -360,7 +537,7 @@ class VibeCodingValidatorTests(unittest.TestCase):
                 commit=governance,
                 baseline="readiness 执行时的当前 HEAD",
             )
-            plan = root / "docs" / "实施任务清单.md"
+            plan = root / GLOBAL_PLAN
             plan.write_text(
                 plan.read_text(encoding="utf-8")
                 .replace(
@@ -406,7 +583,7 @@ class VibeCodingValidatorTests(unittest.TestCase):
                 baseline="readiness 执行时的当前 HEAD",
             )
             self.write_agent_instructions(root)
-            plan = root / "docs" / "实施任务清单.md"
+            plan = root / GLOBAL_PLAN
             plan.write_text(
                 plan.read_text(encoding="utf-8").replace(
                     "- 基础工程提交：N/A（无需变更）",
@@ -666,7 +843,7 @@ class VibeCodingValidatorTests(unittest.TestCase):
             marker_rejected = self.run_validator(root, "greenfield", "delivery")
             self.assertIn("AGENT_FEATURE_BASELINE_UNKNOWN", marker_rejected.stdout)
 
-            plan = root / "docs" / "实施任务清单.md"
+            plan = root / GLOBAL_PLAN
             plan.write_text(
                 plan.read_text(encoding="utf-8").replace(
                     "- 功能开发基线：readiness 执行时的当前 HEAD",
@@ -676,8 +853,9 @@ class VibeCodingValidatorTests(unittest.TestCase):
             )
             root.joinpath("app.txt").write_text("feature\n", encoding="utf-8")
             feature_sha = self.commit_paths(root, "feat: add feature", "app.txt")
-            plan.write_text(
-                plan.read_text(encoding="utf-8")
+            domain_plan = root / DOMAIN_PLAN
+            domain_plan.write_text(
+                domain_plan.read_text(encoding="utf-8")
                 .replace("- 状态：待开始", "- 状态：已完成")
                 .replace("- Commit：待生成", f"- Commit：{feature_sha}")
                 .replace("- 集成状态：尚未集成。", "- 集成状态：已集成。"),
@@ -918,7 +1096,7 @@ class VibeCodingValidatorTests(unittest.TestCase):
                 ],
                 check=True,
             )
-            plan = root / "docs" / "实施任务清单.md"
+            plan = root / GLOBAL_PLAN
             plan.write_text(
                 plan.read_text(encoding="utf-8").replace(
                     "- 既有 Worktrees：N/A（无既有 worktree）",
@@ -982,7 +1160,7 @@ class VibeCodingValidatorTests(unittest.TestCase):
             self.write_readiness_plan(
                 root, "F-001 F-001-AC-01", commit=sha, baseline=sha
             )
-            plan = root / "docs" / "实施任务清单.md"
+            plan = root / DOMAIN_PLAN
             plan.write_text(
                 plan.read_text(encoding="utf-8")
                 .replace("- 状态：待开始", "- 状态：已完成")
@@ -1028,7 +1206,7 @@ class VibeCodingValidatorTests(unittest.TestCase):
                 commit="N/A（无需更新）",
                 baseline=sha,
             )
-            plan = root / "docs" / "实施任务清单.md"
+            plan = root / DOMAIN_PLAN
             plan.write_text(
                 plan.read_text(encoding="utf-8")
                 .replace("- 状态：待开始", "- 状态：已完成")
@@ -1046,7 +1224,7 @@ class VibeCodingValidatorTests(unittest.TestCase):
                 root, "greenfield", "delivery", "--require-clean"
             )
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-            plan = root / "docs" / "实施任务清单.md"
+            plan = root / DOMAIN_PLAN
             plan.write_text(plan.read_text().replace(sha, "deadbee"), encoding="utf-8")
             failed = self.run_validator(root, "greenfield", "delivery")
             self.assertIn("TASK_COMMIT_UNKNOWN", failed.stdout)
@@ -1097,7 +1275,7 @@ class VibeCodingValidatorTests(unittest.TestCase):
                 commit="N/A（无需更新）",
                 baseline=sha,
             )
-            plan = root / "docs" / "实施任务清单.md"
+            plan = root / DOMAIN_PLAN
             plan.write_text(
                 plan.read_text(encoding="utf-8")
                 .replace("- 状态：待开始", "- 状态：已完成")
@@ -1183,8 +1361,8 @@ class VibeCodingValidatorTests(unittest.TestCase):
                 "chore(scaffold): establish verified project foundation",
                 "app.txt",
                 ".gitignore",
-                "docs/架构设计方案.md",
-                "docs/PRD需求文档.md",
+                "docs/架构设计",
+                "docs/产品需求",
             )
 
             self.write_agent_instructions(root)
@@ -1214,7 +1392,7 @@ class VibeCodingValidatorTests(unittest.TestCase):
             readiness_record = self.commit_paths(
                 root,
                 "docs(plan): record implementation readiness",
-                "docs/实施任务清单.md",
+                "docs/实施任务",
             )
 
             readiness = self.run_validator(
@@ -1224,7 +1402,7 @@ class VibeCodingValidatorTests(unittest.TestCase):
                 readiness.returncode, 0, readiness.stdout + readiness.stderr
             )
 
-            plan = root / "docs" / "实施任务清单.md"
+            plan = root / GLOBAL_PLAN
             plan.write_text(
                 plan.read_text(encoding="utf-8").replace(
                     "- 功能开发基线：readiness 执行时的当前 HEAD",
@@ -1235,7 +1413,7 @@ class VibeCodingValidatorTests(unittest.TestCase):
             self.commit_paths(
                 root,
                 "docs(plan): freeze readiness baseline",
-                "docs/实施任务清单.md",
+                GLOBAL_PLAN.as_posix(),
             )
 
             worktree = root / ".worktrees" / "TASK-001"
@@ -1279,8 +1457,9 @@ class VibeCodingValidatorTests(unittest.TestCase):
                 text=True,
             )
 
-            plan.write_text(
-                plan.read_text(encoding="utf-8")
+            domain_plan = root / DOMAIN_PLAN
+            domain_plan.write_text(
+                domain_plan.read_text(encoding="utf-8")
                 .replace("- 状态：待开始", "- 状态：已完成")
                 .replace("- Commit：待生成", f"- Commit：{feature}")
                 .replace("- 集成状态：尚未集成。", "- 集成状态：已集成。")
@@ -1340,6 +1519,9 @@ class VibeCodingValidatorTests(unittest.TestCase):
                     target.joinpath("scripts", "validate_delivery.py").is_file()
                 )
                 self.assertTrue(target.joinpath("scripts", "validate_prd.py").is_file())
+                self.assertTrue(
+                    target.joinpath("scripts", "import_requirements.py").is_file()
+                )
                 self.assertTrue(
                     target.joinpath("scripts", "validate_agents_md.py").is_file()
                 )

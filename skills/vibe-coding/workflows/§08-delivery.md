@@ -2,10 +2,10 @@
 
 ## Phase 1: 固化交付证据
 
-使用 `templates/delivery-report.template.md` 创建或更新 `docs/交付验收报告.md`，至少包含：
+使用 `templates/delivery-report.template.md` 创建或更新 `docs/交付验收/交付验收报告.md`，并用 `templates/domain-delivery.template.md` 为每个功能域写 `docs/交付验收/功能域/<功能域>.md`。至少包含：
 
 - 基线与最终 HEAD；
-- 架构、任务和 PRD 产物；
+- 需求快照、架构与任务文档族；
 - 需求追踪矩阵；
 - 任务、Agent、worktree 与 commit 清单；
 - 实际运行的命令和结果；
@@ -21,7 +21,7 @@
 
 ## Phase 2: 更新任务清单
 
-将 `docs/实施任务清单.md` 中每个任务更新为：
+将 `docs/实施任务/功能域/<功能域>.md` 中每个任务更新为：
 
 - 完成、阻塞或取消；
 - commit SHA；
@@ -31,12 +31,14 @@
 
 不删除历史任务来制造 100% 完成率。
 
+同步更新 `docs/实施任务/实施任务清单.md` 的功能域状态、集成顺序和跨域验收结果，但不在全局文件复制每个任务正文。
+
 ## Phase 3: 最终一致性检查
 
 确认：
 
 - 架构文档、代码和目录一致；
-- PRD、任务、测试和提交闭环；
+- 需求包、任务、测试和提交闭环；
 - README 和运行说明没有过时；
 - Git 工作区干净；
 - 临时 worktree 已在安全集成后清理；

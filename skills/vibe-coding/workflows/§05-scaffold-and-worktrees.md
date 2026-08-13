@@ -32,7 +32,7 @@ Python 项目通常优先评估 `uv + pyproject.toml + Ruff + Pyright + pytest +
 
 在干净或隔离环境运行安装、启动、格式、Lint、类型、构建和 smoke test。
 
-将实际执行的安装命令、启动或等价 smoke 命令、基础测试命令、退出状态和关键结果写入任务清单的“基础工程就绪”章节。库或无常驻服务的项目也不能只写“不适用”，应使用导入、CLI `--help`、最小示例或等价可执行 smoke 验证入口。先从基线摘要回填 readiness 前已经存在的 worktree 清单；每项使用“路径 | 完整分支引用 | 既有用途”，没有则记录 `N/A（无既有 worktree）`。
+将实际执行的安装命令、启动或等价 smoke 命令、基础测试命令、退出状态和关键结果写入 `docs/实施任务/实施任务清单.md` 的“基础工程就绪”章节。库或无常驻服务的项目也不能只写“不适用”，应使用导入、CLI `--help`、最小示例或等价可执行 smoke 验证入口。先从基线摘要回填 readiness 前已经存在的 worktree 清单；每项使用“路径 | 完整分支引用 | 既有用途”，没有则记录 `N/A（无既有 worktree）`。
 
 全部通过后创建一个本地提交，例如：
 
@@ -93,12 +93,12 @@ docs(plan): record implementation readiness
 
 ## Phase 5: 执行 readiness 门禁
 
-更新 `docs/实施任务清单.md` 的“基础工程就绪”和“项目指令就绪”章节，然后运行：
+更新 `docs/实施任务/实施任务清单.md` 的“基础工程就绪”和“项目指令就绪”章节，然后运行：
 
 ```bash
 python3 <vibe-coding>/scripts/validate_delivery.py \
   <project-root> \
-  --mode <greenfield|migration> \
+  --mode <greenfield|continuation|migration> \
   --phase readiness \
   --require-clean \
   --strict

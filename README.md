@@ -31,17 +31,17 @@
 | [`shape-idea`](skills/shape-idea/)           | 将初步想法塑造成完整、无歧义的定义                                           |
 | [`build-skill`](skills/build-skill/)         | 按能力设计 <b>Frontmatter</b>，构建并审查高质量 <b>Agent Skill</b>           |
 | [`build-plugin`](skills/build-plugin/)       | 构建、升级或迁移双平台 <b>Plugin</b>                                         |
-| [`build-prd`](skills/build-prd/)             | 调研并生成决策完整的产品 <b>PRD</b>                                          |
-| [`vibe-coding`](skills/vibe-coding/)         | 从 <b>PRD</b> 或旧项目编排架构、<b>TDD</b>、多 <b>Agent</b> 开发与全链路验收 |
+| [`build-prd`](skills/build-prd/)             | 生成包含真实输入输出与行为样例的可复制产品需求包                              |
+| [`vibe-coding`](skills/vibe-coding/)         | 按需求包与项目路线编排架构、<b>TDD</b>、多 <b>Agent</b> 开发与全链路验收      |
 | [`build-readme`](skills/build-readme/)       | 探索项目并创建或更新 <b>GitHub</b> 风格 <b>README</b>                        |
 | [`build-agents-md`](skills/build-agents-md/) | 初始化或整体重构跨平台 <b>AGENTS.md</b> 与 <b>CLAUDE.md</b>                  |
 | [`handoff`](skills/handoff/)                 | 整理跨会话交接文档并生成可直接复制的接续提示词                               |
 
-<p><code>build-prd</code> 支持已有项目的全功能梳理，也能把尚不完整的想法完善为详细 <b>PRD</b>。它会调研当前竞品、活跃开源项目与适用的官方规范，逐项确认产品决策，并生成或规范化更新项目唯一的 <code>docs/PRD需求文档.md</code>。</p>
+<p><code>build-prd</code> 支持从已有项目提取完整对外行为，也能把尚不完整的想法完善为产品需求包。它先确认功能域地图，再逐域确认用户输入、追问、输出固定结构与语义、对外契约、异常边界和行为样例；大项目可在 <code>.build-goals/build-prd/</code> 保存已确认的逐域检查点，最终生成可独立复制和校验的 <code>docs/产品需求/</code>。</p>
 
 <p><code>build-skill</code> 会根据调用方式、参数、权限、上下文与硬性环境要求形成 <b>Frontmatter</b> 字段决策矩阵；实现后分别完成内容审查、文案审查、内容回归和适用的独立 <b>Reviewer</b> 审查。</p>
 
-<p><code>vibe-coding</code> 是端到端软件交付总控：它可以实现 <code>build-prd</code> 的确认产物，也可以审查并迁移已有低质量项目。架构方案和任务列表分别经过用户确认后，才会搭建脚手架；功能开发前会检查项目指令，只有缺失、失效或冲突时才调用 <code>build-agents-md</code>，并在完整内容确认、治理提交 <b>SHA</b> 冻结、既有 <b>worktree</b> 基线登记和 <b>readiness</b> 门禁通过后组织 <b>TDD</b>、多 <b>Agent</b> 与 <b>Git worktrees</b>，最终完成全链路验收。</p>
+<p><code>vibe-coding</code> 是端到端软件交付总控：它按用户原话选择“新项目只按需求实现”“新项目仅参考旧项目指定部分”“现有项目按需求续建”或“现有项目架构/技术栈迁移”。外部需求包会复制为目标项目本地快照，不与来源实时联动；架构方案和整体实施路线经过两次全局确认后，按功能域组织 <b>TDD</b>、多 <b>Agent</b> 与可选 <b>Git worktrees</b>，最终执行跨域端到端验收。</p>
 
 <p><code>build-readme</code> 会先了解代码、命令、测试、<b>CI</b>、文档和资源并提供具体修改预览；用户确认后才创建或更新 <b>README</b>，并分别报告静态检查、<b>GitHub</b> 渲染和未验证内容。</p>
 
@@ -56,7 +56,7 @@ flowchart LR
     A[Shape Idea] --> B{Build Goal}
     B --> C[Skill]
     B --> D[Plugin]
-    B --> E[PRD]
+    B --> E[Requirement Package]
     B --> F[README]
     B --> M[AGENTS.md]
     E --> G[Vibe Coding]
@@ -196,12 +196,28 @@ python3 skills/build-skill/scripts/validate_skill.py \
   --strict
 ```
 
-<p>验证 <code>build-prd</code> 生成的目标文档：</p>
+<p>验证 <code>build-prd</code> 生成的正式需求包：</p>
 
 ```bash
 python3 skills/build-prd/scripts/validate_prd.py \
-  /path/to/project/docs/PRD需求文档.md \
+  /path/to/project \
   --strict
+```
+
+<p>验证 <code>build-prd</code> 的逐功能域过程检查点：</p>
+
+```bash
+python3 skills/build-prd/scripts/validate_checkpoint.py \
+  /path/to/project \
+  --strict
+```
+
+<p>比较并导入外部需求包快照（默认只读；确认后添加 <code>--write</code>）：</p>
+
+```bash
+python3 skills/vibe-coding/scripts/import_requirements.py \
+  /path/to/source/docs/产品需求 \
+  /path/to/target
 ```
 
 <p>验证 <code>vibe-coding</code> 的架构、任务追踪和最终交付：</p>

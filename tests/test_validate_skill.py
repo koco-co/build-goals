@@ -372,12 +372,12 @@ class ValidateSkillTests(unittest.TestCase):
         expected = {
             "build-agents-md": "需要 Python 3.9+ 运行内置校验脚本。",
             "build-plugin": "需要互联网访问和 Python 3.9+ 运行内置静态校验脚本。",
-            "build-prd": "需要互联网访问和 Python 3.9+ 运行内置校验脚本。",
+            "build-prd": "需要互联网访问、Python 3.9+，以及对来源项目和目标文档目录的本地读写权限。",
             "build-readme": "需要 Python 3.9+ 运行内置校验脚本。",
             "build-skill": "需要互联网访问和 Python 3.9+ 运行内置静态校验脚本。",
             "handoff": None,
             "shape-idea": None,
-            "vibe-coding": "需要 Python 3.9+、Git、互联网访问及目标项目的构建与测试工具。",
+            "vibe-coding": "需要 Python 3.9+、Git、互联网访问、目标项目构建与测试工具；多 Agent 或 worktree 不可用时支持串行降级。",
         }
         prohibited = ("当前适配", "目前适配", "目前仅适配")
 
@@ -398,12 +398,12 @@ class ValidateSkillTests(unittest.TestCase):
         expected = {
             "build-agents-md": 'version: "1.2.0"',
             "build-plugin": 'version: "1.3.1"',
-            "build-prd": 'version: "1.0.1"',
+            "build-prd": 'version: "1.1.0"',
             "build-readme": 'version: "1.0.1"',
             "build-skill": 'version: "1.5.1"',
             "handoff": 'version: "1.1.1"',
             "shape-idea": 'version: "1.0.1"',
-            "vibe-coding": 'version: "1.2.1"',
+            "vibe-coding": 'version: "1.3.0"',
         }
 
         for name, version_line in expected.items():
@@ -458,6 +458,69 @@ class ValidateSkillTests(unittest.TestCase):
         ):
             with self.subTest(required=required):
                 self.assertIn(required, contract)
+
+    def test_build_prd_and_vibe_coding_define_portable_domain_workflow(self) -> None:
+        build_prd = REPO_ROOT / "skills" / "build-prd"
+        prd_contract = "\n".join(
+            path.read_text(encoding="utf-8")
+            for path in (
+                build_prd / "SKILL.md",
+                build_prd / "workflows" / "§02-domain-confirmation.md",
+                build_prd / "workflows" / "§03-authoring.md",
+                build_prd / "rules" / "prd-quality-standard.md",
+            )
+        )
+        for required in (
+            "docs/产品需求/",
+            ".build-goals/build-prd/",
+            "不按问题数量",
+            "固定结构",
+            "语义要求",
+            "运行时可变内容",
+            "normal",
+            "clarification",
+            "invalid",
+            "boundary",
+            "不能实施",
+        ):
+            with self.subTest(contract="build-prd", required=required):
+                self.assertIn(required, prd_contract)
+        for relative in (
+            "templates/requirement-manifest.template.yaml",
+            "templates/domain-requirements.template.md",
+            "templates/domain-behavior.template.yaml",
+            "templates/checkpoint-session.template.yaml",
+            "templates/checkpoint-domain.template.yaml",
+            "scripts/validate_checkpoint.py",
+        ):
+            self.assertTrue(build_prd.joinpath(relative).is_file(), relative)
+
+        vibe = REPO_ROOT / "skills" / "vibe-coding"
+        vibe_contract = "\n".join(
+            path.read_text(encoding="utf-8")
+            for path in (
+                vibe / "SKILL.md",
+                vibe / "workflows" / "§01-baseline-and-routing.md",
+                vibe / "workflows" / "§02-requirements-architecture.md",
+                vibe / "rules" / "orchestration-contract.md",
+            )
+        )
+        for required in (
+            "新项目，只按需求实现",
+            "新项目，参考旧项目的指定部分",
+            "现有项目，按需求续建",
+            "现有项目，架构或技术栈迁移",
+            "scripts/import_requirements.py",
+            "不会自动同步",
+            "不再询问",
+            "当前功能域",
+            "直接依赖",
+        ):
+            with self.subTest(contract="vibe-coding", required=required):
+                self.assertIn(required, vibe_contract)
+        self.assertTrue(
+            vibe.joinpath("prompts", "legacy-reference-inspector.agent.md").is_file()
+        )
 
     def test_build_agents_md_defines_nested_orchestration_contract(self) -> None:
         skill_root = REPO_ROOT / "skills" / "build-agents-md"

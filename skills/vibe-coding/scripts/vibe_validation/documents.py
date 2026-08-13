@@ -10,12 +10,28 @@ from typing import Optional
 from .model import Issue, add_issue
 
 ARCHITECTURE_PATHS = {
-    "greenfield": Path("docs/架构设计方案.md"),
-    "migration": Path("docs/架构迁移方案.md"),
+    "greenfield": Path("docs/架构设计/架构设计方案.md"),
+    "continuation": Path("docs/架构设计/架构设计方案.md"),
+    "migration": Path("docs/架构迁移/架构迁移方案.md"),
 }
-PLAN_PATH = Path("docs/实施任务清单.md")
-REPORT_PATH = Path("docs/交付验收报告.md")
-PRD_PATH = Path("docs/PRD需求文档.md")
+ARCHITECTURE_DOMAIN_DIRS = {
+    "greenfield": Path("docs/架构设计/功能域"),
+    "continuation": Path("docs/架构设计/功能域"),
+    "migration": Path("docs/架构迁移/功能域"),
+}
+PLAN_PATH = Path("docs/实施任务/实施任务清单.md")
+PLAN_DOMAIN_DIR = Path("docs/实施任务/功能域")
+REPORT_PATH = Path("docs/交付验收/交付验收报告.md")
+REPORT_DOMAIN_DIR = Path("docs/交付验收/功能域")
+REQUIREMENTS_PATH = Path("docs/产品需求")
+REQUIREMENTS_MODES = {"greenfield", "continuation"}
+LEGACY_DOCUMENT_PATHS = (
+    Path("docs/PRD需求文档.md"),
+    Path("docs/架构设计方案.md"),
+    Path("docs/架构迁移方案.md"),
+    Path("docs/实施任务清单.md"),
+    Path("docs/交付验收报告.md"),
+)
 
 ARCHITECTURE_HEADINGS = {
     "greenfield": (
@@ -47,6 +63,15 @@ ARCHITECTURE_HEADINGS = {
         "## 风险与验收",
     ),
 }
+ARCHITECTURE_HEADINGS["continuation"] = ARCHITECTURE_HEADINGS["greenfield"]
+DOMAIN_ARCHITECTURE_HEADINGS = (
+    "## 功能域边界",
+    "## 需求映射",
+    "## 组件与依赖",
+    "## 接口与数据契约",
+    "## 验证策略",
+    "## 风险与回退",
+)
 PLAN_HEADINGS = (
     "# 实施任务清单",
     "## 执行原则",
@@ -80,6 +105,20 @@ REPORT_HEADINGS = (
     "## 外部动作状态",
     "## 可复现命令",
 )
+DOMAIN_PLAN_HEADINGS = (
+    "## 功能域目标",
+    "## 输入与依赖",
+    "## 任务列表",
+    "## 功能域验证",
+    "## 集成与回滚",
+)
+DOMAIN_REPORT_HEADINGS = (
+    "## 完成范围",
+    "## 需求与任务追踪",
+    "## 实际验证",
+    "## 未验证与阻塞",
+    "## 集成结果",
+)
 PLACEHOLDERS = (
     (re.compile(r"\{\{[^{}\n]+\}\}"), "模板占位符"),
     (re.compile(r"(?i)\bTODO\b"), "TODO"),
@@ -90,6 +129,16 @@ PLACEHOLDERS = (
 
 
 def read_required(path: Path, root: Path, issues: list[Issue]) -> Optional[str]:
+    if path.is_symlink():
+        add_issue(
+            issues,
+            "error",
+            "DOCUMENT_SYMLINK",
+            path,
+            "交付文档必须是项目内普通文件，不能是符号链接。",
+            root,
+        )
+        return None
     if not path.is_file():
         add_issue(issues, "error", "FILE_REQUIRED", path, "缺少必需文件。", root)
         return None
@@ -98,6 +147,184 @@ def read_required(path: Path, root: Path, issues: list[Issue]) -> Optional[str]:
     except (OSError, UnicodeError) as exc:
         add_issue(issues, "error", "FILE_READ", path, f"无法以 UTF-8 读取：{exc}", root)
         return None
+
+
+def validate_legacy_document_paths(root: Path, issues: list[Issue]) -> None:
+    for relative in LEGACY_DOCUMENT_PATHS:
+        path = root / relative
+        if path.exists() or path.is_symlink():
+            add_issue(
+                issues,
+                "error",
+                "LEGACY_DOCUMENT_PATH",
+                path,
+                "旧的 docs 根目录产物路径已停用；请迁移到对应的文档族目录。",
+                root,
+            )
+
+
+def domain_document_paths(
+    directory: Path,
+    names: Iterable[str],
+    root: Path,
+    issues: list[Issue],
+) -> list[Path]:
+    """Resolve an exact domain document set and reject undeclared Markdown files."""
+
+    expected = {f"{name}.md" for name in names}
+    paths: list[Path] = []
+    for filename in sorted(expected):
+        path = directory / filename
+        if path.is_symlink() or not path.is_file():
+            add_issue(
+                issues,
+                "error",
+                "DOMAIN_DOCUMENT_REQUIRED",
+                path,
+                "缺少功能域普通文档，或该路径是符号链接。",
+                root,
+            )
+        else:
+            paths.append(path)
+    if directory.is_dir():
+        for path in sorted(directory.glob("*.md")):
+            if path.name not in expected:
+                add_issue(
+                    issues,
+                    "error",
+                    "DOMAIN_DOCUMENT_UNDECLARED",
+                    path,
+                    "功能域文档未出现在当前已确认的功能域集合中。",
+                    root,
+                )
+    return paths
+
+
+def discover_domain_names(
+    directory: Path, root: Path, issues: list[Issue]
+) -> list[str]:
+    if not directory.is_dir():
+        add_issue(
+            issues,
+            "error",
+            "DOMAIN_DOCUMENT_REQUIRED",
+            directory,
+            "至少需要一个功能域文档。",
+            root,
+        )
+        return []
+    names: list[str] = []
+    for path in sorted(directory.glob("*.md")):
+        if path.is_symlink() or not path.is_file():
+            add_issue(
+                issues,
+                "error",
+                "DOMAIN_DOCUMENT_REQUIRED",
+                path,
+                "功能域文档必须是普通文件。",
+                root,
+            )
+            continue
+        names.append(path.stem)
+    if not names:
+        add_issue(
+            issues,
+            "error",
+            "DOMAIN_DOCUMENT_REQUIRED",
+            directory,
+            "至少需要一个功能域 Markdown 文档。",
+            root,
+        )
+    return names
+
+
+def validate_route_metadata(
+    text: str, mode: str, path: Path, root: Path, issues: list[Issue]
+) -> None:
+    def field(label: str) -> Optional[str]:
+        match = re.search(
+            rf"(?m)^-[ \t]*{re.escape(label)}：[ \t]*(.*?)[ \t]*$", text
+        )
+        return match.group(1).strip() if match else None
+
+    route = field("项目路线")
+    reference = field("旧项目参考")
+    scope = field("允许参考范围")
+    if mode == "greenfield":
+        if route != "新项目":
+            add_issue(
+                issues,
+                "error",
+                "PROJECT_ROUTE",
+                path,
+                "项目路线必须是“新项目”。",
+                root,
+            )
+        if reference not in {"不参考", "按用户指定范围"}:
+            add_issue(
+                issues,
+                "error",
+                "REFERENCE_POLICY",
+                path,
+                "新项目必须明确不参考旧项目，或仅按用户指定范围参考。",
+                root,
+            )
+        if reference == "按用户指定范围" and (not scope or scope.startswith("N/A")):
+            add_issue(
+                issues,
+                "error",
+                "REFERENCE_SCOPE",
+                path,
+                "参考旧项目时必须写明用户授权的具体范围。",
+                root,
+            )
+    elif mode == "continuation":
+        if route != "现有项目续建":
+            add_issue(
+                issues,
+                "error",
+                "PROJECT_ROUTE",
+                path,
+                "项目路线必须是“现有项目续建”。",
+                root,
+            )
+        if reference != "当前项目" or not scope:
+            add_issue(
+                issues,
+                "error",
+                "REFERENCE_SCOPE",
+                path,
+                "续建路线必须明确当前项目及允许读取的范围。",
+                root,
+            )
+    else:
+        if route != "现有项目架构或技术栈迁移":
+            add_issue(
+                issues,
+                "error",
+                "PROJECT_ROUTE",
+                path,
+                "迁移路线必须明确为现有项目架构或技术栈迁移。",
+                root,
+            )
+        if reference != "当前项目" or not scope:
+            add_issue(
+                issues,
+                "error",
+                "REFERENCE_SCOPE",
+                path,
+                "迁移路线必须记录已确认的旧项目基线范围。",
+                root,
+            )
+    if mode in REQUIREMENTS_MODES and field("需求快照") != "`docs/产品需求/需求包清单.yaml`":
+        add_issue(
+            issues,
+            "error",
+            "REQUIREMENTS_SNAPSHOT",
+            path,
+            "架构文档必须固定引用项目内的需求包清单快照。",
+            root,
+        )
 
 
 def validate_headings(

@@ -9,6 +9,8 @@
 - 每个任务都有 commit SHA、验证命令和最终状态；
 - 没有用“基本完成”“大致支持”代替明确结果。
 
+先按 `docs/产品需求/需求包清单.yaml` 的功能域逐域核对，再检查跨域用户旅程和直接依赖契约。阶段需求包只验收清单纳入范围，但必须验证其外部依赖契约。
+
 ## Phase 2: 机械质量门禁
 
 按项目实际运行：
@@ -67,16 +69,24 @@
 
 项目指令最终复查必须区分阻断问题和一般建议。断链、错误目标、已证实失效的命令、目录或安全边界冲突、必要局部规则缺失、秘密或危险操作属于阻断项，重新调用 `build-agents-md` 并取得完整内容确认。纯精简、非关键背景和未证实的潜在过时只记录建议，不静默重写。
 
-## Phase 6: 独立复核与最终校验
+## Phase 6: 跨域端到端与独立复核
+
+全部功能域通过本域门禁后，至少执行：
+
+- 每条跨域用户旅程的端到端路径；
+- 功能域直接依赖的输入、输出、错误和恢复契约；
+- 共享身份、权限、状态、文案和数据一致性；
+- 需求包行为样例中的跨域正常、信息不足、无效或不适用和边界场景；
+- 全量回归与受影响的性能、安全、视觉和无障碍检查。
 
 调用独立 Reviewer，并按项目类型调用 UI 和 Security Reviewer。所有 Blocking Finding 修复后重跑。
 
-写入 `docs/交付验收报告.md` 后执行：
+写入 `docs/交付验收/交付验收报告.md` 和各功能域交付文件后执行：
 
 ```bash
 python3 <vibe-coding>/scripts/validate_delivery.py \
   <project-root> \
-  --mode <greenfield|migration> \
+  --mode <greenfield|continuation|migration> \
   --phase delivery \
   --require-clean \
   --strict

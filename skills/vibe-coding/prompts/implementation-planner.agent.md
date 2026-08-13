@@ -7,7 +7,7 @@
 ## Inputs
 
 - 已确认架构文档；
-- PRD 功能与验收 ID，或迁移 Findings；
+- 需求包当前功能域的功能、行为样例与验收 ID，或迁移 Findings；
 - 当前目录和代码基线；
 - Agent 与 worktree 能力；
 - 质量门禁；

@@ -1,7 +1,7 @@
 {
   "name": "build-goals",
-  "version": "1.8.1",
-  "description": "A focused toolkit for clarifying goals and delivering verifiable software projects, Agent Skills, plugins, product PRDs, GitHub READMEs, and project agent instructions.",
+  "version": "1.9.0",
+  "description": "A focused toolkit for clarifying goals and delivering verifiable software projects, Agent Skills, plugins, portable product requirement packages, GitHub READMEs, and project agent instructions.",
   "author": {
     "name": "koco-co",
     "url": "https://github.com/koco-co"
@@ -24,8 +24,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "Build Goals",
-    "shortDescription": "Deliver software, Skills, plugins, PRDs, READMEs, and agent guides",
-    "longDescription": "A focused toolkit that turns clarified goals and repository facts into designed, implemented, tested, validated, and deliverable software projects, Agent Skills, Claude Code or Codex plugins, product requirements documents, GitHub READMEs, and project agent instructions.",
+    "shortDescription": "Deliver software, Skills, plugins, requirement packages, READMEs, and agent guides",
+    "longDescription": "A focused toolkit that turns clarified goals and repository facts into designed, implemented, tested, validated, and deliverable software projects, Agent Skills, Claude Code or Codex plugins, portable product requirement packages, GitHub READMEs, and project agent instructions.",
     "developerName": "koco-co",
     "category": "Productivity",
     "capabilities": [
@@ -37,8 +37,8 @@
     "defaultPrompt": [
       "Use shape-idea to turn a rough idea into a clear scope with fully resolved decisions.",
       "Use build-skill or build-plugin to create a verifiable Agent capability.",
-      "Use build-prd to produce a research-backed, fully decided product requirements document.",
-      "Use vibe-coding to implement a confirmed PRD or modernize an existing project through architecture approval, task approval, conditional project-instruction readiness, TDD, multi-agent delivery, and end-to-end validation.",
+      "Use build-prd to produce a research-backed, domain-sliced product requirement package with representative inputs, outputs, behavior samples, and acceptance contracts.",
+      "Use vibe-coding to build from a confirmed requirement snapshot, optionally reference only user-authorized parts of an old project, continue an existing project, or migrate its architecture through two global approvals, TDD, multi-agent delivery, and cross-domain validation.",
       "Use build-readme to explore a repository and create or update its GitHub README after a confirmed preview.",
       "Use build-agents-md to initialize or fully restructure AGENTS.md and its CLAUDE.md single-source link after a confirmed full preview, or handoff to prepare the next session."
     ],
