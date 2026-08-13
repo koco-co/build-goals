@@ -21,7 +21,7 @@ def _expanded_marker(marker: str) -> str:
     return " ".join(parts)
 
 
-def _write_architecture(self: _VibeCases, root: Path, mode: str) -> None:
+def _write_architecture(self, root: Path, mode: str) -> None:
     _original_write_architecture(self, root, mode)
     if mode != "migration":
         return
