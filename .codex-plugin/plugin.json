@@ -1,6 +1,6 @@
 {
   "name": "build-goals",
-  "version": "1.9.1",
+  "version": "1.9.0",
   "description": "A focused toolkit for clarifying goals and delivering verifiable software projects, Agent Skills, plugins, portable product requirement packages, GitHub READMEs, and project agent instructions.",
   "author": {
     "name": "koco-co",

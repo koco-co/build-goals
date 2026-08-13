@@ -6,7 +6,7 @@ from __future__ import annotations
 import json
 import sys
 from pathlib import Path
-from typing import Mapping, Optional, Sequence
+from typing import Optional, Sequence
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 if str(SCRIPT_DIR) not in sys.path:
@@ -90,17 +90,18 @@ def _validate_claude_marketplace(plugin_root: Path, report: Report) -> None:
             matched_manifest = True
 
         version = item.get("version")
-        if not isinstance(version, str) or _core.SEMVER_RE.fullmatch(version) is None:
-            _core.add_issue(report.issues, "error", "CLAUDE_MARKETPLACE_VERSION", path, f"plugins[{index}].version 必须使用 SemVer。", plugin_root)
-        elif entry_name == manifest_name and manifest_version and version != manifest_version:
-            _core.add_issue(report.issues, "error", "CLAUDE_MARKETPLACE_VERSION_MISMATCH", path, f"Marketplace 中 {entry_name!r} 的版本 {version!r} 与 Claude Plugin Manifest {manifest_version!r} 不一致。", plugin_root)
+        if version is not None:
+            if not isinstance(version, str) or _core.SEMVER_RE.fullmatch(version) is None:
+                _core.add_issue(report.issues, "error", "CLAUDE_MARKETPLACE_VERSION", path, f"plugins[{index}].version 存在时必须使用 SemVer。", plugin_root)
+            elif entry_name == manifest_name and manifest_version and version != manifest_version:
+                _core.add_issue(report.issues, "error", "CLAUDE_MARKETPLACE_VERSION_MISMATCH", path, f"Marketplace 中 {entry_name!r} 的版本 {version!r} 与 Claude Plugin Manifest {manifest_version!r} 不一致。", plugin_root)
 
-        if not _nonempty(item.get("description")):
-            _core.add_issue(report.issues, "error", "CLAUDE_MARKETPLACE_DESCRIPTION", path, f"plugins[{index}].description 必须是非空字符串。", plugin_root)
-
-        author = item.get("author")
-        if not isinstance(author, dict) or not _nonempty(author.get("name")):
-            _core.add_issue(report.issues, "error", "CLAUDE_MARKETPLACE_AUTHOR", path, f"plugins[{index}].author 必须包含非空 name。", plugin_root)
+        if "description" in item and not _nonempty(item.get("description")):
+            _core.add_issue(report.issues, "error", "CLAUDE_MARKETPLACE_DESCRIPTION", path, f"plugins[{index}].description 存在时必须是非空字符串。", plugin_root)
+        if "author" in item:
+            author = item.get("author")
+            if not isinstance(author, dict) or not _nonempty(author.get("name")):
+                _core.add_issue(report.issues, "error", "CLAUDE_MARKETPLACE_AUTHOR", path, f"plugins[{index}].author 存在时必须包含非空 name。", plugin_root)
 
         source = item.get("source")
         if isinstance(source, str) and source.startswith("./"):

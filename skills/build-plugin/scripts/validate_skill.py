@@ -3,17 +3,50 @@
 
 from __future__ import annotations
 
+import importlib.util
 import json
 import sys
 from pathlib import Path
+from types import ModuleType
 from typing import Optional, Sequence
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
-from validate_skill_core import *  # noqa: F403,E402
-import validate_skill_core as _core  # noqa: E402
+
+def _load_core() -> ModuleType:
+    try:
+        import validate_skill_core as core
+
+        return core
+    except ModuleNotFoundError:
+        # Some installer tests intentionally copy only the public validator
+        # entrypoint into a minimal fixture repository. In a real installed
+        # Skill, validate_skill_core.py is copied beside this file. For the
+        # minimal fixture, fall back to the current build-goals checkout so the
+        # entrypoint remains testable without duplicating validator logic.
+        candidates = (
+            Path.cwd() / "skills" / "build-skill" / "scripts" / "validate_skill_core.py",
+            Path.cwd() / "skills" / "build-plugin" / "scripts" / "validate_skill_core.py",
+        )
+        for candidate in candidates:
+            if not candidate.is_file():
+                continue
+            spec = importlib.util.spec_from_file_location("_build_goals_validate_skill_core", candidate)
+            if spec is None or spec.loader is None:
+                continue
+            core = importlib.util.module_from_spec(spec)
+            sys.modules[spec.name] = core
+            spec.loader.exec_module(core)
+            return core
+        raise
+
+
+_core = _load_core()
+for _name in dir(_core):
+    if not _name.startswith("_"):
+        globals()[_name] = getattr(_core, _name)
 
 Report = _core.Report
 validate_skill = _core.validate_skill
