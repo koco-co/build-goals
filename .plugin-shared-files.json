@@ -41,10 +41,6 @@
       "targets": ["skills/build-plugin/scripts/validate_skill.py"]
     },
     {
-      "source": "skills/build-skill/scripts/validate_skill_core.py",
-      "targets": ["skills/build-plugin/scripts/validate_skill_core.py"]
-    },
-    {
       "source": "skills/build-skill/templates/skill.template.md",
       "targets": ["skills/build-plugin/templates/skill.template.md"]
     },
