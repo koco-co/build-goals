@@ -1,10 +1,14 @@
 # 基线、路线与需求快照
 
+开始本工作流前先读取 `../rules/workflow-state-and-permissions.md`。基线阶段固定处于 `baseline_readonly`；本文件不得扩大该状态的写入或 Git 权限。
+
 ## 1. 保护当前工作
 
 记录项目绝对路径、当前分支与 HEAD、`git status --short`、`git worktree list --porcelain`、最近提交和所有未提交文件。全部现有改动都属于用户；只读检查，不执行 reset、clean、stash、强制 checkout、历史改写或全仓自动格式化。
 
-目标不是 Git 仓库时记录事实，不为满足流程擅自初始化。发现并发 Agent、其他 worktree 或会话外提交时，建立所有权表并避开重叠修改。
+目标不是 Git 仓库时记录事实并立即暂停，说明后续本地原子提交与 worktree 流程需要 Git，然后只询问用户是否初始化 Git。用户同意后才执行初始化并重新建立完整基线；用户拒绝时停止本 Skill，不为满足流程擅自初始化，也不静默降级成无 Git 交付。
+
+发现并发 Agent、其他 worktree 或会话外提交时，建立所有权表并避开重叠修改。
 
 readiness 前已经存在的非当前 worktree 必须按“路径 | 完整分支引用 | 既有用途”冻结登记；不存在时记录 `N/A（无既有 worktree）`。
 
@@ -44,7 +48,7 @@ readiness 前已经存在的非当前 worktree 必须按“路径 | 完整分支
 
 用户自然语言已经明确时不得再让用户选择编号。只有确实存在多种合理解释且会改变读取范围或实施方式时，提出一个带推荐答案的路线问题。
 
-## 4. 校验并导入需求快照
+## 4. 校验并比较需求快照
 
 路线 1–3 必须先运行：
 
@@ -52,17 +56,19 @@ readiness 前已经存在的非当前 worktree 必须按“路径 | 完整分支
 python3 <vibe-coding>/scripts/validate_prd.py <requirement-source> --strict
 ```
 
-只接受 `status=confirmed` 的完整包，或范围闭合、外部依赖契约明确的正式阶段包。`.build-goals/build-prd/`、旧的单文件 PRD、草稿和哈希漂移包均不可实施。
+只接受 `status=confirmed` 的完整包，或范围、外部依赖和验收条件都已明确的正式阶段包。`.build-goals/build-prd/`、旧的单文件 PRD、草稿和哈希漂移包均不可实施。
 
-来源不在目标项目时先只读比较：
+来源不在目标项目时只读比较：
 
 ```text
 python3 <vibe-coding>/scripts/import_requirements.py <requirement-source> <target-project>
 ```
 
-输出变化功能域、功能和文件。首次导入在当前已确认任务范围内使用 `--write`；目标已有不同快照时，必须先向用户说明影响并得到明确替换确认，再使用 `--write --replace`。导入必须复制普通文件到 `docs/产品需求/`，记录来源、导入时间和来源清单哈希；禁止符号链接或运行时读取来源项目。
+输出变化功能域、功能和文件。`baseline_readonly` 阶段禁止使用 `--write` 或 `--replace`；第一次架构确认后才进入 `architecture_approved`，届时按 `§04-plan-and-approval.md` 固定本地需求快照。
 
-不会自动同步来源更新。每次更新都重新比较、说明影响并单独确认。
+目标已有不同快照时，此阶段只展示差异和影响，不替换文件。替换必须在第一次架构确认后再次说明受影响功能域、功能和文件，并取得明确替换确认后执行 `--write --replace`。
+
+不会自动同步来源更新。每次更新都重新比较、说明影响并按统一状态表处理写入权限。
 
 ## 5. 形成基线摘要
 
@@ -70,10 +76,10 @@ python3 <vibe-coding>/scripts/import_requirements.py <requirement-source> <targe
 
 - 用户选择的路线及原话依据；
 - 允许读取的旧项目范围，或明确“不读取旧项目”；
-- 需求包 ID、版本、类型、来源、状态、功能域和校验结果；
+- 需求包 ID、版本、类型、来源标识、状态、功能域和校验结果；
 - 当前 HEAD、工作区、已有 worktrees 和保护方式；
 - 工具链、入口、测试、CI 和项目指令初步状态；
 - 可用 Agent、浏览器、worktree 和验证能力；
 - 下一阶段只读调研范围与真实阻塞。
 
-完成前不得修改项目。需求快照的首次复制属于用户已要求实施该包时的准备动作；已有快照替换仍需明确确认。
+完成前不得修改目标项目。第一次架构确认前，需求快照首次复制也不属于例外写入。
