@@ -1,0 +1,24 @@
+{
+  "name": "@koco-co/dsh-build-goals",
+  "version": "1.9.1",
+  "description": "DeepSeek Harness plugin bundle distributing the build-goals skill collection (shape-idea, build-skill, build-plugin, build-prd, vibe-coding, build-readme, build-agents-md, handoff) as bundled user-invocable skills.",
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib/index.js",
+    "lib/skills.generated.js",
+    "assets",
+    "cordis.patch.yml",
+    "README.md"
+  ],
+  "license": "UNLICENSED",
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  }
+}

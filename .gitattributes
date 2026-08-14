@@ -1,0 +1,3 @@
+# Generated mirrors owned by sync scripts — collapse in PR diffs, never edit.
+packages/dsh-build-goals/assets/** linguist-generated
+packages/dsh-build-goals/lib/skills.generated.js linguist-generated

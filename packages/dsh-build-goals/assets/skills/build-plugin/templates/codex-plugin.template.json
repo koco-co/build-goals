@@ -1,0 +1,6 @@
+{
+  "name": "<plugin-name>",
+  "version": "0.1.0",
+  "description": "<plugin-description>",
+  "skills": "./skills/"
+}

@@ -1,0 +1,22 @@
+{
+  "schema_version": "1.0",
+  "status": "in_progress",
+  "source": {
+    "project": "{{来源项目绝对路径或产品想法标识}}",
+    "revision": "{{commit-sha 或输入版本}}"
+  },
+  "domain_map_confirmed_at": "{{ISO-8601 时间}}",
+  "domains": [
+    {
+      "id": "{{domain-id}}",
+      "name": "{{功能域名称}}",
+      "dependencies": [],
+      "checkpoint": "功能域/{{domain-id}}.yaml"
+    }
+  ],
+  "completed_domains": [],
+  "current_domain": "{{domain-id}}",
+  "pending_domains": [
+    "{{domain-id}}"
+  ]
+}

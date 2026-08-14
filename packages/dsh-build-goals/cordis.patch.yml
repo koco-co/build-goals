@@ -1,0 +1,9 @@
+# dsh-build-goals bundle patch: mount the bundled build-goals skill provider.
+
+# The `skills` registry service is provided by the base layer, so this row
+# only registers a provider on it. Users can override any bundled skill by
+# placing a same-named bundle in ~/.dsh/skills/ (filesystem provider rank 400
+# beats the bundled rank 600).
+- insert:
+    - id: build-goals-skill-provider
+      name: '@koco-co/dsh-build-goals'

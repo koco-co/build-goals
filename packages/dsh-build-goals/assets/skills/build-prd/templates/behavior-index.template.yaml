@@ -1,0 +1,16 @@
+{
+  "schema_version": "1.0",
+  "package_id": "{{package-id}}",
+  "domains": [
+    {
+      "id": "{{domain-id}}",
+      "file": "{{功能域名称}}.yaml",
+      "sample_ids": [
+        "SAMPLE-{{DOMAIN}}-001",
+        "SAMPLE-{{DOMAIN}}-002",
+        "SAMPLE-{{DOMAIN}}-003",
+        "SAMPLE-{{DOMAIN}}-004"
+      ]
+    }
+  ]
+}

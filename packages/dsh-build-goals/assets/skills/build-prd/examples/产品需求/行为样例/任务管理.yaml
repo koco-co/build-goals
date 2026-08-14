@@ -1,0 +1,268 @@
+{
+  "schema_version": "1.0",
+  "domain_id": "task",
+  "samples": [
+    {
+      "id": "SAMPLE-TASK-001",
+      "feature_id": "F-001",
+      "kind": "normal",
+      "user_input": "预约牙医",
+      "starting_state": [
+        "用户已进入任务页"
+      ],
+      "expected_behavior": [
+        "校验名称",
+        "创建任务并显示结果"
+      ],
+      "expected_output": "列表顶部显示“预约牙医 · 未完成”，并提示“任务已创建”。",
+      "output_contract": {
+        "exact": [
+          "任务名称、未完成状态和成功文案"
+        ],
+        "semantic": [
+          "解释任务已经创建"
+        ],
+        "runtime": [
+          "创建时间和内部 ID 允许变化"
+        ]
+      },
+      "assertions": [
+        "满足 F-001-AC-01"
+      ],
+      "forbidden": [
+        "不得只返回内部 ID"
+      ],
+      "sensitive_data": "none"
+    },
+    {
+      "id": "SAMPLE-TASK-002",
+      "feature_id": "F-001",
+      "kind": "clarification",
+      "user_input": "帮我创建一个任务",
+      "starting_state": [
+        "用户尚未提供任务名称"
+      ],
+      "expected_behavior": [
+        "只追问缺失的任务名称"
+      ],
+      "expected_output": "询问“任务名称是什么？”",
+      "output_contract": {
+        "exact": [
+          "追问对象必须是任务名称"
+        ],
+        "semantic": [
+          "问题必须让用户知道应补充什么"
+        ],
+        "runtime": [
+          "无运行时变量"
+        ]
+      },
+      "assertions": [
+        "没有在信息不足时创建任务"
+      ],
+      "forbidden": [
+        "不得猜测任务名称"
+      ],
+      "sensitive_data": "none"
+    },
+    {
+      "id": "SAMPLE-TASK-003",
+      "feature_id": "F-001",
+      "kind": "invalid",
+      "user_input": "",
+      "starting_state": [
+        "用户已进入任务页"
+      ],
+      "expected_behavior": [
+        "拒绝空名称并保留输入位置"
+      ],
+      "expected_output": "显示“请输入任务名称”并聚焦任务名称输入框。",
+      "output_contract": {
+        "exact": [
+          "错误文案和焦点位置"
+        ],
+        "semantic": [
+          "说明缺少任务名称"
+        ],
+        "runtime": [
+          "无运行时变量"
+        ]
+      },
+      "assertions": [
+        "满足 F-001-AC-02"
+      ],
+      "forbidden": [
+        "不得创建空名称任务"
+      ],
+      "sensitive_data": "none"
+    },
+    {
+      "id": "SAMPLE-TASK-004",
+      "feature_id": "F-001",
+      "kind": "boundary",
+      "user_input": "任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任任",
+      "starting_state": [
+        "用户已进入任务页"
+      ],
+      "expected_behavior": [
+        "接受 80 字符上限输入并原样创建"
+      ],
+      "expected_output": "任务创建成功，名称保持完整 80 个字符。",
+      "output_contract": {
+        "exact": [
+          "任务名称必须与输入的 80 个字符完全一致"
+        ],
+        "semantic": [
+          "说明任务创建成功"
+        ],
+        "runtime": [
+          "创建时间和内部 ID 允许变化"
+        ]
+      },
+      "assertions": [
+        "实际 user_input 长度必须为 80"
+      ],
+      "forbidden": [
+        "不得截断任务名称",
+        "不得错误提示长度超限"
+      ],
+      "sensitive_data": "none"
+    },
+    {
+      "id": "SAMPLE-TASK-005",
+      "feature_id": "F-002",
+      "kind": "normal",
+      "user_input": {
+        "task": "预约牙医",
+        "action": "complete"
+      },
+      "starting_state": [
+        "“预约牙医”存在且状态为未完成"
+      ],
+      "expected_behavior": [
+        "定位任务并更新为已完成"
+      ],
+      "expected_output": "列表项显示“预约牙医 · 已完成”，并提示“任务已完成”。",
+      "output_contract": {
+        "exact": [
+          "原任务名称和已完成状态"
+        ],
+        "semantic": [
+          "说明目标任务已经完成"
+        ],
+        "runtime": [
+          "完成时间允许变化"
+        ]
+      },
+      "assertions": [
+        "满足 F-002-AC-01"
+      ],
+      "forbidden": [
+        "不得删除原任务"
+      ],
+      "sensitive_data": "none"
+    },
+    {
+      "id": "SAMPLE-TASK-006",
+      "feature_id": "F-002",
+      "kind": "clarification",
+      "user_input": {
+        "action": "complete"
+      },
+      "starting_state": [
+        "列表中存在多个任务"
+      ],
+      "expected_behavior": [
+        "只追问需要完成哪一项任务"
+      ],
+      "expected_output": "询问“要完成哪一项任务？”",
+      "output_contract": {
+        "exact": [
+          "追问对象必须是目标任务"
+        ],
+        "semantic": [
+          "让用户可以唯一指定目标"
+        ],
+        "runtime": [
+          "无运行时变量"
+        ]
+      },
+      "assertions": [
+        "满足 F-002-AC-02"
+      ],
+      "forbidden": [
+        "不得任意选择一个任务"
+      ],
+      "sensitive_data": "none"
+    },
+    {
+      "id": "SAMPLE-TASK-007",
+      "feature_id": "F-002",
+      "kind": "invalid",
+      "user_input": {
+        "task": "不存在的任务",
+        "action": "complete"
+      },
+      "starting_state": [
+        "列表中没有该名称任务"
+      ],
+      "expected_behavior": [
+        "拒绝更新并保留列表"
+      ],
+      "expected_output": "显示“未找到该任务”。",
+      "output_contract": {
+        "exact": [
+          "错误文案"
+        ],
+        "semantic": [
+          "说明目标不存在并允许重新选择"
+        ],
+        "runtime": [
+          "无运行时变量"
+        ]
+      },
+      "assertions": [
+        "没有修改其他任务"
+      ],
+      "forbidden": [
+        "不得创建替代任务"
+      ],
+      "sensitive_data": "none"
+    },
+    {
+      "id": "SAMPLE-TASK-008",
+      "feature_id": "F-002",
+      "kind": "boundary",
+      "user_input": {
+        "task": "预约牙医",
+        "action": "complete"
+      },
+      "starting_state": [
+        "“预约牙医”已经是已完成状态"
+      ],
+      "expected_behavior": [
+        "保持已完成状态并返回幂等反馈"
+      ],
+      "expected_output": "“预约牙医”仍显示“已完成”，不产生重复任务。",
+      "output_contract": {
+        "exact": [
+          "任务名称和已完成状态保持不变"
+        ],
+        "semantic": [
+          "说明当前状态无需重复变更"
+        ],
+        "runtime": [
+          "完成时间可以保持原值"
+        ]
+      },
+      "assertions": [
+        "重复完成不会改变任务数量"
+      ],
+      "forbidden": [
+        "不得恢复为未完成",
+        "不得新增重复任务"
+      ],
+      "sensitive_data": "none"
+    }
+  ]
+}

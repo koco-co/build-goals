@@ -6,6 +6,7 @@
 
 [![Claude Code](https://img.shields.io/badge/Claude_Code-Plugin-D97757?logo=anthropic&logoColor=white&cacheSeconds=3600)](https://code.claude.com/docs/en/plugins)
 [![Codex](https://img.shields.io/badge/Codex-Supported-000000?style=flat-square&logo=openai&logoColor=white&cacheSeconds=3600)](https://developers.openai.com/plugins/)
+[![DeepSeek Harness](https://img.shields.io/badge/DeepSeek_Harness-Plugin-4D6BFE?cacheSeconds=3600)](https://github.com/deepseek-ai/deepseek-harness)
 [![Agent Skills](https://img.shields.io/badge/Agent_Skills-Compatible-2563EB?cacheSeconds=3600)](https://github.com/agentskills/agentskills)
 [![Validate Plugin](https://github.com/koco-co/build-goals/actions/workflows/validate-skills.yml/badge.svg)](https://github.com/koco-co/build-goals/actions/workflows/validate-skills.yml)
 [![Python](https://img.shields.io/badge/Python-3.9%2B-3776AB?logo=python&logoColor=white&cacheSeconds=3600)](https://www.python.org/)
@@ -17,25 +18,25 @@
 
 <h2 align="center">𝑶𝒗𝒆𝒓𝒗𝒊𝒆𝒘 · 简介</h2>
 
-<p><code>build-goals</code> 是一个持续演进与沉淀的 <b>Agent</b> 目标构建仓库。它既是可以直接加载的 <b>Claude Code</b> 与 <b>Codex</b> 双平台 <b>Plugin</b>，也保留单个 <b>Skill</b> 的独立安装方式。</p>
+<p><code>build-goals</code> 是一个持续演进与沉淀的 <b>Agent</b> 目标构建仓库。它既是可以直接加载的 <b>Claude Code</b>、<b>Codex</b> 与 <b>DeepSeek Harness</b> 三平台 <b>Plugin</b>，也保留单个 <b>Skill</b> 的独立安装方式。</p>
 
-- 当前适配 <b>Claude Code</b> 与 <b>Codex</b>。
+- 当前适配 <b>Claude Code</b>、<b>Codex</b> 与 <b>DeepSeek Harness</b>。
 - 其他 <b>Coding Agent</b> 尚未声明兼容；新增平台前会先核对真实能力与契约。
 
 <a id="capabilities"></a>
 
 <h2 align="center">𝑪𝒂𝒑𝒂𝒃𝒊𝒍𝒊𝒕𝒊𝒆𝒔 · 已收录能力</h2>
 
-| <b>Skill</b>                                 | 作用                                                                         |
-| -------------------------------------------- | ---------------------------------------------------------------------------- |
-| [`shape-idea`](skills/shape-idea/)           | 将初步想法塑造成完整、无歧义的定义                                           |
-| [`build-skill`](skills/build-skill/)         | 按能力设计 <b>Frontmatter</b>，构建并审查高质量 <b>Agent Skill</b>           |
-| [`build-plugin`](skills/build-plugin/)       | 构建、升级或迁移双平台 <b>Plugin</b>                                         |
-| [`build-prd`](skills/build-prd/)             | 生成包含真实输入输出与行为样例的可复制产品需求包                              |
-| [`vibe-coding`](skills/vibe-coding/)         | 按需求包与项目路线编排架构、<b>TDD</b>、多 <b>Agent</b> 开发与全链路验收      |
-| [`build-readme`](skills/build-readme/)       | 探索项目并创建或更新 <b>GitHub</b> 风格 <b>README</b>                        |
-| [`build-agents-md`](skills/build-agents-md/) | 初始化或整体重构跨平台 <b>AGENTS.md</b> 与 <b>CLAUDE.md</b>                  |
-| [`handoff`](skills/handoff/)                 | 整理跨会话交接文档并生成可直接复制的接续提示词                               |
+| <b>Skill</b>                                 | 作用                                                                     |
+| -------------------------------------------- | ------------------------------------------------------------------------ |
+| [`shape-idea`](skills/shape-idea/)           | 将初步想法塑造成完整、无歧义的定义                                       |
+| [`build-skill`](skills/build-skill/)         | 按能力设计 <b>Frontmatter</b>，构建并审查高质量 <b>Agent Skill</b>       |
+| [`build-plugin`](skills/build-plugin/)       | 构建、升级或迁移双平台 <b>Plugin</b>                                     |
+| [`build-prd`](skills/build-prd/)             | 生成包含真实输入输出与行为样例的可复制产品需求包                         |
+| [`vibe-coding`](skills/vibe-coding/)         | 按需求包与项目路线编排架构、<b>TDD</b>、多 <b>Agent</b> 开发与全链路验收 |
+| [`build-readme`](skills/build-readme/)       | 探索项目并创建或更新 <b>GitHub</b> 风格 <b>README</b>                    |
+| [`build-agents-md`](skills/build-agents-md/) | 初始化或整体重构跨平台 <b>AGENTS.md</b> 与 <b>CLAUDE.md</b>              |
+| [`handoff`](skills/handoff/)                 | 整理跨会话交接文档并生成可直接复制的接续提示词                           |
 
 <p><code>build-prd</code> 支持从已有项目提取完整对外行为，也能把尚不完整的想法完善为产品需求包。它先确认功能域地图，再逐域确认用户输入、追问、输出固定结构与语义、对外契约、异常边界和行为样例；大项目可在 <code>.build-goals/build-prd/</code> 保存已确认的逐域检查点，最终生成可独立复制和校验的 <code>docs/产品需求/</code>。</p>
 
@@ -119,6 +120,17 @@ build-goals/
 │   ├── build-readme/
 │   ├── build-agents-md/
 │   └── handoff/
+├── packages/
+│   └── dsh-build-goals/
+│       ├── package.json
+│       ├── cordis.patch.yml
+│       ├── lib/
+│       │   ├── index.js
+│       │   └── skills.generated.js
+│       ├── assets/
+│       │   └── skills/
+│       └── scripts/
+│           └── sync_skills.py
 └── tests/
 ```
 
@@ -148,6 +160,16 @@ codex plugin marketplace list
 codex plugin add build-goals@build-goals
 ```
 
+<a id="deepseek-harness"></a>
+
+<h3 align="center">𝑫𝒆𝒆𝒑𝑺𝒆𝒆𝒌 𝑯𝒂𝒓𝒏𝒆𝒔𝒔 · 添加 𝑫𝑺𝑯 𝑷𝒍𝒖𝒈𝒊𝒏</h3>
+
+```bash
+dsh plugin --profile web add 'github:koco-co/build-goals#path:packages/dsh-build-goals'
+```
+
+<p>需要 <b>pnpm</b> 9+；本地开发可用绝对路径替代 <b>git</b> 地址。安装后重启对应 <code>profile</code> 的 <code>dsh</code> 进程，新会话的 <code>/</code> 菜单即可调用 8 个 <b>Skill</b>。升级 = 重跑 <code>add</code>（<b>git</b> 渠道装的是仓库快照）；<b>npm</b> 注册表为预留发布渠道。</p>
+
 <a id="standalone-skills"></a>
 
 <h2 align="center">𝑺𝒕𝒂𝒏𝒅𝒂𝒍𝒐𝒏𝒆 𝑺𝒌𝒊𝒍𝒍𝒔 · 独立安装</h2>
@@ -170,6 +192,14 @@ python3 scripts/install_skill.py build-skill \
   --scope user
 ```
 
+<p><b>DeepSeek Harness</b>：</p>
+
+```bash
+python3 scripts/install_skill.py build-skill \
+  --platform dsh \
+  --scope user
+```
+
 <p>将 <code>build-skill</code> 替换为 <code>build-plugin</code>、<code>build-prd</code>、<code>vibe-coding</code>、<code>build-readme</code>、<code>build-agents-md</code>、<code>shape-idea</code> 或 <code>handoff</code> 即可安装另一个 <b>Skill</b>。目标目录已存在时默认拒绝覆盖；明确确认后添加 <code>--force</code>。</p>
 
 <a id="validation"></a>
@@ -184,6 +214,12 @@ python3 skills/build-plugin/scripts/validate_plugin.py \
   . \
   --platform dual \
   --strict
+```
+
+<p>检查 <b>DSH</b> 插件包资产与 <code>skills/</code> 一致（默认只读；确认修改后添加 <code>--write</code> 刷新）：</p>
+
+```bash
+python3 packages/dsh-build-goals/scripts/sync_skills.py --root .
 ```
 
 <p>验证单个 <b>Skill</b>：</p>
@@ -272,11 +308,12 @@ python3 -m unittest discover -s tests -p 'test_*.py' -v
 
 <h2 align="center">𝑷𝒍𝒂𝒕𝒇𝒐𝒓𝒎 𝑺𝒖𝒑𝒑𝒐𝒓𝒕 · 平台支持</h2>
 
-| 平台                     | <b>Manifest</b>              | 静态校验         | 真实客户端验证                                    |
-| ------------------------ | ---------------------------- | ---------------- | ------------------------------------------------- |
-| <b>Claude Code</b>       | `.claude-plugin/plugin.json` | 已接入 <b>CI</b> | 需在本地 <b>Claude Code</b> 完成                  |
-| <b>Codex</b>             | `.codex-plugin/plugin.json`  | 已接入 <b>CI</b> | 需在支持 <b>Plugin</b> 的 <b>Codex</b> 客户端完成 |
-| 其他 <b>Coding Agent</b> | 暂无                         | 暂无             | 暂无                                              |
+| 平台                     | <b>Manifest</b>                         | 静态校验         | 真实客户端验证                                    |
+| ------------------------ | --------------------------------------- | ---------------- | ------------------------------------------------- |
+| <b>Claude Code</b>       | `.claude-plugin/plugin.json`            | 已接入 <b>CI</b> | 需在本地 <b>Claude Code</b> 完成                  |
+| <b>Codex</b>             | `.codex-plugin/plugin.json`             | 已接入 <b>CI</b> | 需在支持 <b>Plugin</b> 的 <b>Codex</b> 客户端完成 |
+| <b>DeepSeek Harness</b>  | `packages/dsh-build-goals/package.json` | 已接入 <b>CI</b> | 已在本机 <b>DSH</b> web/headless 完成             |
+| 其他 <b>Coding Agent</b> | 暂无                                    | 暂无             | 暂无                                              |
 
 <a id="license"></a>
 

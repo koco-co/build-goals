@@ -1,0 +1,18 @@
+{
+  "schema_version": "1.0",
+  "baseline_revision": "{{审查时的 commit SHA 或稳定基线标识}}",
+  "generated_from": "independent-repository-audit",
+  "findings": [
+    {
+      "id": "AUD-001",
+      "severity": "{{Blocking|High|Medium|Low}}",
+      "area": "{{目录、测试、安全、构建等}}",
+      "evidence": [
+        "{{旧项目文件路径、命令结果或其他独立事实}}"
+      ],
+      "impact": "{{对用户行为、维护、迁移或安全的实际影响}}",
+      "recommendation": "{{建议处理方式}}",
+      "verification": "{{修复后如何验证}}"
+    }
+  ]
+}

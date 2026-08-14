@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
-"""Install a dual-platform source Skill into Claude Code or Codex.
+"""Install a source Skill into Claude Code, Codex, or DeepSeek Harness.
 
-The repository itself is distributed as a Plugin. This compatibility installer
-creates a platform-specific standalone copy:
+The repository itself is distributed as a Plugin (Claude Code, Codex) or a
+bundled-skill package (DeepSeek Harness). This compatibility installer creates
+a platform-specific standalone copy:
 - Claude Code preserves the source frontmatter and removes Codex UI metadata.
 - Codex removes Claude-only frontmatter and keeps agents/openai.yaml.
+- DeepSeek Harness preserves the full frontmatter (unknown fields are
+  tolerated) and removes agents/.
 Repository-internal symlinks are dereferenced in the installed copy.
 """
 
@@ -72,10 +75,24 @@ def resolve_destination(
     project_dir: Optional[Path] = None,
     home_dir: Optional[Path] = None,
 ) -> Path:
-    if platform not in {"claude", "codex"}:
+    if platform not in {"claude", "codex", "dsh"}:
         raise InstallError(f"不支持的平台：{platform}")
     if scope not in {"user", "project"}:
         raise InstallError(f"不支持的安装范围：{scope}")
+
+    if platform == "dsh":
+        # DeepSeek Harness scans <dshHome>/skills (rank 400) and
+        # <project>/.dsh/skills (rank 100); dshHome defaults to ~/.dsh.
+        if scope == "user":
+            dsh_home = os.environ.get("DSH_HOME")
+            base = (
+                (Path(dsh_home) if dsh_home else (home_dir or Path.home()) / ".dsh")
+                .expanduser()
+                .resolve()
+            )
+            return base / "skills" / skill_name
+        base = (project_dir or Path.cwd()).expanduser().resolve()
+        return base / ".dsh" / "skills" / skill_name
 
     platform_root = ".claude" if platform == "claude" else ".agents"
     if scope == "user":
@@ -137,9 +154,7 @@ def install_skill(
 
     repo_root = repo_root.expanduser().resolve()
     source = repo_root / "skills" / skill_name
-    validator = (
-        repo_root / "skills" / "build-skill" / "scripts" / "validate_skill.py"
-    )
+    validator = repo_root / "skills" / "build-skill" / "scripts" / "validate_skill.py"
 
     if scope == "project":
         project_root = (project_dir or Path.cwd()).expanduser().resolve()
@@ -188,15 +203,18 @@ def install_skill(
 
         skill_md = stage / "SKILL.md"
         text = skill_md.read_text(encoding="utf-8")
-        if platform == "claude":
-            shutil.rmtree(stage / "agents", ignore_errors=True)
-            profile = "claude"
-        else:
+        if platform == "codex":
             skill_md.write_text(
                 strip_claude_frontmatter(text),
                 encoding="utf-8",
             )
             profile = "codex"
+        else:
+            # Claude Code and DeepSeek Harness both keep the full frontmatter
+            # and drop agents/: the staged copies are content-identical, so
+            # the DSH install reuses the claude validation profile.
+            shutil.rmtree(stage / "agents", ignore_errors=True)
+            profile = "claude"
 
         run_validator(validator, stage, profile, plugin_root=stage)
 
@@ -225,10 +243,10 @@ def install_skill(
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="将双平台 Skill 源安装为 Claude Code 或 Codex 的独立副本。"
+        description="将 Skill 源安装为 Claude Code、Codex 或 DeepSeek Harness 的独立副本。"
     )
     parser.add_argument("skill", help="skills/ 下的 Skill 目录名")
-    parser.add_argument("--platform", choices=("claude", "codex"), required=True)
+    parser.add_argument("--platform", choices=("claude", "codex", "dsh"), required=True)
     parser.add_argument("--scope", choices=("user", "project"), default="user")
     parser.add_argument(
         "--project-dir",
