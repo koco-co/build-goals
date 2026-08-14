@@ -4,10 +4,8 @@ description: 通过逐轮提问与事实核查，把初步想法塑造成目标�
 disable-model-invocation: true
 metadata:
   author: koco-co
-  version: "2.0.0"
+  version: "2.0.1"
 ---
-
-最高优先级：只处理有用户需求、仓库事实、平台契约、可复现缺陷或明确安全要求支持的内容；不得为未经证实的假设增加问题、分支、兜底、兼容、校验或流程。
 
 # Outcome
 

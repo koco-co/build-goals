@@ -5,10 +5,8 @@ compatibility: 需要互联网访问、Python 3.9+，以及对来源项目和目
 disable-model-invocation: true
 metadata:
   author: koco-co
-  version: "2.0.0"
+  version: "2.0.1"
 ---
-
-最高优先级：只记录有用户输入、产品事实、公开契约、外部证据或已确认决策支持的需求；不得为未经证实的假设增加异常、边界、恢复、兼容、校验或禁止结果。
 
 # Outcome
 

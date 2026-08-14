@@ -5,10 +5,8 @@ compatibility: 需要 Python 3.9+ 运行内置校验脚本。
 disable-model-invocation: true
 metadata:
   author: koco-co
-  version: "2.0.0"
+  version: "2.0.1"
 ---
-
-最高优先级：只写入有用户需求、仓库事实、平台契约、可复现缺陷或明确安全要求支持的内容；不得为未经证实的假设增加功能、限制、兼容、校验、章节或提示词。
 
 # Outcome
 

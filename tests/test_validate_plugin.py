@@ -584,7 +584,7 @@ class ValidatePluginTests(unittest.TestCase):
         self.assertEqual(
             claude_manifest["version"], marketplace["plugins"][0]["version"]
         )
-        self.assertEqual(claude_manifest["version"], "2.0.0")
+        self.assertEqual(claude_manifest["version"], "2.0.1")
 
     def test_claude_marketplace_manifest_is_allowed(self) -> None:
         with tempfile.TemporaryDirectory() as temp:

@@ -5,10 +5,8 @@ compatibility: 需要 Python 3.9+、Git，以及目标项目实际使用的构�
 disable-model-invocation: true
 metadata:
   author: koco-co
-  version: "2.0.0"
+  version: "2.0.1"
 ---
-
-最高优先级：只实现有用户需求、项目事实、平台契约、可复现缺陷或明确安全要求支持的行为；不得为未经证实的假设增加架构、工具、分支、兜底、兼容、校验、权限门禁或提示词。
 
 # Outcome
 

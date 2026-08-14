@@ -400,14 +400,14 @@ class ValidateSkillTests(unittest.TestCase):
 
     def test_behavior_changed_skill_versions_are_updated(self) -> None:
         expected = {
-            "build-agents-md": 'version: "2.0.0"',
-            "build-plugin": 'version: "2.0.0"',
-            "build-prd": 'version: "2.0.0"',
-            "build-readme": 'version: "2.0.0"',
-            "build-skill": 'version: "2.0.0"',
-            "handoff": 'version: "2.0.0"',
-            "shape-idea": 'version: "2.0.0"',
-            "vibe-coding": 'version: "2.0.0"',
+            "build-agents-md": 'version: "2.0.1"',
+            "build-plugin": 'version: "2.0.1"',
+            "build-prd": 'version: "2.0.1"',
+            "build-readme": 'version: "2.0.1"',
+            "build-skill": 'version: "2.0.1"',
+            "handoff": 'version: "2.0.1"',
+            "shape-idea": 'version: "2.0.1"',
+            "vibe-coding": 'version: "2.0.1"',
         }
 
         for name, version_line in expected.items():
@@ -417,13 +417,7 @@ class ValidateSkillTests(unittest.TestCase):
                 )
                 self.assertIn(version_line, text)
 
-    def test_shipped_skills_publish_the_evidence_first_rule(self) -> None:
-        for skill_md in sorted(REPO_ROOT.glob("skills/*/SKILL.md")):
-            with self.subTest(skill=skill_md.parent.name):
-                text = skill_md.read_text(encoding="utf-8")
-                self.assertIn("最高优先级", text)
-                self.assertIn("不得为未经证实的假设", text)
-
+    def test_repository_quality_sources_publish_the_evidence_first_rule(self) -> None:
         agents = REPO_ROOT.joinpath("AGENTS.md").read_text(encoding="utf-8")
         quality = REPO_ROOT.joinpath(
             "skills", "build-skill", "rules", "quality-standard.md"
