@@ -207,7 +207,7 @@ class InstallSkillDshTests(unittest.TestCase):
 
             destination = home / ".dsh" / "skills" / "build-skill"
             skill_md = destination.joinpath("SKILL.md").read_text(encoding="utf-8")
-            self.assertIn("disable-model-invocation: true", skill_md)
+            self.assertNotIn("disable-model-invocation:", skill_md)
             self.assertIn("compatibility:", skill_md)
             self.assertFalse(destination.joinpath("agents").exists())
 
@@ -274,6 +274,31 @@ class DshPluginPackageTests(unittest.TestCase):
         )
         for skill_name in shipped:
             self.assertIn(f'"name": "{skill_name}"', manifest)
+
+        lines = {
+            skill_name: next(
+                line
+                for line in manifest.splitlines()
+                if f'"name": "{skill_name}"' in line
+            )
+            for skill_name in shipped
+        }
+        for skill_name in (
+            "build-agents-md",
+            "build-plugin",
+            "build-prd",
+            "build-readme",
+            "build-skill",
+            "handoff",
+            "shape-idea",
+        ):
+            with self.subTest(skill=skill_name):
+                self.assertIn('"modelInvocable": true', lines[skill_name])
+        self.assertIn('"modelInvocable": false', lines["vibe-coding"])
+
+        readme = (PACKAGE_DIR / "README.md").read_text(encoding="utf-8")
+        self.assertIn("7 个配套 Skill 既可由模型按描述调用", readme)
+        self.assertIn("`vibe-coding` 仅通过 `/vibe-coding` 启动", readme)
 
     def test_committed_assets_match_the_authoritative_source(self) -> None:
         result = run_sync(REPO_ROOT)

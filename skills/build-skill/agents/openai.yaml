@@ -4,4 +4,4 @@ interface:
   default_prompt: "使用 $build-skill 构建或升级一个高质量 Agent Skill。"
 
 policy:
-  allow_implicit_invocation: false
+  allow_implicit_invocation: true

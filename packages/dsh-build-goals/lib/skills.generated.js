@@ -2,12 +2,12 @@
 // Authoritative source: skills/ in the build-goals repository root.
 // Regenerate with: python3 packages/dsh-build-goals/scripts/sync_skills.py --root . --write
 export const SKILLS = [
-  {"name": "build-agents-md", "description": "初始化或整体重构项目的 AGENTS.md，并以 CLAUDE.md 相对符号链接供 Claude Code 与 Codex 共用；先研究仓库并给出完整内容预览，确认后写入和验证。", "modelInvocable": false, "userInvocable": true},
-  {"name": "build-plugin", "description": "创建或改造 Claude Code、Codex 等 Agent Plugin，组织 Skills、Agents、Hooks、MCP、UI 与发布配置；Plugin 中的新建或升级 Skill 必须遵循 build-skill 的同一规范。", "modelInvocable": false, "userInvocable": true},
-  {"name": "build-prd", "description": "将已有软件项目的完整对外行为或尚未成形的产品想法，整理为可跨项目复制、按功能域拆分、包含真实输入输出与行为样例的已确认产品需求包；按实际决策需要调研外部产品、开源项目或官方规范。", "modelInvocable": false, "userInvocable": true},
-  {"name": "build-readme", "description": "新建或更新项目 README.md；先完整了解仓库并提供修改预览，确认后生成可验证的 GitHub 风格文档、图表与可选插图。", "modelInvocable": false, "userInvocable": true},
-  {"name": "build-skill", "description": "从零设计、实现和验证通用 Skill 或项目级定制 Skill，也用于审查并重构已有低质量 Skill。", "modelInvocable": false, "userInvocable": true},
-  {"name": "handoff", "description": "将当前对话整理为精简的交接文档和可直接复制的接续提示词，方便下一位 Agent 继续工作。", "modelInvocable": false, "userInvocable": true},
-  {"name": "shape-idea", "description": "通过逐轮提问与事实核查，把初步想法塑造成目标、范围、约束与关键决策均明确的完整定义。", "modelInvocable": false, "userInvocable": true},
+  {"name": "build-agents-md", "description": "初始化或整体重构项目的 AGENTS.md，并以 CLAUDE.md 相对符号链接供 Claude Code 与 Codex 共用；项目指令缺失、链接异常或与仓库事实冲突时使用，不用于普通文档、CI 或测试框架建设。", "modelInvocable": true, "userInvocable": true},
+  {"name": "build-plugin", "description": "创建、升级或迁移 Claude Code、Codex 等 Agent Plugin；任务涉及 Plugin 打包、平台适配、安装或分发时使用，单独构建 Skill 或普通代码时不使用。", "modelInvocable": true, "userInvocable": true},
+  {"name": "build-prd", "description": "将已有项目的对外行为或产品想法整理为可跨项目复制、包含真实输入输出与行为样例的需求包；用户要求正式需求包，或已启动的 vibe-coding 流程缺少合格需求包时使用，不用于技术架构、实施任务或普通代码修改。", "modelInvocable": true, "userInvocable": true},
+  {"name": "build-readme", "description": "新建或更新项目 README.md；用户要求 README，或 README 缺失、与稳定项目事实不一致时使用，不用于普通文档润色、代码开发或发布。", "modelInvocable": true, "userInvocable": true},
+  {"name": "build-skill", "description": "从零构建、升级或重构通用 Skill 与项目级 Agent Skill；任务明确涉及 Agent Skill 时使用，不用于 Plugin 打包分发、普通提示词润色或一般编码任务。", "modelInvocable": true, "userInvocable": true},
+  {"name": "handoff", "description": "将当前对话整理为精简交接文档和可复制的接续提示词；用户要求交接，或工作必须切换会话、客户端或环境时使用，不用于普通总结。", "modelInvocable": true, "userInvocable": true},
+  {"name": "shape-idea", "description": "通过逐轮提问与事实核查完善初步想法；目标、范围或关键取舍尚不明确且需要用户决策时使用，目标明确、普通问答、评审或直接实施时不使用。", "modelInvocable": true, "userInvocable": true},
   {"name": "vibe-coding", "description": "依据已确认的 docs/产品需求/ 需求包新建项目、按用户指定范围参考旧项目、续建现有项目，或实施现有项目的架构与技术栈迁移；经过架构方案和整体实施路线两次全局确认，以 TDD、多 Agent 和可选 Git worktrees 按功能域交付并完成全链路验收。", "modelInvocable": false, "userInvocable": true},
 ];

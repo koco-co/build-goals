@@ -4,4 +4,4 @@ interface:
   default_prompt: "使用 $shape-idea 通过逐轮提问完善我的想法，直到目标、范围、约束和关键决策全部明确。"
 
 policy:
-  allow_implicit_invocation: false
+  allow_implicit_invocation: true

@@ -1,11 +1,10 @@
 ---
 name: build-skill
-description: 从零设计、实现和验证通用 Skill 或项目级定制 Skill，也用于审查并重构已有低质量 Skill。
+description: 从零构建、升级或重构通用 Skill 与项目级 Agent Skill；任务明确涉及 Agent Skill 时使用，不用于 Plugin 打包分发、普通提示词润色或一般编码任务。
 compatibility: 需要互联网访问和 Python 3.9+ 运行内置静态校验脚本。
-disable-model-invocation: true
 metadata:
   author: koco-co
-  version: "2.0.1"
+  version: "2.1.0"
 ---
 
 # Outcome

@@ -579,12 +579,18 @@ class ValidatePluginTests(unittest.TestCase):
                 encoding="utf-8"
             )
         )
+        dsh_package = json.loads(
+            REPO_ROOT.joinpath("packages", "dsh-build-goals", "package.json").read_text(
+                encoding="utf-8"
+            )
+        )
 
         self.assertEqual(claude_manifest["version"], codex_manifest["version"])
         self.assertEqual(
             claude_manifest["version"], marketplace["plugins"][0]["version"]
         )
-        self.assertEqual(claude_manifest["version"], "2.0.1")
+        self.assertEqual(claude_manifest["version"], dsh_package["version"])
+        self.assertEqual(claude_manifest["version"], "2.1.0")
 
     def test_claude_marketplace_manifest_is_allowed(self) -> None:
         with tempfile.TemporaryDirectory() as temp:

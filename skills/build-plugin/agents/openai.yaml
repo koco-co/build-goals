@@ -4,4 +4,4 @@ interface:
   default_prompt: "使用 $build-plugin 构建、升级或迁移一个可验证的 Plugin。"
 
 policy:
-  allow_implicit_invocation: false
+  allow_implicit_invocation: true

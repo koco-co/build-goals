@@ -4,4 +4,4 @@ interface:
   default_prompt: "使用 $handoff 将当前会话整理成交接文档，供下一位 Agent 继续工作。"
 
 policy:
-  allow_implicit_invocation: false
+  allow_implicit_invocation: true

@@ -282,7 +282,7 @@ class ValidateSkillTests(unittest.TestCase):
         self.assertNotIn("/plugin-name:skill-name", skill_md)
         self.assertNotIn("`$skill-name`", skill_md)
 
-    def test_shipped_user_only_skills_do_not_repeat_invocation_policy(self) -> None:
+    def test_shipped_skills_publish_the_confirmed_invocation_policy(self) -> None:
         redundant_phrases = (
             "用户明确调用",
             "普通请求不得自动触发",
@@ -290,12 +290,35 @@ class ValidateSkillTests(unittest.TestCase):
             "无法确认是否为显式调用",
             "显式调用只授权",
         )
+        model_invocable = {
+            "build-agents-md",
+            "build-plugin",
+            "build-prd",
+            "build-readme",
+            "build-skill",
+            "handoff",
+            "shape-idea",
+        }
 
         for skill_md in sorted(REPO_ROOT.glob("skills/*/SKILL.md")):
+            name = skill_md.parent.name
             text = skill_md.read_text(encoding="utf-8")
-            self.assertIn("disable-model-invocation: true", text)
+            adapter = skill_md.parent.joinpath("agents", "openai.yaml").read_text(
+                encoding="utf-8"
+            )
+            if name in model_invocable:
+                with self.subTest(skill=name, policy="model-invocable"):
+                    self.assertNotIn("disable-model-invocation:", text)
+                    self.assertIn("allow_implicit_invocation: true", adapter)
+                    self.assertIn("时使用", text.split("---", 2)[1])
+                    self.assertRegex(text.split("---", 2)[1], r"不用于|不使用")
+            else:
+                with self.subTest(skill=name, policy="user-only"):
+                    self.assertEqual(name, "vibe-coding")
+                    self.assertIn("disable-model-invocation: true", text)
+                    self.assertIn("allow_implicit_invocation: false", adapter)
             for phrase in redundant_phrases:
-                with self.subTest(skill=skill_md.parent.name, phrase=phrase):
+                with self.subTest(skill=name, phrase=phrase):
                     self.assertNotIn(phrase, text)
 
     def test_build_skill_defines_conditional_invocation_copy_rules(self) -> None:
@@ -400,13 +423,13 @@ class ValidateSkillTests(unittest.TestCase):
 
     def test_behavior_changed_skill_versions_are_updated(self) -> None:
         expected = {
-            "build-agents-md": 'version: "2.0.1"',
-            "build-plugin": 'version: "2.0.1"',
-            "build-prd": 'version: "2.0.1"',
-            "build-readme": 'version: "2.0.1"',
-            "build-skill": 'version: "2.0.1"',
-            "handoff": 'version: "2.0.1"',
-            "shape-idea": 'version: "2.0.1"',
+            "build-agents-md": 'version: "2.1.0"',
+            "build-plugin": 'version: "2.1.0"',
+            "build-prd": 'version: "2.1.0"',
+            "build-readme": 'version: "2.1.0"',
+            "build-skill": 'version: "2.1.0"',
+            "handoff": 'version: "2.1.0"',
+            "shape-idea": 'version: "2.1.0"',
             "vibe-coding": 'version: "2.0.1"',
         }
 
@@ -505,6 +528,10 @@ class ValidateSkillTests(unittest.TestCase):
         ):
             with self.subTest(contract="build-prd", required=required):
                 self.assertIn(required, prd_contract)
+        self.assertIn(
+            "已启动的 vibe-coding 流程缺少合格需求包时使用", prd_contract
+        )
+        self.assertNotIn("项目实施缺少已确认需求时使用", prd_contract)
         for relative in (
             "templates/requirement-manifest.template.yaml",
             "templates/domain-requirements.template.md",

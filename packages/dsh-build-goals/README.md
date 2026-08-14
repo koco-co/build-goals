@@ -2,8 +2,8 @@
 
 `build-goals` 的 **DeepSeek Harness** 插件包：把仓库 `skills/` 下的 8 个
 Skill 以 DSH 官方「内置技能 provider」模式（同 `dsh-skill-badge`）打包，
-通过 `dsh plugin add` 一条命令安装。技能为**用户显式调用**
-（`disable-model-invocation`，`/name` 触发），不出现在模型的自动调用目录。
+通过 `dsh plugin add` 一条命令安装。7 个配套 Skill 既可由模型按描述调用，
+也可通过 `/name` 显式调用；`vibe-coding` 仅通过 `/vibe-coding` 启动。
 
 ## 安装
 

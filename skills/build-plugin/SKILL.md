@@ -1,11 +1,10 @@
 ---
 name: build-plugin
-description: 创建或改造 Claude Code、Codex 等 Agent Plugin，组织 Skills、Agents、Hooks、MCP、UI 与发布配置；Plugin 中的新建或升级 Skill 必须遵循 build-skill 的同一规范。
+description: 创建、升级或迁移 Claude Code、Codex 等 Agent Plugin；任务涉及 Plugin 打包、平台适配、安装或分发时使用，单独构建 Skill 或普通代码时不使用。
 compatibility: 需要互联网访问和 Python 3.9+ 运行内置静态校验脚本。
-disable-model-invocation: true
 metadata:
   author: koco-co
-  version: "2.0.1"
+  version: "2.1.0"
 ---
 
 # Outcome

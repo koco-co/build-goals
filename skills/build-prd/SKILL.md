@@ -1,11 +1,10 @@
 ---
 name: build-prd
-description: 将已有软件项目的完整对外行为或尚未成形的产品想法，整理为可跨项目复制、按功能域拆分、包含真实输入输出与行为样例的已确认产品需求包；按实际决策需要调研外部产品、开源项目或官方规范。
+description: 将已有项目的对外行为或产品想法整理为可跨项目复制、包含真实输入输出与行为样例的需求包；用户要求正式需求包，或已启动的 vibe-coding 流程缺少合格需求包时使用，不用于技术架构、实施任务或普通代码修改。
 compatibility: 需要互联网访问、Python 3.9+，以及对来源项目和目标文档目录的本地读写权限。
-disable-model-invocation: true
 metadata:
   author: koco-co
-  version: "2.0.1"
+  version: "2.1.0"
 ---
 
 # Outcome

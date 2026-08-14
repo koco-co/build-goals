@@ -225,7 +225,7 @@ class BuildAgentsMdContractTests(unittest.TestCase):
             path.read_text(encoding="utf-8") for path in sorted(SKILL_DIR.rglob("*.md"))
         )
 
-        self.assertIn("disable-model-invocation: true", skill_md)
+        self.assertNotIn("disable-model-invocation:", skill_md)
         self.assertIn("整体重构", contract)
         self.assertIn("完整内容预览", contract)
         self.assertIn("内容取舍原则", contract)
@@ -285,12 +285,12 @@ class BuildAgentsMdContractTests(unittest.TestCase):
 
         self.assertEqual(actual, expected)
 
-    def test_codex_adapter_disables_implicit_invocation(self) -> None:
+    def test_codex_adapter_allows_implicit_invocation(self) -> None:
         adapter = SKILL_DIR.joinpath("agents", "openai.yaml").read_text(
             encoding="utf-8"
         )
 
-        self.assertIn("allow_implicit_invocation: false", adapter)
+        self.assertIn("allow_implicit_invocation: true", adapter)
 
 
 if __name__ == "__main__":

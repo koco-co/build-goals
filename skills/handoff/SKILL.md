@@ -1,11 +1,10 @@
 ---
 name: handoff
-description: 将当前对话整理为精简的交接文档和可直接复制的接续提示词，方便下一位 Agent 继续工作。
+description: 将当前对话整理为精简交接文档和可复制的接续提示词；用户要求交接，或工作必须切换会话、客户端或环境时使用，不用于普通总结。
 argument-hint: "下一次会话将用于什么？"
-disable-model-invocation: true
 metadata:
   author: koco-co
-  version: "2.0.1"
+  version: "2.1.0"
 ---
 
 # Outcome

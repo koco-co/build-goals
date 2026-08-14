@@ -1,11 +1,10 @@
 ---
 name: build-readme
-description: 新建或更新项目 README.md；先完整了解仓库并提供修改预览，确认后生成可验证的 GitHub 风格文档、图表与可选插图。
+description: 新建或更新项目 README.md；用户要求 README，或 README 缺失、与稳定项目事实不一致时使用，不用于普通文档润色、代码开发或发布。
 compatibility: 需要 Python 3.9+ 运行内置校验脚本。
-disable-model-invocation: true
 metadata:
   author: koco-co
-  version: "2.0.1"
+  version: "2.1.0"
 ---
 
 # Outcome

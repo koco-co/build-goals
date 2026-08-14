@@ -1,10 +1,9 @@
 ---
 name: shape-idea
-description: 通过逐轮提问与事实核查，把初步想法塑造成目标、范围、约束与关键决策均明确的完整定义。
-disable-model-invocation: true
+description: 通过逐轮提问与事实核查完善初步想法；目标、范围或关键取舍尚不明确且需要用户决策时使用，目标明确、普通问答、评审或直接实施时不使用。
 metadata:
   author: koco-co
-  version: "2.0.1"
+  version: "2.1.0"
 ---
 
 # Outcome

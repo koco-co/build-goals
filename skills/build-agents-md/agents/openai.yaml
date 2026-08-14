@@ -4,4 +4,4 @@ interface:
   default_prompt: "使用 $build-agents-md 研究当前项目，先给出完整内容预览，确认后创建或更新 AGENTS.md 与 CLAUDE.md。"
 
 policy:
-  allow_implicit_invocation: false
+  allow_implicit_invocation: true

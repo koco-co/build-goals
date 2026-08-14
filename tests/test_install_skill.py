@@ -58,13 +58,13 @@ class InstallSkillTests(unittest.TestCase):
             self.assertNotIn("disable-model-invocation:", skill_md)
             self.assertTrue(destination.joinpath("agents", "openai.yaml").is_file())
             self.assertIn(
-                "allow_implicit_invocation: false",
+                "allow_implicit_invocation: true",
                 destination.joinpath("agents", "openai.yaml").read_text(
                     encoding="utf-8"
                 ),
             )
 
-    def test_claude_install_keeps_manual_only_field(self) -> None:
+    def test_claude_install_keeps_model_invocable_policy(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
             home = Path(temp)
             result = self.run_installer(home, "claude")
@@ -72,7 +72,7 @@ class InstallSkillTests(unittest.TestCase):
 
             destination = home / ".claude" / "skills" / "build-skill"
             skill_md = destination.joinpath("SKILL.md").read_text(encoding="utf-8")
-            self.assertIn("disable-model-invocation: true", skill_md)
+            self.assertNotIn("disable-model-invocation:", skill_md)
             self.assertFalse(destination.joinpath("agents").exists())
 
             second = self.run_installer(home, "claude")
@@ -332,16 +332,29 @@ class InstallSkillTests(unittest.TestCase):
                         0,
                         result.stdout + result.stderr,
                     )
-
                     destination = home / root_name / "skills" / skill_name
-                    self.assertTrue(destination.joinpath("SKILL.md").is_file())
+                    skill_md = destination.joinpath("SKILL.md").read_text(
+                        encoding="utf-8"
+                    )
+                    model_invocable = skill_name != "vibe-coding"
                     if platform == "claude":
                         self.assertFalse(destination.joinpath("agents").exists())
+                        if model_invocable:
+                            self.assertNotIn("disable-model-invocation:", skill_md)
+                        else:
+                            self.assertIn(
+                                "disable-model-invocation: true", skill_md
+                            )
                     else:
-                        self.assertTrue(
-                            destination.joinpath("agents", "openai.yaml").is_file()
+                        self.assertNotIn("disable-model-invocation:", skill_md)
+                        adapter = destination.joinpath(
+                            "agents", "openai.yaml"
+                        ).read_text(encoding="utf-8")
+                        self.assertIn(
+                            "allow_implicit_invocation: "
+                            + ("true" if model_invocable else "false"),
+                            adapter,
                         )
-
     def test_dry_run_does_not_create_target_directories(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
             home = Path(temp) / "new-home"
