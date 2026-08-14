@@ -17,14 +17,14 @@
 
 ## Phase 3：建立共享镜像
 
-跨 Skill 运行依赖在共享文件清单中声明规范源和镜像目标。先显式同步，再执行只读检查：
+跨 Skill 运行依赖在共享文件清单中声明唯一规范源和镜像目标。先显式同步，再执行只读检查：
 
 ```bash
-python3 <build-plugin>/scripts/sync_shared_files.py --root <plugin-root> --write
-python3 <build-plugin>/scripts/sync_shared_files.py --root <plugin-root>
+python3 <build-plugin-skill-dir>/scripts/sync_shared_files.py --root <plugin-root> --write
+python3 <build-plugin-skill-dir>/scripts/sync_shared_files.py --root <plugin-root>
 ```
 
-镜像必须是普通文件，并与规范源逐字节一致。确需保留的符号链接仍须使用相对路径、留在 Plugin 根目录内，并在真实安装缓存中复验。
+两条命令都必须成功；第二条只读检查用于确认写入后没有缺失、软链接、越界路径或内容漂移。
 
 ## Phase 4：写入平台配置
 

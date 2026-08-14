@@ -53,7 +53,7 @@ def task_field(task: Task, label: str) -> Optional[str]:
 
 
 def _first_validation_evidence(task: Task) -> Optional[str]:
-    return _field(task.body, "首个验证证据") or _field(task.body, "第一条失败测试")
+    return _field(task.body, "首个验证证据")
 
 
 def validate_tasks(
@@ -90,7 +90,7 @@ def validate_tasks(
                 "error",
                 "TASK_FIELD",
                 path,
-                f"{task.task_id} 缺少有效“首个验证证据”或兼容字段“第一条失败测试”。",
+                f"{task.task_id} 缺少有效“首个验证证据”。",
                 root,
             )
         if not delivery:

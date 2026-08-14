@@ -11,63 +11,9 @@
       "expected_behavior": ["{{处理步骤和外部可观察反馈}}"],
       "expected_output": "{{完整正确结果}}",
       "output_contract": {
-        "exact": ["{{必须完全一致的结构或文案}}"],
-        "semantic": ["{{必须覆盖的含义}}"],
-        "runtime": ["{{允许变化的值及格式}}"]
+        "semantic": ["{{必须覆盖的含义}}"]
       },
       "assertions": ["{{可直接检查的正常结果}}"],
-      "forbidden": ["{{正常路径禁止出现的结果}}"],
-      "sensitive_data": "none"
-    },
-    {
-      "id": "SAMPLE-{{DOMAIN}}-002",
-      "feature_id": "F-001",
-      "kind": "clarification",
-      "user_input": "{{缺少关键信息的真实输入}}",
-      "starting_state": ["{{起始状态}}"],
-      "expected_behavior": ["{{只追问无法推导的关键信息}}"],
-      "expected_output": "{{具体追问文案或结构}}",
-      "output_contract": {
-        "exact": ["{{固定追问结构或字段}}"],
-        "semantic": ["{{追问必须表达的缺失信息}}"],
-        "runtime": ["{{允许变化的上下文值}}"]
-      },
-      "assertions": ["{{追问后能够继续完成流程}}"],
-      "forbidden": ["{{不得猜测、静默失败或一次追问无关内容}}"],
-      "sensitive_data": "none"
-    },
-    {
-      "id": "SAMPLE-{{DOMAIN}}-003",
-      "feature_id": "F-001",
-      "kind": "invalid",
-      "user_input": "{{无效输入；不适用场景可把 kind 改为 not_applicable}}",
-      "starting_state": ["{{起始状态}}"],
-      "expected_behavior": ["{{拒绝原因、输入保留与恢复动作}}"],
-      "expected_output": "{{完整错误或不适用反馈}}",
-      "output_contract": {
-        "exact": ["{{固定错误字段、状态或文案}}"],
-        "semantic": ["{{必须说明原因和下一步}}"],
-        "runtime": ["{{允许变化的错误上下文}}"]
-      },
-      "assertions": ["{{不会产生不允许的副作用}}"],
-      "forbidden": ["{{不得丢失输入、泄露内部错误或返回成功}}"],
-      "sensitive_data": "none"
-    },
-    {
-      "id": "SAMPLE-{{DOMAIN}}-004",
-      "feature_id": "F-001",
-      "kind": "boundary",
-      "user_input": "{{长度、数量、状态、权限或格式边界输入}}",
-      "starting_state": ["{{边界前置状态}}"],
-      "expected_behavior": ["{{边界处理和反馈}}"],
-      "expected_output": "{{边界结果完整示例}}",
-      "output_contract": {
-        "exact": ["{{边界仍需保持的固定结构}}"],
-        "semantic": ["{{边界结果必须表达的含义}}"],
-        "runtime": ["{{允许变化的边界值}}"]
-      },
-      "assertions": ["{{边界内通过、边界外拒绝的明确断言}}"],
-      "forbidden": ["{{不得截断、溢出、越权或产生不一致状态}}"],
       "sensitive_data": "none"
     }
   ]

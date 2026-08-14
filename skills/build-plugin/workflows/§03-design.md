@@ -39,6 +39,8 @@ Skills + MCP + UI
 - 跨 Skill 运行依赖使用清单声明的普通镜像，并设计同步与漂移校验；
 - 无法等价实现的能力明确分支或降级。
 
+只设计当前方案实际需要的文件，不为未采用的平台入口、组件或目录生成占位骨架。
+
 ## Phase 4：输出方案
 
 使用 `templates/plugin-design-proposal.template.md`，至少包含：

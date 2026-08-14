@@ -5,8 +5,10 @@ compatibility: 需要互联网访问和 Python 3.9+ 运行内置静态校验脚�
 disable-model-invocation: true
 metadata:
   author: koco-co
-  version: "1.5.1"
+  version: "2.0.0"
 ---
+
+最高优先级：只实现有用户需求、仓库事实、平台契约、可复现缺陷或明确安全要求支持的行为；不得为未经证实的假设增加分支、兜底、兼容、校验、权限门禁、提示词或流程。
 
 # Outcome
 
@@ -30,7 +32,7 @@ metadata:
    - 对已有 Skill，记录当前输入、输出、行为、依赖、已知问题和兼容接口。
    - 调研目标平台规范以及同类实现；用户明确免除外部竞品调研时，仍需核对目标环境和平台契约。
    - 不向用户询问能够从环境、代码或文档中自行查明的事实。
-   - 完成条件：形成现状与约束摘要，清楚区分已确认事实、合理推断和未知项。
+   - 完成条件：形成现状与约束摘要，清楚区分已确认事实和未知项；推断不作为实现依据。
 
 2. 确认关键决策
    - 完整读取 `workflows/§02-clarification.md`。
@@ -38,7 +40,7 @@ metadata:
    - 每轮只询问一个主要问题，同时给出推荐答案、推荐理由及其他选择的影响。
    - 已在提示词、代码、文档或此前回答中明确的内容不得重复询问。
    - 不存在真实未决问题时，明确记录“无待确认决策”，直接进入设计。
-   - 对已有 Skill 也要重新判断可选 Frontmatter，不因原文件只有 `name` 和 `description` 而跳过。
+   - 对已有 Skill 也要重新评估调用、参数、权限、上下文和环境要求。
    - 完成条件：目标、非目标、Skill 类型、触发方式、输入、输出、分支、权限边界、Frontmatter 决策和验收标准均已明确。
 
 3. 提出设计并等待确认
@@ -52,9 +54,9 @@ metadata:
 
 4. 执行
    - 完整读取 `workflows/§04-implementation.md`。
-   - 使用 `templates/skill.template.md` 作为 `SKILL.md` 的结构基线，不得删除其中的核心章节；按照 `rules/frontmatter.md` 添加有依据的可选字段。
+   - 使用 `templates/skill.template.md` 作为结构基线，默认骨架按 `rules/architecture.md` 的省略准则调整；按照 `rules/frontmatter.md` 形成并落盘平台配置。
    - 优先复用仓库已有 CLI、校验器、测试和公共能力；只有确有缺口时才新增 Skill 内脚本。
-   - 将确定性处理交给代码，将固定结构交给模板，将输出范式交给少样本示例，将无法静态判断的要求交给规则和清单。
+   - 实现方式优先级遵循 `rules/quality-standard.md` §1。
    - 完成初稿后先确认内容正确、完整，再按照文案审查规则润色；不确定原意时退回内容设计，不自行改变行为。
    - 保持单一规范源；平台差异集中在 Manifest、适配文件或安装过程，不复制两套核心工作流。
    - Agent 提示文件格式: `<name>.agent.md`。
@@ -67,7 +69,7 @@ metadata:
    - 使用 `checklists/design-review.md` 检查设计实现情况，再依次执行 `checklists/content-review.md` 和 `checklists/copy-review.md`。
    - 文案修改后重新进行内容回归，确认触发、流程、权限和验收语义没有变化。
    - 新建、整体重构或改变触发、Frontmatter、权限与平台行为时，使用 `prompts/reviewer.agent.md` 调起独立 Reviewer；微小且不改变语义的修改可以省略。
-   - 根据目标 Skill 的调用配置验证对应触发方式，并覆盖新建通用 Skill、新建项目级 Skill、升级已有 Skill、确认步骤和失败路径。
+   - 根据目标 Skill 的调用配置和已确认行为验证实际触发、步骤、输出与可复现缺陷。
    - 能够实际运行的平台必须进行真实验证；只能静态检查的平台必须标记为“未完成真实运行验证”。
    - 发现失败时，修复后重新运行受影响检查，不得用文字说明替代验证。
    - 完成条件：静态检查、内容审查、文案审查、适用的独立审查和关键场景均通过，未验证内容和无法继续的原因均已记录。
@@ -86,15 +88,12 @@ metadata:
 最终输出必须包含：
 
 - 本次目标、已完成范围和明确排除项；
-- 最终目录树与每个关键文件的职责；
 - 新增、修改、删除及移出 Skill 目录的内容；
-- Claude Code、Codex 或其他目标平台的适配差异；
-- Frontmatter 字段决策矩阵及每个可选字段的依据；
-- 实际执行的校验命令、场景、结果和失败修复记录；
-- 内容审查、文案审查、内容回归和独立 Reviewer 的结果；
-- 外部来源与许可证信息；未使用外部来源时明确说明；
+- 实际执行的校验命令、场景和结果；
 - 已验证、未验证，以及无法完成的内容和原因；
-- 下一步状态；独立调用时包含真实适用的交付动作及用户授权状态，受控调用时包含提交状态与恢复条件；随后停止当前 Skill。
+- 独立调用时真实适用的交付动作及用户授权状态，受控调用时提交状态与恢复条件。
+
+其余交付细节（目录树、平台适配、字段决策、审查结果、外部来源、下一步状态等）遵循 `workflows/§06-delivery.md`，并用 `templates/delivery-report.template.md` 组织报告。
 
 ## Guardrails
 
@@ -106,14 +105,3 @@ metadata:
 - 可静态判断的要求由 CLI、脚本、测试或结构化校验承担；模型只处理内容和场景层面的问题。
 - 规则冲突时，优先保护数据与权限，其次遵循用户明确约束、目标仓库约定和平台官方契约。
 - 发现任务不属于 Skill 构建或升级时及时退出本流程，不把本 Skill 扩张为通用任务代理。
-
-## References
-
-- 开始调研时，完整读取 `workflows/§01-research.md`。
-- 识别和询问关键决策时，完整读取 `workflows/§02-clarification.md`。
-- 输出目录与实施方案前，完整读取 `workflows/§03-design.md`、`rules/architecture.md`、`rules/frontmatter.md`、`rules/quality-standard.md` 和 `rules/platform-compatibility.md`。
-- 构建通用 Skill 时，读取 `examples/global-skill.example.md`；构建项目级 Skill 时，读取 `examples/project-skill.example.md`。
-- 开始改动文件后，完整读取 `workflows/§04-implementation.md`。
-- 验证时，完整读取 `workflows/§05-validation.md`、`checklists/design-review.md`、`checklists/content-review.md` 和 `checklists/copy-review.md`；需要文案改写参考时读取 `examples/copy-review.example.md`。
-- 新建、整体重构或改变触发、Frontmatter、权限与平台行为时，读取 `prompts/reviewer.agent.md` 并调起独立 Reviewer；微小且不改变语义的修改可以省略。
-- 交付时，完整读取 `workflows/§06-delivery.md` 和 `templates/delivery-report.template.md`。

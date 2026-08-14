@@ -24,9 +24,6 @@ ROOT_HEADINGS = (
     "## 功能域地图",
     "## 跨域用户旅程",
     "## 全局输入与输出约定",
-    "## 全局交互与文案原则",
-    "## 跨功能产品要求",
-    "## 设计依据与来源",
 )
 DOMAIN_HEADINGS = (
     "## 功能域范围",
@@ -37,12 +34,7 @@ FEATURE_HEADINGS = (
     "#### 作用与目标",
     "#### 适用角色、入口与前置条件",
     "#### 用户输入契约",
-    "#### 用户交互与追问",
-    "#### 状态与提示文案",
     "#### 输出契约",
-    "#### 对外契约",
-    "#### 异常、边界与恢复",
-    "#### 产品质量要求",
     "#### 设计依据",
     "#### 行为样例",
     "#### 验收标准",
@@ -52,18 +44,13 @@ INPUT_COLUMNS = (
     "提供者",
     "必填",
     "格式与范围",
-    "默认值",
-    "校验规则",
-    "正确示例",
-    "错误示例",
+    "示例",
 )
 OUTPUT_COLUMNS = (
     "输出内容",
     "呈现形式",
     "触发条件",
-    "固定结构",
     "语义要求",
-    "运行时可变内容",
     "完整示例",
 )
 COPY_COLUMNS = ("状态", "触发条件", "最终文案", "后续动作")
@@ -629,24 +616,28 @@ def _validate_samples(
             ("starting_state", "SAMPLE_STARTING_STATE"),
             ("expected_behavior", "SAMPLE_BEHAVIOR"),
             ("assertions", "SAMPLE_ASSERTIONS"),
-            ("forbidden", "SAMPLE_FORBIDDEN"),
         ):
             if not _nonempty_list(sample.get(key)):
                 add_issue(issues, code, f"{sample_id} 的 {key} 必须是非空字符串数组。")
+        if "forbidden" in sample and sample.get("forbidden") != [] and not _nonempty_list(sample.get("forbidden")):
+            add_issue(issues, "SAMPLE_FORBIDDEN", f"{sample_id} 的 forbidden 如存在，必须是字符串数组。")
         output_contract = sample.get("output_contract")
-        if not isinstance(output_contract, dict) or not all(_nonempty_list(output_contract.get(key)) for key in ("exact", "semantic", "runtime")):
-            add_issue(issues, "OUTPUT_CONTRACT", f"{sample_id} 必须分别声明 exact、semantic 和 runtime 输出约束。")
+        if not isinstance(output_contract, dict) or not _nonempty_list(output_contract.get("semantic")):
+            add_issue(issues, "OUTPUT_CONTRACT", f"{sample_id} 必须声明 semantic 输出约束。")
+        elif any(
+            key in output_contract
+            and output_contract.get(key) != []
+            and not _nonempty_list(output_contract.get(key))
+            for key in ("exact", "runtime")
+        ):
+            add_issue(issues, "OUTPUT_CONTRACT", f"{sample_id} 的 exact 和 runtime 如存在，必须是字符串数组。")
         if sample.get("sensitive_data") not in {"none", "sanitized"}:
             add_issue(issues, "SENSITIVE_DATA", f"{sample_id} 必须声明敏感数据为空或已脱敏。")
 
     for feature in sorted(features):
         kinds = kinds_by_feature.get(feature, set())
-        required = {"normal", "clarification", "boundary"}
-        missing = sorted(required - kinds)
-        if not ({"invalid", "not_applicable"} & kinds):
-            missing.append("invalid-or-not_applicable")
-        if missing:
-            add_issue(issues, "SAMPLE_KIND_COVERAGE", f"{feature} 缺少行为样例类型：{', '.join(missing)}。")
+        if "normal" not in kinds:
+            add_issue(issues, "SAMPLE_KIND_COVERAGE", f"{feature} 缺少 normal 行为样例。")
         referenced = refs_by_feature.get(feature, set())
         actual = sample_ids_by_feature.get(feature, set())
         if referenced != actual:
@@ -702,30 +693,20 @@ def _parse_source_rows(text: str) -> list[list[str]]:
 
 
 def _validate_research(text: str, issues: list[Issue]) -> None:
-    counts = {"竞品": 0, "开源项目": 0, "官方规范": 0}
+    source_types = {"竞品", "开源项目", "官方规范"}
     for cells in _parse_source_rows(text):
         if len(cells) < 5:
             add_issue(issues, "SOURCE_ROW", "调研来源表格的每行必须包含五列。")
             continue
         source_type, name, url, accessed, adopted = cells[:5]
-        if source_type not in counts:
+        if source_type not in source_types:
             continue
-        valid = True
         if not name or not adopted:
             add_issue(issues, "SOURCE_DETAIL", f"{source_type} 来源必须填写名称和借鉴点。")
-            valid = False
         if URL_RE.fullmatch(url) is None:
             add_issue(issues, "SOURCE_URL", f"{source_type} 来源必须使用 https URL：{url!r}。")
-            valid = False
         if DATE_RE.fullmatch(accessed) is None:
             add_issue(issues, "SOURCE_DATE", f"{source_type} 来源日期格式无效：{accessed!r}。")
-            valid = False
-        if valid:
-            counts[source_type] += 1
-    requirements = {"竞品": 2, "开源项目": 2, "官方规范": 1}
-    missing = [f"{kind} {counts[kind]}/{minimum}" for kind, minimum in requirements.items() if counts[kind] < minimum]
-    if missing:
-        add_issue(issues, "RESEARCH_COVERAGE", "调研来源未达到最低覆盖：" + "，".join(missing) + "。")
 
 
 def validate_requirement_package(target: Path) -> Report:

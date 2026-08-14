@@ -5,8 +5,10 @@ compatibility: 需要互联网访问和 Python 3.9+ 运行内置静态校验脚�
 disable-model-invocation: true
 metadata:
   author: koco-co
-  version: "1.3.1"
+  version: "2.0.0"
 ---
+
+最高优先级：只实现有用户需求、仓库事实、平台契约、可复现缺陷或明确安全要求支持的行为；不得为未经证实的假设增加组件、分支、兜底、兼容、校验、权限门禁或提示词。
 
 # Outcome
 
@@ -69,7 +71,7 @@ metadata:
    - 完整读取 `workflows/§06-validation.md`。
    - 运行 `scripts/validate_plugin.py`，再运行目标平台官方校验和真实安装或本地加载测试。
    - 使用 `checklists/plugin-design-review.md` 和 `checklists/plugin-semantic-acceptance.md` 完成内容与场景审查。
-   - 至少覆盖 Manifest、组件发现、目标 Skill 的调用策略、共享镜像、安装缓存、更新、失败路径和平台差异。
+   - 验证本次变更涉及的 Manifest、组件发现、调用策略、共享镜像、安装、更新、可复现失败和平台差异。
    - 无法运行的平台必须标为“未完成真实客户端验证”，不得描述为已通过。
    - 完成条件：静态检查和关键场景均通过，未验证内容和无法继续的原因均已说明。
 
@@ -87,16 +89,14 @@ metadata:
 最终输出必须包含：
 
 - Plugin 目标、已完成范围和明确排除项；
-- 最终目录树与关键组件职责；
 - 新增、修改、删除和迁移内容；
 - Claude Code 与 Codex 的 Manifest、调用、安装和验证差异；
-- Skill 子任务及其 `build-skill` 验收结果；
-- 共享镜像清单、规范源及必要符号链接；
-- 实际运行的命令、结果、失败修复记录；
-- 已验证、未验证，以及无法完成的内容和原因；
+- 共享镜像清单、规范源及必要链接，以及 Skill 子任务的 `build-skill` 验收结果；
+- 实际运行的命令与结果；
 - 版本、Marketplace 或发布状态；
-- 独立调用时记录真实适用的交付动作及用户授权状态；受控调用时记录提交、发布状态与恢复条件；
-- 独立调用提问后停止；受控调用返回上层总控后停止。
+- 已验证、未验证，以及无法完成的内容和原因。
+
+其余交付细节遵循 `workflows/§07-delivery.md`，并用 `templates/plugin-delivery-report.template.md` 组织报告；独立调用提问后停止，受控调用返回上层总控后停止。
 
 ## Guardrails
 
@@ -110,16 +110,3 @@ metadata:
 - 不把静态文件存在描述为真实安装或调用已经通过。
 - 不为 Claude Code 与 Codex 复制两套相同工作流；只隔离真实的平台差异。
 - 当前不声明其他 Coding Agent 的兼容性。
-
-## References
-
-- 开始时完整读取 `workflows/§01-research.md`。
-- 澄清关键决策时完整读取 `workflows/§02-clarification.md`。
-- 输出设计前完整读取 `workflows/§03-design.md`、`rules/plugin-architecture.md`、`rules/platform-compatibility.md` 和 `rules/security-and-permissions.md`。
-- Plugin 包含 Skill 时读取 `rules/skill-architecture.md`、`rules/skill-frontmatter.md`、`rules/skill-quality-standard.md` 和 `templates/skill.template.md`。
-- 处理 Skill 子任务时完整读取 `workflows/§04-skill-delegation.md`。
-- 实施时完整读取 `workflows/§05-implementation.md`。
-- 验证时完整读取 `workflows/§06-validation.md`、`checklists/plugin-design-review.md` 和 `checklists/plugin-semantic-acceptance.md`。
-- 审查 Plugin 内 Skill 时读取 `checklists/skill-content-review.md` 和 `checklists/skill-copy-review.md`；需要改写参考时读取 `examples/skill-copy-review.example.md`。
-- 新建、整体重构或改变 Skill 的触发、Frontmatter、权限与平台行为时读取 `prompts/reviewer.agent.md` 并调起独立 Reviewer。
-- 交付时完整读取 `workflows/§07-delivery.md` 和 `templates/plugin-delivery-report.template.md`。

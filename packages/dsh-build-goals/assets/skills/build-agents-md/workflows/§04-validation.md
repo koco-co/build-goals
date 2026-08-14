@@ -8,13 +8,7 @@
 python3 scripts/validate_agents_md.py /path/to/project --strict
 ```
 
-项目要求所有 `CLAUDE.md` 必须为符号链接时追加：
-
-```bash
-python3 scripts/validate_agents_md.py /path/to/project --strict --require-symlink
-```
-
-校验器检查根文件、嵌套文件、单一来源、相对链接、断开的本地 Markdown 链接、遗留占位符和软长度预算。软长度提示不因 `--strict` 变成失败。
+校验器检查根文件、嵌套文件与软长度预算；断链与占位符由脚本覆盖（错误码 `LOCAL_LINK_NOT_FOUND`/`PLACEHOLDER`），详见 `validate_agents_md.py`。软长度提示不因 `--strict` 变成失败。
 
 ## 项目验证
 

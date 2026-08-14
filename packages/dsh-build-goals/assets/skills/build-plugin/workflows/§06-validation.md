@@ -8,17 +8,7 @@
 python3 scripts/validate_plugin.py <plugin-root> --platform <dual|claude|codex> --strict
 ```
 
-检查：
-
-- Manifest JSON、名称、版本和组件路径；
-- 双平台身份与版本一致；
-- Skills 遵循同一质量规范；
-- Skill Frontmatter 与字段决策矩阵一致；
-- `prompts/` 文件使用 `*.agent.md`；
-- 共享镜像存在、不是软链接且与规范源一致；
-- 必要软链接相对、有效且没有越界；
-- Marketplace 路径；
-- 空文件、失效引用和错误目录。
+检查：运行 `python3 scripts/validate_plugin.py <plugin-root> --platform <dual|claude|codex> --strict`；脚本已覆盖 Manifest、双平台身份与版本、Skill 质量与 Frontmatter、共享镜像（存在/非软链接/与规范源一致/越界）、必要链接、空文件与失效引用，并顺带校验 Claude Marketplace，本清单只处理脚本无法判断的内容与场景项。
 
 ## Phase 2：平台官方检查
 
@@ -48,11 +38,11 @@ Codex：
 3. 仓库迁移；
 4. 双平台共用组件；
 5. Skill 委派；
-6. Manifest 路径错误；
-7. 缺失、漂移或被软链接替代的共享镜像，以及失效或越界的必要链接；
-8. 用户确认步骤；
-9. 安装、更新和失败回滚；
-10. 每个 Skill 的实际调用行为与平台配置一致。
+6. 缺失、漂移或被软链接替代的共享镜像，以及失效或越界的必要链接；
+7. 安装、更新和失败回滚；
+8. 每个 Skill 的实际调用行为与平台配置一致。
+
+其余场景参照 `rules/skill-quality-standard.md` §7 决策与确认。
 
 ## Phase 4：结果分类
 

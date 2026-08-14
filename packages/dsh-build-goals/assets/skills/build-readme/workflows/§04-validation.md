@@ -4,24 +4,7 @@
 
 ## Phase 1：机械检查
 
-使用当前 Skill 目录中的校验器：
-
-```bash
-python3 <skill-dir>/scripts/validate_readme.py \
-  <project-root>/README.md \
-  --project-root <project-root> \
-  --strict
-```
-
-它检查：
-
-- 居中首屏、精确花体标题、中文普通描述、英文装饰字形和 Shields 数量；
-- 居中章节标题、稳定锚点、英文 `<b>` 标签、下划线斜体禁用、粗体冲突和未解决占位符；
-- HTML 标签配对、代码块语言标签和格式转换残留；
-- 本地链接、远程热链、图片替代文本和 SVG XML/安全内容；
-- Mermaid 代码块的基础声明。
-
-只有用户已允许联网验证时增加 `--verify-remote`。远程检查失败必须显示具体 URL，不得静默忽略。
+使用当前 Skill 目录中的校验器，执行 `python3 <skill-dir>/scripts/validate_readme.py <project-root>/README.md --project-root <project-root> --strict`；该校验器检查首屏/章节视觉规范、锚点、英文标签与斜体禁用、围栏语言、HTML 配对、本地链接与图片、SVG 安全与 Mermaid 声明；仅用户已授权联网时加 `--verify-remote`。远程检查失败必须显示具体 URL，不得静默忽略。
 
 ## Phase 2：项目检查
 
@@ -32,7 +15,7 @@ python3 <skill-dir>/scripts/validate_readme.py \
 ## Phase 3：GitHub 与视觉检查
 
 - 项目已有 Mermaid CLI 时实际解析图表；没有时不临时安装，改用可用的 GitHub 渲染路径或标记 Mermaid 真实渲染未验证。
-- 只有预览已批准外部传输并且 `gh` 已认证时，才可调用 GitHub Markdown API 检查 GFM HTML。
+- 只有预览已批准外部传输并且当前环境具备可用的渲染 API 认证凭据时，才可调用渲染 API 检查 GFM HTML。
 - 所有新增或修改图片必须实际查看；检查浅色、深色背景、裁切、可读性和替代文本。
 - 验证 Shields、远程图片和外部链接时记录访问时间与结果。
 

@@ -273,10 +273,14 @@ class ValidateSkillTests(unittest.TestCase):
             skill_md,
         )
         self.assertIn(
-            "请使用 `$skill-name`，读取 `<真实文件路径>` 并继续完成其中记录的任务；"
+            "请调用 `skill-name`，读取 `<真实文件路径>` 并继续完成其中记录的任务；"
             "严格遵循文档中的目标、约束、已确认决策和后续步骤。",
             skill_md,
         )
+        self.assertNotIn("# Codex", skill_md)
+        self.assertNotIn("# Claude Code Plugin", skill_md)
+        self.assertNotIn("/plugin-name:skill-name", skill_md)
+        self.assertNotIn("`$skill-name`", skill_md)
 
     def test_shipped_user_only_skills_do_not_repeat_invocation_policy(self) -> None:
         redundant_phrases = (
@@ -377,7 +381,7 @@ class ValidateSkillTests(unittest.TestCase):
             "build-skill": "需要互联网访问和 Python 3.9+ 运行内置静态校验脚本。",
             "handoff": None,
             "shape-idea": None,
-            "vibe-coding": "需要 Python 3.9+、Git、互联网访问、目标项目构建与测试工具；多 Agent 或 worktree 不可用时支持串行降级。",
+            "vibe-coding": "需要 Python 3.9+、Git，以及目标项目实际使用的构建与验证工具；调研公开资料时需要互联网访问。",
         }
         prohibited = ("当前适配", "目前适配", "目前仅适配")
 
@@ -396,14 +400,14 @@ class ValidateSkillTests(unittest.TestCase):
 
     def test_behavior_changed_skill_versions_are_updated(self) -> None:
         expected = {
-            "build-agents-md": 'version: "1.2.0"',
-            "build-plugin": 'version: "1.3.1"',
-            "build-prd": 'version: "1.1.1"',
-            "build-readme": 'version: "1.0.1"',
-            "build-skill": 'version: "1.5.1"',
-            "handoff": 'version: "1.1.2"',
-            "shape-idea": 'version: "1.0.1"',
-            "vibe-coding": 'version: "1.3.1"',
+            "build-agents-md": 'version: "2.0.0"',
+            "build-plugin": 'version: "2.0.0"',
+            "build-prd": 'version: "2.0.0"',
+            "build-readme": 'version: "2.0.0"',
+            "build-skill": 'version: "2.0.0"',
+            "handoff": 'version: "2.0.0"',
+            "shape-idea": 'version: "2.0.0"',
+            "vibe-coding": 'version: "2.0.0"',
         }
 
         for name, version_line in expected.items():
@@ -412,6 +416,30 @@ class ValidateSkillTests(unittest.TestCase):
                     encoding="utf-8"
                 )
                 self.assertIn(version_line, text)
+
+    def test_shipped_skills_publish_the_evidence_first_rule(self) -> None:
+        for skill_md in sorted(REPO_ROOT.glob("skills/*/SKILL.md")):
+            with self.subTest(skill=skill_md.parent.name):
+                text = skill_md.read_text(encoding="utf-8")
+                self.assertIn("最高优先级", text)
+                self.assertIn("不得为未经证实的假设", text)
+
+        agents = REPO_ROOT.joinpath("AGENTS.md").read_text(encoding="utf-8")
+        quality = REPO_ROOT.joinpath(
+            "skills", "build-skill", "rules", "quality-standard.md"
+        ).read_text(encoding="utf-8")
+        design_review = REPO_ROOT.joinpath(
+            "skills", "build-skill", "checklists", "design-review.md"
+        ).read_text(encoding="utf-8")
+        content_review = REPO_ROOT.joinpath(
+            "skills", "build-skill", "checklists", "content-review.md"
+        ).read_text(encoding="utf-8")
+        for text in (agents, quality, design_review, content_review):
+            self.assertIn("用户需求", text)
+            self.assertIn("仓库事实", text)
+            self.assertIn("平台契约", text)
+            self.assertIn("可复现缺陷", text)
+            self.assertIn("明确安全要求", text)
 
     def test_vibe_coding_defines_companion_skill_lifecycle(self) -> None:
         skill_root = REPO_ROOT / "skills" / "vibe-coding"
@@ -474,9 +502,7 @@ class ValidateSkillTests(unittest.TestCase):
             "docs/产品需求/",
             ".build-goals/build-prd/",
             "不按问题数量",
-            "固定结构",
             "语义要求",
-            "运行时可变内容",
             "normal",
             "clarification",
             "invalid",

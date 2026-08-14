@@ -1,24 +1,13 @@
 # 多 Agent 功能开发与集成
 
-## Phase 1: 构造最小上下文包
+## Phase 1：构造最小上下文包
 
-每个功能 Agent 只获得：
+功能 Agent 的最小上下文包以 `rules/orchestration-contract.md` §4 为唯一定义；本文件只强调两点：
 
-- 全局需求、架构和实施索引中与当前任务相关的条目；
-- 当前功能域的需求、行为样例、架构与任务文件；
-- 当前功能域直接依赖的已确认输入输出契约；
-- 一个 `TASK-NNN`；
-- 对应需求功能与验收 ID，或迁移 Finding；
-- 允许修改的文件与禁止区域；
-- 测试数据与验证命令；
-- 依赖提交；
-- 单次 commit 完成条件；
-- 当前作用域适用的根目录与局部 `AGENTS.md` 路径；
-- 已通过 readiness 的共同基线和项目指令治理提交。
+- 不要无差别发送整个会话、全部需求包、所有已完成功能域或整个旧项目；
+- Agent 确实需要查看额外文件时，先说明它与当前任务的直接关系，再只读加载该范围。
 
-不要无差别发送整个会话、全部需求包、所有已完成功能域或整个旧项目。Agent 确实需要查看额外文件时，先说明它与当前任务的直接关系，再只读加载该范围。
-
-## Phase 2: TDD 功能切片
+## Phase 2：TDD 功能切片
 
 使用 `prompts/feature-developer.agent.md`：
 
@@ -33,7 +22,7 @@
 
 功能切片必须纵向覆盖可见行为，不把“只建数据库表”或“只画页面壳”当作完整产品功能，除非它本身是经确认的独立迁移单元。
 
-## Phase 3: 专项 Agent
+## Phase 3：专项 Agent
 
 按需调用：
 
@@ -44,7 +33,7 @@
 
 专项 Agent 不绕过功能所有者直接扩大范围。发现架构或产品范围问题时返回主 Agent 决策。
 
-## Phase 4: 原子提交
+## Phase 4：原子提交
 
 遵循 `rules/worktree-and-commits.md`：
 
@@ -54,17 +43,9 @@
 - 测试失败、需求未满足或工作区包含未知文件时不提交；
 - 不 push、不 force push、不自动合并受保护分支。
 
-## Phase 5: 集成
+## Phase 5：集成
 
-唯一的 Integration Manager 使用 `prompts/integration-manager.agent.md`：
-
-1. 检查提交边界和证据；
-2. 按依赖顺序合并或 cherry-pick；
-3. 处理冲突时保护最新用户改动；
-4. 每次集成后运行受影响测试；
-5. 更新 `docs/实施任务/功能域/<功能域>.md` 的状态和 commit SHA，并同步全局索引；
-6. 确认任务 worktree 干净且没有未集成补丁后，立即移除该 worktree 和本地任务分支并记录证据；
-7. 所有切片完成后运行全量门禁。
+唯一的 Integration Manager 使用角色提示文件 `prompts/integration-manager.agent.md`，按其中的流程（核对基线与提交边界、按依赖顺序 merge/cherry-pick、冲突保护最新用户改动、每步运行受影响检查、更新任务状态与 SHA、干净后立即清理 worktree 与任务分支）集成并行提交，仓库不变量见 `rules/worktree-and-commits.md`。
 
 如果并行任务修改了同一契约，停止集成并回到任务计划，不用“最后写入覆盖前者”解决。
 

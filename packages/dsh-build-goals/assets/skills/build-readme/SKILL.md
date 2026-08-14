@@ -5,8 +5,10 @@ compatibility: 需要 Python 3.9+ 运行内置校验脚本。
 disable-model-invocation: true
 metadata:
   author: koco-co
-  version: "1.0.1"
+  version: "2.0.0"
 ---
+
+最高优先级：只写入有用户需求、仓库事实、平台契约、可复现缺陷或明确安全要求支持的内容；不得为未经证实的假设增加功能、限制、兼容、校验、章节或提示词。
 
 # Outcome
 
@@ -61,12 +63,3 @@ metadata:
 - 不虚构功能、版本、兼容性、性能、测试、许可证、贡献者、维护状态或外部认可。
 - 生成图片、访问远程服务、发送 README 到渲染 API、安装依赖、提交、推送或发布前，必须在预览中明确并取得相应授权。
 - 不创建仓库中原本不存在的翻译 README；不使用外部托管图片替代可版本控制的项目资源。
-
-## References
-
-- 开始时完整读取 `workflows/§01-research.md`。
-- 输出写入计划前完整读取 `workflows/§02-preview.md` 和 `templates/readme-preview.template.md`。
-- 用户确认后完整读取 `workflows/§03-authoring.md`、`rules/github-style.md` 和 `rules/evidence-and-content.md`。
-- 需要成品范式时读取 `examples/readme.example.md`。
-- 写入完成后完整读取 `workflows/§04-validation.md` 和 `checklists/semantic-acceptance.md`，并执行 `scripts/validate_readme.py`。
-- 交付时完整读取 `workflows/§05-delivery.md`。

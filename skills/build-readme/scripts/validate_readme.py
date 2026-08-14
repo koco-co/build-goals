@@ -6,7 +6,6 @@ from __future__ import annotations
 import argparse
 import json
 import re
-import sys
 import unicodedata
 import urllib.error
 import urllib.parse
@@ -379,7 +378,9 @@ def _english_bold_intervals(value: str) -> list[tuple[int, int]]:
 
 def _english_prose(value: str) -> str:
     """Remove machine-readable markup before checking visible English prose."""
-    mask = lambda match: " " * len(match.group(0))
+    def mask(match: re.Match[str]) -> str:
+        return " " * len(match.group(0))
+
     value = re.sub(r"<code\b[^>]*>.*?</code>", mask, value, flags=re.I | re.S)
     value = re.sub(r"`[^`\n]+`", mask, value)
     value = re.sub(r"!?(\[[^\]]*\])\([^)]*\)", mask, value)

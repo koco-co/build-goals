@@ -87,6 +87,17 @@ class AuditFollowupTests(unittest.TestCase):
             (REPO_ROOT / "skills" / "build-prd" / "templates" / "requirement-manifest.template.yaml").read_text(encoding="utf-8")
         )
         self.assertEqual(set(template["stage"]), {"included_scope", "deferred_scope", "acceptance"})
+        self.assertEqual(template["package_type"], "{{full-or-stage}}")
+
+    def test_json_yaml_templates_remain_json_parseable(self) -> None:
+        template_dir = REPO_ROOT / "skills" / "build-prd" / "templates"
+        for name in (
+            "checkpoint-session.template.yaml",
+            "domain-behavior.template.yaml",
+            "requirement-manifest.template.yaml",
+        ):
+            with self.subTest(template=name):
+                json.loads((template_dir / name).read_text(encoding="utf-8"))
 
     def test_checkpoint_strict_rejects_dependency_cycle(self) -> None:
         with tempfile.TemporaryDirectory() as temp:

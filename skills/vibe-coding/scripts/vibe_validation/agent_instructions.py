@@ -140,7 +140,7 @@ def _is_passing_result(value: str) -> bool:
 def _is_executed_validation_command(value: str) -> bool:
     return not any(marker in value for marker in NEGATIVE_RESULT_MARKERS) and all(
         marker in value
-        for marker in ("validate_agents_md.py", "--strict", "--require-symlink")
+        for marker in ("validate_agents_md.py", "--strict")
     )
 
 
@@ -152,7 +152,7 @@ def _is_confirmed(value: str) -> bool:
 
 def validate_agent_documents(root: Path, issues: list[Issue]) -> None:
     """Reuse build-agents-md's single source and local-reference checks."""
-    report = validate_agents_project(root, strict=True, require_symlink=True)
+    report = validate_agents_project(root, strict=True)
     for issue in report.issues:
         path = root / issue.path if issue.path != "." else root
         severity = issue.severity
@@ -223,7 +223,7 @@ def validate_agent_readiness(
             "error",
             "AGENT_VALIDATION_COMMAND",
             plan_path,
-            "验证命令必须调用 build-agents-md 的 validate_agents_md.py，并启用 --strict --require-symlink。",
+            "验证命令必须调用 build-agents-md 的 validate_agents_md.py，并启用 --strict。",
             root,
         )
     if not _is_passing_result(values.get("验证结果", "")):

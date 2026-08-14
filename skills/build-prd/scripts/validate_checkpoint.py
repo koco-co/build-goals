@@ -104,14 +104,20 @@ def _validate_domain(
             ids.add(feature_id)
         if not isinstance(feature.get("name"), str) or not feature["name"].strip():
             issues.append(Issue("FEATURE_NAME", label, "功能缺少名称。"))
-        for key in ("user_inputs", "interactions", "external_contracts", "forbidden", "acceptance"):
+        for key in ("user_inputs", "acceptance"):
             if not _strings(feature.get(key)):
                 issues.append(Issue("FEATURE_FIELD", label, f"{key} 必须是非空字符串数组。"))
+        for key in ("interactions", "external_contracts", "forbidden"):
+            if key in feature and feature.get(key) != [] and not _strings(feature.get(key)):
+                issues.append(Issue("FEATURE_FIELD", label, f"{key} 如存在，必须是字符串数组。"))
         outputs = feature.get("outputs")
-        if not isinstance(outputs, dict) or not all(
-            _strings(outputs.get(key)) for key in ("exact", "semantic", "runtime")
+        if not isinstance(outputs, dict) or not _strings(outputs.get("semantic")):
+            issues.append(Issue("OUTPUT_CONTRACT", label, "outputs 必须包含 semantic 非空数组。"))
+        elif any(
+            key in outputs and outputs.get(key) != [] and not _strings(outputs.get(key))
+            for key in ("exact", "runtime")
         ):
-            issues.append(Issue("OUTPUT_CONTRACT", label, "outputs 必须分别包含 exact、semantic 和 runtime 非空数组。"))
+            issues.append(Issue("OUTPUT_CONTRACT", label, "outputs 的 exact 和 runtime 如存在，必须是字符串数组。"))
     return ids
 
 

@@ -2,7 +2,7 @@
 
 开始本工作流前读取 `../rules/workflow-state-and-permissions.md`。第一次全局确认后进入 `architecture_approved`；第二次全局确认后进入 `plan_approved`。本文件不得在这两个状态之间提前创建实施任务文件或执行 Git 写操作。
 
-## 1. 固定需求快照并写入已确认架构
+## Phase 1：固定需求快照并写入已确认架构
 
 第一次全局确认后：
 
@@ -24,7 +24,7 @@ python3 <vibe-coding>/scripts/validate_delivery.py <project-root> \
 
 路线 1–2 使用 `greenfield`，路线 3 使用 `continuation`，路线 4 使用 `migration`。失败时修复后重跑。
 
-## 2. 在对话中生成按功能域拆分的任务方案
+## Phase 2：在对话中生成按功能域拆分的任务方案
 
 第二次全局确认前，Implementation Planner 只在对话中构建完整任务方案，不创建 `docs/实施任务/`。
 
@@ -43,7 +43,7 @@ python3 <vibe-coding>/scripts/validate_delivery.py <project-root> \
 
 任务编号在整个项目唯一。按用户可见的垂直功能切片，不按“前端 Agent / 后端 Agent”粗分整层。
 
-## 3. 构建整体实施路线
+## Phase 3：构建整体实施路线
 
 使用 Implementation Planner 输出：
 
@@ -56,7 +56,7 @@ python3 <vibe-coding>/scripts/validate_delivery.py <project-root> \
 
 给规划 Agent 的内容仅包含需求包全局索引、当前规划域及其直接依赖，不发送无关旧项目材料。
 
-## 4. 第二次全局确认并落盘任务文档
+## Phase 4：第二次全局确认并落盘任务文档
 
 在对话中一次展示整体实施路线、功能域顺序、任务摘要、并行边界、提交策略和验收矩阵。用户确认前：
 

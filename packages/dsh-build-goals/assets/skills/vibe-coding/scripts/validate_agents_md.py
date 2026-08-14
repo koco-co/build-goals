@@ -219,7 +219,6 @@ def validate_claude_pair(
     *,
     root: Path,
     strict: bool,
-    require_symlink: bool,
     issues: List[Issue],
 ) -> None:
     claude = agents.with_name("CLAUDE.md")
@@ -283,46 +282,20 @@ def validate_claude_pair(
             )
         return
 
-    if not claude.is_file():
-        add_issue(
-            issues,
-            "error",
-            "CLAUDE_SINGLE_SOURCE",
-            claude,
-            "CLAUDE.md 既不是符号链接，也不是普通导入文件。",
-            root,
-        )
-        return
-
-    content = read_text(claude, root, issues)
-    if content is None:
-        return
-    exact_import = content in {"@AGENTS.md", "@AGENTS.md\n", "@AGENTS.md\r\n"}
-    if not exact_import:
-        add_issue(
-            issues,
-            "error",
-            "CLAUDE_SINGLE_SOURCE",
-            claude,
-            "普通 CLAUDE.md 只能包含精确的 @AGENTS.md 导入回退。",
-            root,
-        )
-    elif require_symlink:
-        add_issue(
-            issues,
-            "error",
-            "CLAUDE_SYMLINK_REQUIRED",
-            claude,
-            "当前校验要求 CLAUDE.md 为相对符号链接，导入回退不被接受。",
-            root,
-        )
+    add_issue(
+        issues,
+        "error",
+        "CLAUDE_SYMLINK_REQUIRED",
+        claude,
+        "CLAUDE.md 必须是指向同目录 AGENTS.md 的相对符号链接。",
+        root,
+    )
 
 
 def validate_project(
     project_root: Path,
     *,
     strict: bool = False,
-    require_symlink: bool = False,
 ) -> Report:
     root = project_root.resolve()
     issues: List[Issue] = []
@@ -379,7 +352,6 @@ def validate_project(
             agents,
             root=root,
             strict=strict,
-            require_symlink=require_symlink,
             issues=issues,
         )
         if strict:
@@ -412,11 +384,6 @@ def build_parser() -> argparse.ArgumentParser:
         help="Require every AGENTS.md companion and validate local content.",
     )
     parser.add_argument(
-        "--require-symlink",
-        action="store_true",
-        help="Reject the portable @AGENTS.md file fallback.",
-    )
-    parser.add_argument(
         "--json",
         action="store_true",
         help="Print a machine-readable report.",
@@ -429,7 +396,6 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     report = validate_project(
         args.project_root,
         strict=args.strict,
-        require_symlink=args.require_symlink,
     )
     if args.json:
         print(json.dumps(report.to_dict(), ensure_ascii=False, indent=2))

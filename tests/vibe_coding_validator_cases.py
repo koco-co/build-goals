@@ -221,7 +221,7 @@ class VibeCodingValidatorTests(unittest.TestCase):
             - 状态：{status}
             - 需求/验收/Finding：{marker}
             - 目标：完成可独立验收的账号创建功能。
-            - 第一条失败测试：test_account_creation
+            - 首个验证证据：test_account_creation
             - 正常测试数据：factory 创建隔离普通用户并自动清理。
             - 验证命令：python -m unittest
             - Worktree：N/A（串行执行）
@@ -335,7 +335,7 @@ class VibeCodingValidatorTests(unittest.TestCase):
             - 状态：{status}
             - 触发证据：根项目指令需要初始化或更新。
             - 内容确认：已确认完整内容和文件操作。
-            - 验证命令：python3 <build-agents-md>/scripts/validate_agents_md.py . --strict --require-symlink
+            - 验证命令：python3 <build-agents-md>/scripts/validate_agents_md.py . --strict
             - 验证结果：通过。
             - 治理提交：{commit}
             - 功能开发基线：{baseline}
@@ -549,8 +549,8 @@ class VibeCodingValidatorTests(unittest.TestCase):
                     "- 安装结果：依赖安装未成功。",
                 )
                 .replace(
-                    "- 验证命令：python3 <build-agents-md>/scripts/validate_agents_md.py . --strict --require-symlink",
-                    "- 验证命令：未执行，因为环境缺失：python3 <build-agents-md>/scripts/validate_agents_md.py . --strict --require-symlink",
+                    "- 验证命令：python3 <build-agents-md>/scripts/validate_agents_md.py . --strict",
+                    "- 验证命令：未执行，因为环境缺失：python3 <build-agents-md>/scripts/validate_agents_md.py . --strict",
                 )
                 .replace("- 内容确认：已确认", "- 内容确认：未经已确认")
                 .replace("- 验证结果：通过。", "- 验证结果：未通过。"),

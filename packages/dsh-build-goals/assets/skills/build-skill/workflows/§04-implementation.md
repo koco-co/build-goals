@@ -17,7 +17,7 @@
 ## Phase 2：建立核心骨架
 
 1. 先创建或更新 `SKILL.md`。
-2. 保留 `Outcome`、`Routing`、`Steps`、`Delivery`、`Guardrails` 和 `References` 的核心顺序。
+2. 默认使用推荐骨架（见 `templates/skill.template.md`），按 `rules/architecture.md` 的省略准则保留或省略各键；不为凑齐六键堆砌空章节。
 3. 根据已确认的字段决策矩阵编写 Frontmatter；没有依据的可选字段保持省略。
 4. Description 同时说明“做什么”和“何时使用”，并清楚描述独立分支；双平台 Skill 不依赖 Claude Code 专属字段承担唯一触发语义。
 5. 将复杂细节移入按需读取文件，但保留完整入口和完成条件。
@@ -29,7 +29,7 @@
 1. 复用已有 CLI、测试和脚本；
 2. 补充缺失的确定性脚本；
 3. 创建固定结构模板；
-4. 创建高质量 Few-shot 示例；
+4. 创建可直接模仿的高质量示例；
 5. 编写仍无法机械保证的规则；
 6. 拆分复杂工作流；
 7. 增加内容、文案或场景审查清单；

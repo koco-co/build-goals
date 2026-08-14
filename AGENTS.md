@@ -23,7 +23,7 @@
 - `python3 -m unittest discover -s tests -p 'test_*.py' -v`：运行全部回归测试。
 - `python3 skills/build-plugin/scripts/validate_plugin.py . --platform dual --strict`：检查双平台 Plugin。
 - `python3 skills/build-skill/scripts/validate_skill.py skills/build-agents-md --profile dual --plugin-root . --strict`：检查单个 Skill；修改其他 Skill 时替换目标路径。
-- `python3 skills/build-agents-md/scripts/validate_agents_md.py . --strict --require-symlink`：检查项目指令和 `CLAUDE.md` 符号链接。
+- `python3 skills/build-agents-md/scripts/validate_agents_md.py . --strict`：检查项目指令和 `CLAUDE.md` 符号链接。
 - `python3 skills/build-readme/scripts/validate_readme.py README.md --project-root . --strict`：检查 README 结构和本地引用。
 - `python3 skills/build-plugin/scripts/sync_shared_files.py --root .`：只读检查跨 Skill 镜像是否与规范源一致；需要刷新时显式添加 `--write`。
 - `python3 packages/dsh-build-goals/scripts/sync_skills.py --root .`：只读检查 DSH 插件包资产是否与 `skills/` 一致；需要刷新时显式添加 `--write`。
@@ -31,6 +31,7 @@
 
 ## 关键约定
 
+- 最高优先级：禁止防御性编程和防御性提示词。只实现有用户需求、仓库事实、平台契约、可复现缺陷或明确安全要求支持的行为；不得为未经证实的假设增加代码、分支、兜底、兼容、校验、权限门禁、提示词或流程。必要的输入校验、数据安全、权限边界和错误处理必须能指出上述依据。
 - 主 `SKILL.md` 只保留入口和主流程；新增的本地引用必须存在，工作流文件使用 `§NN-name.md` 命名。
 - 调用策略写在平台配置中；目标 Skill 允许模型调用时，按 `skills/build-skill/rules/quality-standard.md` 写清触发条件和排除条件。
 - 跨 Skill 运行依赖在 `.plugin-shared-files.json` 中声明，仓库保存普通镜像；修改规范源后显式同步，严格校验必须拒绝缺失、软链接或内容漂移。
@@ -46,7 +47,7 @@
 | 新建或修改 Skill             | 先补行为测试，再运行目标 Skill 检查和相关单元测试                                                                                            |
 | Manifest、平台适配或共享文件 | 镜像检查、双平台 Plugin 检查、安装器测试和完整回归                                                                                           |
 | DSH 插件包                   | `sync_skills.py --root .` 只读检查、DSH 插件包结构测试、安装器测试和完整回归                                                                 |
-| `AGENTS.md` / `CLAUDE.md`    | `validate_agents_md.py --strict --require-symlink`，并检查 Git 中的链接模式                                                                  |
+| `AGENTS.md` / `CLAUDE.md`    | `validate_agents_md.py --strict`，并检查 Git 中的链接模式                                                                                    |
 | README                       | `validate_readme.py`，并核对公开命令与当前仓库一致                                                                                           |
 | 正式版本                     | 核对 `.claude-plugin/plugin.json`、`.claude-plugin/marketplace.json`、`.codex-plugin/plugin.json` 和 `packages/dsh-build-goals/package.json` |
 

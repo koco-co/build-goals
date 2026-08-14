@@ -16,13 +16,13 @@
 
 没有触发证据时记录“不适用”或“有效沿用”，不为了展示编排而调用 Skill、生成文件或制造提交。
 
-## 平台调用原则
+## 调用方式
 
-不要假设配套 Skill 一定能被当前 Agent 自动调用。先依据当前 Claude Code 或 Codex 的实际调用能力判断：
+不要假设配套 Skill 一定能被当前 Agent 自动调用。先依据当前平台的实际调用能力判断：
 
 - 平台明确支持并允许当前 Agent 受控调用时，才进入下述“受控调用”；
 - 当前 Skill 配置或平台限制阻止受控调用时，直接进入“人工交接”，生成用户可复制的真实调用提示并暂停依赖任务；
-- Claude Code Plugin 的用户调用写成 `/plugin-name:skill-name`；Codex 的显式 Skill 调用写成 `$skill-name`。只有已知当前平台与实际 Plugin/Skill 名称时才输出对应语法；未知时使用中性的“请调用 <skill-name>”而不是猜测命令。
+- 受控调用由当前环境执行，不在交接提示中拼接平台命令；人工交接统一写“请调用 `<skill-name>`”，并使用真实 Skill 名称。
 
 ## 受控调用
 
@@ -50,15 +50,15 @@
 
 ## 人工交接
 
-平台不能受控调用配套 Skill 时，不在 `vibe-coding` 中复制一套简化实现。输出可直接复制的交接提示，并暂停所有依赖任务。提示必须使用当前平台真实的调用形式；平台未知时使用中性 Skill 名称。
+平台不能受控调用配套 Skill 时，不在 `vibe-coding` 中复制一套简化实现。输出可直接复制的交接提示，并暂停所有依赖任务。提示统一使用“请调用 `<skill-name>`”，不维护不同平台的命令语法。
 
-`build-agents-md` 的交接正文至少使用以下结构并替换真实路径、任务与调用形式：
+`build-agents-md` 的交接正文至少使用以下结构，并替换真实路径与任务：
 
 ```text
-继续完成 <项目绝对路径> 中由 vibe-coding 编排的 <TASK-ID>。请调用 build-agents-md，根据仓库已经验证的目录、构建、启动和测试命令，初始化或更新 AGENTS.md，并把同目录 CLAUDE.md 建为指向 AGENTS.md 的相对符号链接；先展示完整正文和全部文件操作供我确认，确认后写入，执行 `validate_agents_md.py --strict --require-symlink` 与适用的真实命令验证。不要修改其他项目文件，也不要 commit、push 或更新本地 Plugin。完成后请返回修改内容、确认依据、验证证据、未验证项和恢复条件，以便回到原 vibe-coding 流程创建只含项目指令的治理提交、回填明确 SHA 并执行 readiness 门禁。
+请调用 build-agents-md，继续完成 <项目绝对路径> 中 <TASK-ID> 的项目指令任务；依据仓库已验证的命令更新 AGENTS.md 和 CLAUDE.md，运行 `validate_agents_md.py --strict`，并返回验证结果。
 ```
 
-实际交付时，将“请调用 build-agents-md”替换成已知平台的 `/plugin-name:build-agents-md`、`$build-agents-md` 或中性调用说明。其他配套 Skill 的提示同样必须包含目标、权威输入、允许与禁止范围、确认门禁、验证要求、返回格式和恢复条件，不能只写“请运行某 Skill”。
+其他配套 Skill 沿用同一通用调用范式，并包含目标、权威输入、允许与禁止范围、确认门禁、验证要求、返回格式和恢复条件，不能只写“请运行某 Skill”。
 
 ## 项目指令阻断边界
 

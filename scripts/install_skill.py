@@ -213,7 +213,9 @@ def install_skill(
             # Claude Code and DeepSeek Harness both keep the full frontmatter
             # and drop agents/: the staged copies are content-identical, so
             # the DSH install reuses the claude validation profile.
-            shutil.rmtree(stage / "agents", ignore_errors=True)
+            agents = stage / "agents"
+            if agents.exists():
+                shutil.rmtree(agents)
             profile = "claude"
 
         run_validator(validator, stage, profile, plugin_root=stage)
@@ -230,7 +232,7 @@ def install_skill(
 
         try:
             stage.replace(destination)
-        except Exception:
+        except OSError:
             if backup is not None and backup.exists() and not destination.exists():
                 backup.replace(destination)
             raise

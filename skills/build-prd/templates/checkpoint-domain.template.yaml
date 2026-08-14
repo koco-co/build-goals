@@ -11,28 +11,11 @@
       "id": "F-001",
       "name": "{{功能名称}}",
       "user_inputs": [
-        "{{代表性用户输入与边界}}"
-      ],
-      "interactions": [
-        "{{追问、反馈、恢复和最终文案}}"
+        "{{代表性用户输入}}"
       ],
       "outputs": {
-        "exact": [
-          "{{固定结构}}"
-        ],
-        "semantic": [
-          "{{语义要求}}"
-        ],
-        "runtime": [
-          "{{运行时可变信息}}"
-        ]
+        "semantic": ["{{语义要求}}"]
       },
-      "external_contracts": [
-        "{{需要保持的公开契约}}"
-      ],
-      "forbidden": [
-        "{{禁止结果}}"
-      ],
       "acceptance": [
         "{{Given/When/Then 验收结果}}"
       ]

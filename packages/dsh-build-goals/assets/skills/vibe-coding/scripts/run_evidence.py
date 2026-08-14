@@ -31,11 +31,7 @@ def _summary(data: bytes) -> dict[str, object]:
 def _write_record(path: Path, payload: dict[str, object]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    try:
-        os.chmod(path, 0o600)
-    except OSError:
-        # Non-POSIX platforms may not expose POSIX permission semantics.
-        pass
+    os.chmod(path, 0o600)
 
 
 def build_parser() -> argparse.ArgumentParser:

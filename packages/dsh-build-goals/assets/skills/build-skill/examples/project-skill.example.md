@@ -33,7 +33,7 @@
 ## 推荐结构
 
 ```text
-.agents/skills/service-release/
+service-release/
 ├── SKILL.md
 ├── workflows/
 │   ├── §01-prepare.md
@@ -42,10 +42,10 @@
 ├── templates/
 │   └── release-summary.template.md
 └── checklists/
-    └── release-readiness.md
+    └── release-readiness.md  # 发布就绪检查
 ```
 
-Claude Code 通过项目适配安装到 `.claude/skills/service-release/`，核心文件由同一规范源生成或同步。
+安装位置由各平台安装器决定（Claude Code 到 `.claude/skills/…`、Codex 到对应 skills 目录），示例仅示意通用结构。
 
 ## 边界划分
 

@@ -1,16 +1,20 @@
 ---
 name: vibe-coding
 description: 依据已确认的 docs/产品需求/ 需求包新建项目、按用户指定范围参考旧项目、续建现有项目，或实施现有项目的架构与技术栈迁移；经过架构方案和整体实施路线两次全局确认，以 TDD、多 Agent 和可选 Git worktrees 按功能域交付并完成全链路验收。
-compatibility: 需要 Python 3.9+、Git、互联网访问、目标项目构建与测试工具；多 Agent 或 worktree 不可用时支持串行降级。
+compatibility: 需要 Python 3.9+、Git，以及目标项目实际使用的构建与验证工具；调研公开资料时需要互联网访问。
 disable-model-invocation: true
 metadata:
   author: koco-co
-  version: "1.3.1"
+  version: "2.0.0"
 ---
+
+最高优先级：只实现有用户需求、项目事实、平台契约、可复现缺陷或明确安全要求支持的行为；不得为未经证实的假设增加架构、工具、分支、兜底、兼容、校验、权限门禁或提示词。
 
 # Outcome
 
 把已确认、可复制的产品需求包转化为架构清晰、实现完整、测试充分、可独立回滚且证据可复核的软件项目；或在用户明确选择时，以现有项目为基线完成续建、架构升级或技术栈迁移。
+
+按用户确认的路线产出三族文档：`docs/架构设计/`（路线 4 为 `docs/架构迁移/`）记录架构方案、`docs/实施任务/` 记录按功能域拆分的任务、`docs/交付验收/` 记录验证与交付证据；每个功能单元都以独立可回滚的本地 commit 交付，最后完成全链路验收。
 
 ## Routing
 
@@ -33,15 +37,15 @@ metadata:
 
 1. 建立只读基线、选择路线并比较需求快照
    - 完整读取 `workflows/§01-baseline-and-routing.md`。
-   - 保护当前 HEAD、未提交修改、已有 worktrees 和用户新增文件，不执行破坏性清理或历史改写。
+   - 保护当前 HEAD、未提交修改、已有 worktrees（工作树）和用户新增文件，不执行破坏性清理或历史改写。
    - 目标不是 Git 仓库时暂停并询问是否初始化 Git；未得到同意不得初始化，也不得继续进入依赖 Git/worktree/commit 的实施阶段。
    - 路线 1–3 先严格校验来源需求包；来源不在目标项目时，使用 `scripts/import_requirements.py` 只读比较差异。第一次架构确认前不得使用 `--write`。
    - 已有快照不会自动更新。发现来源版本变化时先报告受影响功能域、功能和文件；替换仍需明确确认。
 
 2. 调研并确认架构方案
    - 路线 1–3 完整读取 `workflows/§02-requirements-architecture.md`；路线 4 读取 `workflows/§03-migration-audit.md`。
-   - 路线 2 只读 Agent 只能访问用户授权范围，并只返回行为、输入、输出、公开契约和证据摘要；无 Agent 能力时由主 Agent 串行执行同样限制并明确降级。
-   - 调研当前官方规范、稳定工具链、活跃开源项目、安全和测试策略，提出至少两个可行方案、权衡与推荐。
+   - 路线 2 的只读检查只能访问用户授权范围，并只返回行为、输入、输出、公开契约和证据摘要。
+   - 调研与当前架构决策直接相关的官方规范和工具，比较真实可行方案并给出推荐；只有一个可行方案时说明依据。
    - 先在对话中提交全局架构方案。用户第一次确认前，目标项目保持只读：不导入需求快照、不写架构文档、不修改代码、不执行 Git 写操作。
 
 3. 固定需求快照、写入架构文档并确认整体实施路线
@@ -54,15 +58,15 @@ metadata:
 
 4. 构建脚手架并通过项目指令就绪门禁
    - 完整读取 `workflows/§05-scaffold-and-worktrees.md`。
-   - 建立最小可运行骨架、依赖管理、格式化、Lint、类型检查、测试入口、CI、环境变量示例、忽略规则和正常测试数据基础。
+   - 建立架构方案要求的最小可运行骨架，不默认增加格式化、Lint、类型检查、CI、环境变量、日志或测试层级。
    - 脚手架通过适用检查后形成可回滚的本地提交。
    - 检查项目指令；缺失、链接异常或与真实工程事实冲突时，按 `rules/companion-skills.md` 处理 `build-agents-md`。平台不能受控调用时输出完整人工交接提示并暂停依赖任务，不在本 Skill 内复制其实现。
-   - 在全局实施任务清单记录安装、启动或 smoke、基础测试、治理提交和既有 worktree 基线；readiness 严格校验通过前不得创建功能 worktree 或调起功能 Agent。
+   - 在全局实施任务清单记录安装、启动或 smoke（冒烟）、基础测试、治理提交和既有 worktree 基线；readiness（项目就绪门禁）严格校验通过前不得创建功能 worktree 或调起功能 Agent。
 
 5. 按功能域组织 Agent 并交付
    - 完整读取 `workflows/§06-feature-delivery.md`、`rules/worktree-and-commits.md` 和 `rules/tdd-and-quality-gates.md`。
    - 每次只加载全局索引、当前功能域文档和当前域直接依赖的已确认契约，不把整个旧项目、全部需求包或所有已完成域重复塞给功能 Agent。
-   - 每个 Agent 只领取一个可独立验证的任务。行为代码优先使用 Red-Green-Refactor；文档、配置、CI、迁移和生成类任务按 `rules/tdd-and-quality-gates.md` 选择适合任务类型的先验验证证据，不机械制造失败测试。
+   - 每个 Agent 只领取一个可独立验证的任务。行为代码优先使用红-绿-重构（Red-Green-Refactor）；文档、配置、CI、迁移和生成类任务按 `rules/tdd-and-quality-gates.md` 选择适合任务类型的首个验证证据，不机械制造失败测试。
    - 无依赖且文件所有权不重叠的任务可以在独立 worktree 并行；有依赖的任务按确认顺序串行。
    - 每个功能域完成后更新本域任务与交付文件并自动进入下一域，不再询问“是否继续”。
    - 任务提交已集成、检查通过、worktree 干净且无独有改动时，按统一状态表限定范围移除本次任务 worktree 和本地任务分支。
@@ -70,8 +74,8 @@ metadata:
 6. 完成跨域与全链路验证
    - 完整读取 `workflows/§07-validation.md` 和 `rules/acceptance-standard.md`。
    - 每个功能域先完成本域验证；全部域完成后必须执行跨域用户旅程、直接依赖契约和端到端回归。
-   - 运行适用的格式化、Lint、类型、构建、单元、集成和端到端测试；有界面时再做视觉、响应式、无障碍与交互验证。
-   - 使用可重复、可清理的正常测试数据，检查安全、配置、权限、日志、错误处理、运行入口和项目指令漂移。
+   - 运行需求、架构方案和项目事实要求的构建与验证；有已确认界面要求时再做对应的视觉和交互验证。
+   - 使用需求所需的测试数据，检查已确认的安全、配置、权限、日志、错误处理、运行入口和项目指令要求。
    - 运行 delivery 阶段严格校验；静态存在、安装成功或测试发现不能代替真实产品行为验收。
 
 7. 写交付文档并停止
@@ -80,7 +84,7 @@ metadata:
    - 更新 `docs/实施任务/` 中的任务状态、验证证据、集成状态和 commit SHA，执行最终严格校验。
    - 受保护主分支合并、push、发布、部署或本地 Plugin 更新仍需分别取得明确授权。
 
-## Delivery
+## Outputs
 
 ```text
 docs/
@@ -103,22 +107,13 @@ docs/
 - 大小项目使用同一结构；小项目只有一个功能域文件。
 - 旧的 `docs/架构设计方案.md`、`docs/架构迁移方案.md`、`docs/实施任务清单.md`、`docs/交付验收报告.md` 只做一次性迁移，不长期兼容或双写。
 - 最终回复列出路线、需求快照、功能域追踪、最终目录、Agent/worktree 分工、提交、实际命令、测试结果、界面验证、安全检查和剩余限制。
+- 已填充的完整示例见 `examples/implementation-plan.example.md` 与 `examples/delivery-report.example.md`。
 
 ## Guardrails
 
-- 所有阶段写入与 Git 权限以 `rules/workflow-state-and-permissions.md` 为准；第一次架构确认前目标项目只读，第二次整体实施路线确认前不创建 `docs/实施任务/`、不搭建脚手架、不修改业务代码，也不执行本地 Git 写操作。
-- 第二次全局确认授权在确认范围内创建本地分支、worktree 和本地 commit，但不授权 push、合并受保护分支、发布、部署、外部数据写入或权限提升。
+- 各阶段的状态、写入与 Git 权限以 `rules/workflow-state-and-permissions.md` 为准。
 - 路线 1 不读取旧项目；路线 2 只读取用户指定范围；路线 3–4 可以读取当前项目，但仍只向功能 Agent 提供完成任务所需的最小上下文。
 - 需求包默认约束外部可观察行为，不强迫复制旧项目内部实现。只有用户确认的目标变化才能改变命令、路径、格式、公开 API、文件或用户流程。
 - 任何会改变产品范围、公开契约、持久化数据、认证授权、兼容性或部署拓扑的偏离，都必须回到全局方案确认。
 - 测试不得破坏生产数据；不得上传私有代码、凭据、用户数据或未公开文档。
 - 不以注释、README、假数据、跳过测试、降低断言或隐藏失败代替功能实现。
-
-## References
-
-- 所有阶段权限、写入边界、Git 操作和确认门禁先读取 `rules/workflow-state-and-permissions.md`。
-- 路由、基线与需求快照读取 `workflows/§01-baseline-and-routing.md`。
-- 路线 1–3 架构设计读取 `workflows/§02-requirements-architecture.md`；路线 4 读取 `workflows/§03-migration-audit.md`。
-- 全局方案确认、目录族与任务编排读取 `workflows/§04-plan-and-approval.md`。
-- readiness、功能开发、验证和交付依次读取 `workflows/§05-scaffold-and-worktrees.md` 至 `§08-delivery.md`。
-- 组织 Agent 前读取 `rules/orchestration-contract.md` 和所需角色 prompt；只给角色与当前任务直接相关的内容。

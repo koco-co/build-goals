@@ -48,6 +48,8 @@ api-contract-review/
     └── semantic-review.md
 ```
 
+六键骨架是默认建议而非必需：本示例因有独立分支和红线，使用完整的 `Outcome / Routing / Steps / Delivery / Guardrails / References`；无附属文件的 Skill 应删除 `References` 整节，无红线时删除 `Guardrails`，均属合法形态。
+
 ## 设计理由
 
 - OpenAPI 解析、引用解析和确定性规则交给 `validate_contract.py`；

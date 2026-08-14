@@ -24,19 +24,21 @@
 
 ## 3. Agent 角色
 
-| 角色 | 主要职责 | 写权限 |
+各角色职责以对应角色提示文件（`prompts/*.agent.md`）中的 Role 段为权威。
+
+| 角色 | 角色提示文件 | 写权限 |
 | --- | --- | --- |
-| Architecture Researcher | 官方规范、工具链和候选架构 | 无 |
-| Competitor Researcher | 竞品与活跃开源参考 | 无 |
-| 旧项目参考检查员 | 只检查用户授权内容，返回行为、输入、输出和证据 | 无 |
-| Repository Auditor | 现有项目完整基线和风险 | 无 |
-| Implementation Planner | 功能域任务、依赖和追踪 | 仅任务草案 |
-| Feature Developer | 单一功能切片及测试 | 仅分配 worktree |
-| Test Engineer | 测试矩阵、fixture、集成与 E2E | 分配范围内 |
-| UI Reviewer | 视觉、交互与无障碍 | 默认只读 |
-| Security Reviewer | 权限、秘密、依赖与数据流 | 默认只读 |
-| Integration Manager | 唯一集成、冲突处理和验证 | 集成分支 |
-| Independent Reviewer | 对照需求与方案审查证据 | 无 |
+| Architecture Researcher | `prompts/architecture-researcher.agent.md` | 无 |
+| Competitor Researcher | `prompts/competitor-researcher.agent.md` | 无 |
+| 旧项目参考检查员 | `prompts/legacy-reference-inspector.agent.md` | 无 |
+| Repository Auditor | `prompts/repository-auditor.agent.md` | 无 |
+| Implementation Planner | `prompts/implementation-planner.agent.md` | 仅任务草案 |
+| Feature Developer | `prompts/feature-developer.agent.md` | 仅分配 worktree |
+| Test Engineer | `prompts/test-engineer.agent.md` | 分配范围内 |
+| UI Reviewer | `prompts/ui-reviewer.agent.md` | 默认只读 |
+| Security Reviewer | `prompts/security-reviewer.agent.md` | 默认只读 |
+| Integration Manager | `prompts/integration-manager.agent.md` | 集成分支 |
+| Independent Reviewer | `prompts/reviewer.agent.md` | 无 |
 
 同一 Agent 不同时担任功能实现者和最终独立 Reviewer。
 
@@ -49,7 +51,7 @@
 - 当前功能域需求、行为样例、架构和任务；
 - 当前域直接依赖的输入输出契约；
 - 允许修改、只读依赖和禁止修改路径；
-- 第一条失败测试、正常测试数据、验证命令和完成条件；
+- 首个验证证据、正常测试数据、验证命令和完成条件；
 - 当前适用的 `AGENTS.md` 路径与功能开发基线；
 - 是否允许本地提交和要求的返回格式。
 
@@ -70,7 +72,7 @@
 
 ## 5. 返回契约
 
-研究 Agent 返回事实、来源、发现、候选方案、推荐、风险和证据缺口。实现 Agent 返回任务、修改文件、先写的失败测试、实现、命令与结果、commit、偏离和阻塞。集成 Agent 返回已集成提交、冲突、验证、任务文档更新和剩余风险。
+研究 Agent 返回事实、来源、发现、候选方案、推荐、风险和证据缺口。实现 Agent 返回任务、修改文件、首个验证证据、实现、命令与结果、commit、偏离和阻塞。集成 Agent 返回已集成提交、冲突、验证、任务文档更新和剩余风险。
 
 所有结论区分实际运行证据、静态证据和推断。没有真实执行的界面、业务或外部流程不得写成已验证。
 
@@ -79,9 +81,3 @@
 按 `rules/companion-skills.md` 处理 `shape-idea`、`build-prd`、`build-agents-md`、`build-skill`、`build-plugin`、`build-readme` 和 `handoff`。
 
 受控调用只传最小上下文。子 Skill 不重复询问由总控管理的本地 commit，也不得自行 push、发布、部署或更新本地 Plugin。出现新的产品、架构、公开契约或范围决策时返回对应全局门禁。
-
-## 7. 降级
-
-无法使用 Subagent 时，主 Agent 按角色顺序串行执行并保留独立输入、输出与复核记录。无法使用 worktree 时按依赖串行修改，同一时间只处理一个功能切片。
-
-路线 2 的只读检查可以由主 Agent 降级完成，但必须遵守相同授权范围，并在交付报告中说明没有使用独立 Agent。不得把串行角色模拟描述成真实并行或独立审查。

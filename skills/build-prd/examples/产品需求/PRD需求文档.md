@@ -4,7 +4,7 @@
 - 需求包 ID：task-product
 - 需求包版本：1.0.0
 - 需求包类型：完整
-- 更新时间：2026-08-13
+- 更新时间：2025-11-20
 
 ## 产品定位与范围
 
@@ -40,8 +40,8 @@
 
 | 类型     | 名称                | 一手来源                                           | 访问日期   | 借鉴点       |
 | -------- | ------------------- | -------------------------------------------------- | ---------- | ------------ |
-| 竞品     | Todoist             | https://www.todoist.com/features                    | 2026-08-13 | 快速创建入口 |
-| 竞品     | Microsoft To Do     | https://support.microsoft.com/en-us/todo            | 2026-08-13 | 列表反馈方式 |
-| 开源项目 | Super Productivity  | https://github.com/super-productivity/super-productivity | 2026-08-13 | 空状态处理   |
-| 开源项目 | Vikunja             | https://github.com/go-vikunja/vikunja               | 2026-08-13 | 输入校验体验 |
-| 官方规范 | WCAG 2.2            | https://www.w3.org/TR/WCAG22/                       | 2026-08-13 | 键盘操作要求 |
+| 竞品     | Todoist             | https://www.todoist.com/features                    | 2025-11-20 | 快速创建入口 |
+| 竞品     | Microsoft To Do     | https://support.microsoft.com/en-us/todo            | 2025-11-20 | 列表反馈方式 |
+| 开源项目 | Super Productivity  | https://github.com/super-productivity/super-productivity | 2025-11-20 | 空状态处理   |
+| 开源项目 | Vikunja             | https://github.com/go-vikunja/vikunja               | 2025-11-20 | 输入校验体验 |
+| 官方规范 | WCAG 2.2            | https://www.w3.org/TR/WCAG22/                       | 2025-11-20 | 键盘操作要求 |

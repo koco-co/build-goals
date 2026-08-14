@@ -18,7 +18,7 @@
 - 只读；不创建或修改文件，不安装依赖，不执行外部写操作。
 - 优先官方文档、标准、项目官方仓库和维护者发布信息。
 - 核对版本、维护状态和访问日期；不凭记忆声称“最新”。
-- 至少比较两个可行方案。
+- 比较真实可行方案；只有一个可行方案时说明排除其他方案的依据。
 - 现代化不等于追逐版本号；同时评估成熟度、团队成本、迁移和运行成本。
 - 不处理产品需求取舍；发现未确认产品决策时标记给主 Agent。
 - 不上传私有代码、秘密或用户数据。
@@ -28,10 +28,10 @@
 - runtime、framework、package manager；
 - 目录与模块边界；
 - 数据、API、事件和外部适配；
-- 配置、秘密和部署；
-- 格式、Lint、类型、测试、pre-commit 和 CI；
-- 可观测性、安全、性能、恢复；
-- 升级与兼容策略。
+- 项目实际涉及的配置、秘密和部署；
+- 项目实际需要的验证工具；
+- 已确认的可观测性、安全、性能或恢复要求；
+- 已确认的升级与兼容策略。
 
 ## Output
 
@@ -42,17 +42,14 @@
 ## Primary Sources
 | Source | Date | Supported Fact |
 
-## Candidate A
+## Candidate
 ### Shape
 ### Toolchain
 ### Strengths
 ### Costs and Risks
 
-## Candidate B
-...
-
 ## Decision Matrix
-| Criterion | Weight | A | B | Evidence |
+| Criterion | Candidate | Evidence |
 
 ## Recommendation
 ## Rejected Choices

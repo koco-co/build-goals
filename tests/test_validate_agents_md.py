@@ -94,7 +94,7 @@ class ValidateAgentsMdTests(unittest.TestCase):
             result = self.run_validator(project, "--strict")
 
             self.assertEqual(result.returncode, 1)
-            self.assertIn("CLAUDE_SINGLE_SOURCE", result.stdout)
+            self.assertIn("CLAUDE_SYMLINK_REQUIRED", result.stdout)
 
     def test_absolute_claude_symlink_fails(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
@@ -109,17 +109,15 @@ class ValidateAgentsMdTests(unittest.TestCase):
             self.assertEqual(result.returncode, 1)
             self.assertIn("CLAUDE_LINK_TARGET", result.stdout)
 
-    def test_import_fallback_passes_unless_symlink_is_required(self) -> None:
+    def test_import_fallback_fails(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
             project = Path(temp)
             self.write_instruction_pair(project, use_import_fallback=True)
 
-            portable = self.run_validator(project, "--strict")
-            symlink_only = self.run_validator(project, "--strict", "--require-symlink")
+            result = self.run_validator(project, "--strict")
 
-            self.assertEqual(portable.returncode, 0, portable.stdout + portable.stderr)
-            self.assertEqual(symlink_only.returncode, 1)
-            self.assertIn("CLAUDE_SYMLINK_REQUIRED", symlink_only.stdout)
+            self.assertEqual(result.returncode, 1)
+            self.assertIn("CLAUDE_SYMLINK_REQUIRED", result.stdout)
 
     def test_import_fallback_rejects_extra_content(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
@@ -130,7 +128,7 @@ class ValidateAgentsMdTests(unittest.TestCase):
             result = self.run_validator(project, "--strict")
 
             self.assertEqual(result.returncode, 1)
-            self.assertIn("CLAUDE_SINGLE_SOURCE", result.stdout)
+            self.assertIn("CLAUDE_SYMLINK_REQUIRED", result.stdout)
 
     def test_broken_local_link_fails_strict_validation(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
@@ -215,11 +213,7 @@ class ValidateAgentsMdTests(unittest.TestCase):
             self.assertIn("AGENTS_LENGTH_SOFT", result.stdout)
 
     def test_repository_instructions_pass_strict_symlink_validation(self) -> None:
-        result = self.run_validator(
-            REPO_ROOT,
-            "--strict",
-            "--require-symlink",
-        )
+        result = self.run_validator(REPO_ROOT, "--strict")
 
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
@@ -239,7 +233,7 @@ class BuildAgentsMdContractTests(unittest.TestCase):
         self.assertIn("命令验证状态", contract)
         self.assertIn("嵌套 `AGENTS.md`", contract)
         self.assertIn("CLAUDE.md", contract)
-        self.assertIn("@AGENTS.md", contract)
+        self.assertNotIn("@AGENTS.md", contract)
         self.assertIn("来源已确认、运行未验证", contract)
         self.assertIn("不得在用户确认预览前写入", contract)
         self.assertIn("不得创建项目级 `docs/`", contract)

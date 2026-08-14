@@ -4,7 +4,7 @@
   "package_version": "1.0.0",
   "status": "confirmed",
   "package_type": "full",
-  "generated_at": "2026-08-13",
+  "generated_at": "2025-11-20",
   "source": {
     "project": "build-prd example",
     "revision": "shipped-example"
@@ -23,7 +23,7 @@
   "files": [
     {
       "path": "PRD需求文档.md",
-      "sha256": "016e0515ef515ac720cf772eefa76a8efc3c570e79c695a62f84a2925136e0f7"
+      "sha256": "953c63d5ed1db1c70cfd37b7a40541f0d5d4206e9b2cffe304629beb793c7422"
     },
     {
       "path": "功能域/任务管理.md",

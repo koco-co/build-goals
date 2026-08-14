@@ -20,8 +20,7 @@
     {
       "source": "skills/build-skill/prompts/reviewer.agent.md",
       "targets": [
-        "skills/build-plugin/prompts/reviewer.agent.md",
-        "skills/vibe-coding/prompts/reviewer.agent.md"
+        "skills/build-plugin/prompts/reviewer.agent.md"
       ]
     },
     {
@@ -39,6 +38,10 @@
     {
       "source": "skills/build-skill/scripts/validate_skill.py",
       "targets": ["skills/build-plugin/scripts/validate_skill.py"]
+    },
+    {
+      "source": "skills/build-skill/scripts/validate_skill_core.py",
+      "targets": ["skills/build-plugin/scripts/validate_skill_core.py"]
     },
     {
       "source": "skills/build-skill/templates/skill.template.md",

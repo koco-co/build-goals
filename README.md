@@ -281,8 +281,7 @@ python3 skills/build-readme/scripts/validate_readme.py \
 ```bash
 python3 skills/build-agents-md/scripts/validate_agents_md.py \
   /path/to/project \
-  --strict \
-  --require-symlink
+  --strict
 ```
 
 <p>运行全部测试：</p>

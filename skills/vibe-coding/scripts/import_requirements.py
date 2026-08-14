@@ -141,7 +141,7 @@ def _write_snapshot(source: PackageSnapshot, target_project: Path, *, replace: b
         staged.rename(target)
         if displaced is not None:
             shutil.rmtree(displaced)
-    except Exception:
+    except OSError:
         if displaced is not None and displaced.exists() and not target.exists():
             displaced.rename(target)
         raise

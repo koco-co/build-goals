@@ -247,8 +247,16 @@ def validate_tracked_secrets(root: Path, issues: list[Issue]) -> None:
         try:
             if not path.is_file() or path.stat().st_size > 1_000_000:
                 continue
-            content = path.read_text(encoding="utf-8", errors="ignore")
-        except OSError:
+            content = path.read_text(encoding="utf-8")
+        except (OSError, UnicodeError) as exc:
+            add_issue(
+                issues,
+                "warning",
+                "TRACKED_FILE_UNREADABLE",
+                path,
+                f"无法检查已跟踪文件内容：{exc}",
+                root,
+            )
             continue
         if PRIVATE_KEY_RE.search(content):
             add_issue(

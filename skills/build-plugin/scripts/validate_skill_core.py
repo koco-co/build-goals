@@ -40,7 +40,7 @@ CLAUDE_EXTENSION_KEYS = {
     "paths",
     "shell",
 }
-REQUIRED_HEADINGS = (
+RECOMMENDED_HEADINGS = (
     "# Outcome",
     "## Routing",
     "## Steps",
@@ -82,6 +82,10 @@ class Report:
     def warnings(self) -> List[Issue]:
         return [issue for issue in self.issues if issue.severity == "warning"]
 
+    @property
+    def infos(self) -> List[Issue]:
+        return [issue for issue in self.issues if issue.severity == "info"]
+
     def to_dict(self) -> Dict[str, object]:
         return {
             "skill_dir": self.skill_dir,
@@ -89,6 +93,7 @@ class Report:
             "status": "pass" if not self.errors else "fail",
             "error_count": len(self.errors),
             "warning_count": len(self.warnings),
+            "info_count": len(self.infos),
             "issues": [asdict(issue) for issue in self.issues],
         }
 
@@ -317,40 +322,50 @@ def validate_frontmatter(
 def validate_headings(
     text: str, skill_dir: Path, skill_md: Path, issues: List[Issue]
 ) -> None:
-    positions: List[int] = []
-    for heading in REQUIRED_HEADINGS:
+    """Treat the six-key skeleton as a recommendation, not a contract.
+
+    The keys are a default skeleton authors may trim, rename, or restructure;
+    omission rules live in rules/architecture.md. Duplicated top-level keys
+    still warn (they almost always indicate confusion), and deviation from
+    the default skeleton is reported as informational guidance that never
+    fails strict validation.
+    """
+    positions: Dict[str, int] = {}
+    for heading in RECOMMENDED_HEADINGS:
         matches = [
             match.start()
             for match in re.finditer(rf"(?m)^{re.escape(heading)}\s*$", text)
         ]
-        if not matches:
-            add_issue(
-                issues,
-                "error",
-                "HEADING_REQUIRED",
-                skill_md,
-                f"缺少核心章节 {heading!r}。",
-                skill_dir,
-            )
-            continue
         if len(matches) > 1:
             add_issue(
                 issues,
-                "error",
+                "warning",
                 "HEADING_DUPLICATE",
                 skill_md,
-                f"核心章节 {heading!r} 出现多次。",
+                f"章节标题重复：{heading}",
                 skill_dir,
             )
-        positions.append(matches[0])
+        if matches:
+            positions[heading] = matches[0]
 
-    if len(positions) == len(REQUIRED_HEADINGS) and positions != sorted(positions):
+    present = [heading for heading in RECOMMENDED_HEADINGS if heading in positions]
+    complete = len(present) == len(RECOMMENDED_HEADINGS)
+    ordered = positions and [
+        positions[heading] for heading in present
+    ] == sorted(positions[heading] for heading in present)
+    if not (complete and ordered):
+        missing = "、".join(
+            heading.lstrip("# ") for heading in RECOMMENDED_HEADINGS if heading not in positions
+        )
+        detail = f"缺失：{missing}" if missing else "顺序与推荐不同"
         add_issue(
             issues,
-            "error",
-            "HEADING_ORDER",
+            "info",
+            "HEADING_SKELETON",
             skill_md,
-            "核心章节顺序必须为 Outcome、Routing、Steps、Delivery、Guardrails、References。",
+            f"未使用默认推荐骨架（{detail}）；"
+            "Outcome/Routing/Steps/Delivery/Guardrails/References 为建议而非必需，"
+            "确认结构满足内容需要即可，省略准则见 rules/architecture.md。",
             skill_dir,
         )
 

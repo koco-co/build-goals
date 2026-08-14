@@ -61,6 +61,7 @@ def _report_to_dict(self: Report, strict: bool = False) -> dict[str, object]:
         "status": "fail" if failed else "pass",
         "error_count": len(self.errors),
         "warning_count": len(self.warnings),
+        "info_count": len(self.infos),
         "strict": strict,
         "issues": [_core.asdict(issue) for issue in self.issues],
     }
@@ -77,7 +78,8 @@ def print_human(report: Report, *, strict: bool = False) -> None:
     prefix = "FAIL" if failed else "PASS"
     print(
         f"{prefix}: {len(report.errors)} error(s), "
-        f"{len(report.warnings)} warning(s) — {report.skill_dir}"
+        f"{len(report.warnings)} warning(s), "
+        f"{len(report.infos)} info(s) — {report.skill_dir}"
     )
 
 

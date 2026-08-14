@@ -109,6 +109,39 @@ class ValidatePluginTests(unittest.TestCase):
         self.assertIn("skills/shape-idea", result.stdout)
         self.assertIn("skills/handoff", result.stdout)
 
+    def test_build_plugin_templates_and_rules_are_standalone_safe(self) -> None:
+        skill = REPO_ROOT / "skills" / "build-plugin"
+        for name in ("claude-plugin.template.json", "codex-plugin.template.json"):
+            with self.subTest(template=name):
+                manifest = json.loads(
+                    (skill / "templates" / name).read_text(encoding="utf-8")
+                )
+                self.assertNotIn("_comment", manifest)
+
+        claude_manifest = json.loads(
+            (skill / "templates" / "claude-plugin.template.json").read_text(
+                encoding="utf-8"
+            )
+        )
+        self.assertEqual(claude_manifest["author"]["name"], "<author-name>")
+        self.assertEqual(claude_manifest["author"]["url"], "<author-url>")
+
+        compatibility = (skill / "rules" / "platform-compatibility.md").read_text(
+            encoding="utf-8"
+        )
+        self.assertNotIn("skills/build-skill/", compatibility)
+
+        implementation = (skill / "workflows" / "§05-implementation.md").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("<build-plugin-skill-dir>/scripts/sync_shared_files.py", implementation)
+        self.assertIn("--root <plugin-root> --write", implementation)
+        self.assertEqual(implementation.count("sync_shared_files.py --root <plugin-root>"), 2)
+        self.assertNotIn("python3 skills/build-plugin/", implementation)
+
+        design = (skill / "workflows" / "§03-design.md").read_text(encoding="utf-8")
+        self.assertNotIn("examples/dual-platform-plugin.example.md", design)
+
     def test_repository_shared_runtime_files_are_regular_mirrors(self) -> None:
         contracts = {
             "skills/build-plugin/checklists/skill-content-review.md": "skills/build-skill/checklists/content-review.md",
@@ -120,8 +153,8 @@ class ValidatePluginTests(unittest.TestCase):
             "skills/build-plugin/rules/skill-frontmatter.md": "skills/build-skill/rules/frontmatter.md",
             "skills/build-plugin/rules/skill-quality-standard.md": "skills/build-skill/rules/quality-standard.md",
             "skills/build-plugin/scripts/validate_skill.py": "skills/build-skill/scripts/validate_skill.py",
+            "skills/build-plugin/scripts/validate_skill_core.py": "skills/build-skill/scripts/validate_skill_core.py",
             "skills/build-plugin/templates/skill.template.md": "skills/build-skill/templates/skill.template.md",
-            "skills/vibe-coding/prompts/reviewer.agent.md": "skills/build-skill/prompts/reviewer.agent.md",
             "skills/vibe-coding/scripts/validate_agents_md.py": "skills/build-agents-md/scripts/validate_agents_md.py",
             "skills/vibe-coding/scripts/validate_prd.py": "skills/build-prd/scripts/validate_prd.py",
         }
@@ -551,7 +584,7 @@ class ValidatePluginTests(unittest.TestCase):
         self.assertEqual(
             claude_manifest["version"], marketplace["plugins"][0]["version"]
         )
-        self.assertEqual(claude_manifest["version"], "1.9.1")
+        self.assertEqual(claude_manifest["version"], "2.0.0")
 
     def test_claude_marketplace_manifest_is_allowed(self) -> None:
         with tempfile.TemporaryDirectory() as temp:

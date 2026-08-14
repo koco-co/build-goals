@@ -111,18 +111,35 @@ class ValidatePrdTests(unittest.TestCase):
             self.assertEqual(result.returncode, 1)
             self.assertIn("NON_REGULAR_FILE", result.stdout)
 
-    def test_missing_behavior_sample_kind_fails(self) -> None:
+    def test_only_normal_behavior_sample_is_required(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
-            for kind in ("normal", "clarification", "invalid", "boundary"):
-                with self.subTest(kind=kind):
-                    root = Path(temp) / kind
-                    samples = [item for item in DEFAULT_SAMPLES if item["kind"] != kind]
-                    package = write_requirement_package(root, samples=samples)
-                    result = self.run_validator(package)
-                    self.assertEqual(result.returncode, 1)
-                    self.assertIn("SAMPLE_KIND_COVERAGE", result.stdout)
+            root = Path(temp)
+            normal = [item for item in DEFAULT_SAMPLES if item["kind"] == "normal"]
+            package = write_requirement_package(root / "normal-only", samples=normal)
+            domain = package / "功能域" / "任务管理.md"
+            text = domain.read_text(encoding="utf-8")
+            for sample_id in ("002", "003", "004"):
+                text = "\n".join(
+                    line
+                    for line in text.splitlines()
+                    if f"SAMPLE-TASK-{sample_id}" not in line
+                ) + "\n"
+            domain.write_text(text, encoding="utf-8")
+            refresh_manifest_hashes(package)
+            result = self.run_validator(package)
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
-    def test_sample_requires_output_contract_assertions_and_forbidden_results(self) -> None:
+            without_normal = [
+                item for item in DEFAULT_SAMPLES if item["kind"] != "normal"
+            ]
+            package = write_requirement_package(
+                root / "missing-normal", samples=without_normal
+            )
+            result = self.run_validator(package)
+            self.assertEqual(result.returncode, 1)
+            self.assertIn("SAMPLE_KIND_COVERAGE", result.stdout)
+
+    def test_sample_requires_semantic_output_contract_and_assertions(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
             samples = json.loads(json.dumps(DEFAULT_SAMPLES, ensure_ascii=False))
@@ -134,7 +151,7 @@ class ValidatePrdTests(unittest.TestCase):
             self.assertEqual(result.returncode, 1)
             self.assertIn("OUTPUT_CONTRACT", result.stdout)
             self.assertIn("SAMPLE_ASSERTIONS", result.stdout)
-            self.assertIn("SAMPLE_FORBIDDEN", result.stdout)
+            self.assertNotIn("SAMPLE_FORBIDDEN", result.stdout)
 
     def test_unresolved_and_internal_implementation_content_fail(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
@@ -171,7 +188,7 @@ class ValidatePrdTests(unittest.TestCase):
             self.assertIn("AC_REQUIRED", result.stdout)
             self.assertIn("FEATURE_ID_DUPLICATE", result.stdout)
 
-    def test_insufficient_research_coverage_fails(self) -> None:
+    def test_research_source_count_is_not_forced(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
             package = write_requirement_package(root)
@@ -185,8 +202,7 @@ class ValidatePrdTests(unittest.TestCase):
             )
             refresh_manifest_hashes(package)
             result = self.run_validator(package)
-            self.assertEqual(result.returncode, 1)
-            self.assertIn("RESEARCH_COVERAGE", result.stdout)
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
     def test_full_package_rejects_missing_dependency(self) -> None:
         with tempfile.TemporaryDirectory() as temp:

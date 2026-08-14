@@ -5,8 +5,10 @@ compatibility: 需要 Python 3.9+ 运行内置校验脚本。
 disable-model-invocation: true
 metadata:
   author: koco-co
-  version: "1.2.0"
+  version: "2.0.0"
 ---
+
+最高优先级：只写入有用户需求、仓库事实、平台契约、可复现缺陷或明确安全要求支持的规则；不得为未经证实的假设增加约定、兜底、兼容、校验或流程。
 
 # Outcome
 
@@ -60,7 +62,7 @@ metadata:
 
 - `AGENTS.md` 只保留项目特有信息，不复制通用 Agent 操作守则或长篇教程。
 - 不以固定九章、固定行数或博客模板替代对仓库事实的判断；长度阈值只能是提醒。
-- 不静默丢弃现有 `CLAUDE.md` 中的 Claude 专有规则；必须改写为公共规则、说明移除理由，或交给用户决定如何处理。
+- 不静默丢弃现有 `CLAUDE.md` 中的 Claude 专有规则；无法改写为公共规则的内容必须说明移除理由，或交给用户决定如何处理。具体迁移方法见 `rules/platform-and-scope.md`。
 - 不得创建项目级 `docs/`、lint、CI、测试 harness 或其他辅助体系来支撑本 Skill。
 - 保留用户已有未提交修改；完整替换也必须限于预览中明确列出的文件和内容。
 - 不运行需要凭据、外部写入、发布或高成本环境初始化的命令，除非用户另行授权。
@@ -69,9 +71,4 @@ metadata:
 
 ## References
 
-- 开始时完整读取 `workflows/§01-research.md` 和 `rules/content-admission.md`。
-- 预览前完整读取 `workflows/§02-preview.md` 和 `templates/replacement-preview.template.md`。
-- 用户确认后完整读取 `workflows/§03-authoring.md`、`rules/platform-and-scope.md` 与 `templates/agents-md.template.md`。
 - 示例按项目形态选读：`examples/library-or-cli.example.md`、`examples/application.example.md` 或 `examples/monorepo.example.md`。
-- 写入后完整读取 `workflows/§04-validation.md` 和 `checklists/semantic-acceptance.md`，并执行 `scripts/validate_agents_md.py`。
-- 交付时完整读取 `workflows/§05-delivery.md`。

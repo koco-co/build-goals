@@ -1,46 +1,34 @@
 # Plugin 平台兼容规则
 
+本文件必须随 `build-plugin` 独立安装并保持自包含，不依赖兄弟 Skill 或原始仓库路径。平台能力会持续演进；实施前仍需核对目标平台当前官方契约。
+
 ## 当前范围
 
-当前只支持：
+当前通用构建流程支持 Claude Code 与 Codex。其他 Agent 平台只有在发现方式、Manifest、调用策略、安装和验证契约均已查明后才能加入；不能只创建空 Manifest 并宣称兼容。
 
-- Claude Code；
-- Codex。
+## 平台入口
 
-其他 Coding Agent 不写入兼容声明，不创建空 Manifest。
+| 平台 | Manifest | Marketplace | 调用策略 |
+| --- | --- | --- | --- |
+| Claude Code | `.claude-plugin/plugin.json` | `.claude-plugin/marketplace.json` | Claude Code 专用 Frontmatter |
+| Codex | `.codex-plugin/plugin.json` | `.agents/plugins/marketplace.json` | `agents/openai.yaml` |
 
-## Claude Code
+组件仍位于 Plugin 根目录。Manifest 中的组件路径使用以 `./` 开头、相对 Plugin 根目录解析的路径，不把 Skills、Hooks 或资源塞进 Manifest 目录。
 
-- Manifest：`.claude-plugin/plugin.json`；
-- 仓库 Marketplace：`.claude-plugin/marketplace.json`；
-- Skills：Plugin 根目录 `skills/`；
-- 调用：`/<plugin-name>:<skill-name>`；
-- 本地加载：`claude --plugin-dir <plugin-root>`；
-- Marketplace 安装：`claude plugin marketplace add <owner>/<repo>@<ref>`，再执行 `claude plugin install <plugin-name>@<marketplace-name>`；
-- 官方校验：`claude plugin validate <plugin-root> --strict`；
-- 仅限用户调用的 Skill 使用 `disable-model-invocation: true`；允许模型调用时不设置该字段，并优先在跨平台 `description` 中写清触发条件和排除条件。
+## 双平台规范源
 
-## Codex
+- Claude Code 与 Codex 的 `name`、`version` 默认保持一致，Manifest 分开维护。
+- 共用 Skill 的核心工作流、规则、模板、示例和脚本只维护一份。
+- Claude Code 专用字段与 Codex 的 `agents/openai.yaml` 可以同时存在于共用源；独立安装时再生成平台专用副本。
+- Codex 独立副本只保留通用 Agent Skills Frontmatter，并完整移除 Claude Code 专用字段及其嵌套内容。
+- 平台缺少等价能力时明确记录降级或退出条件，不伪造兼容行为。
 
-- Manifest：`.codex-plugin/plugin.json`；
-- Skills：Plugin 根目录 `skills/`；
-- 调用：`$<skill-name>`；
-- 调用权限：仅限用户调用时，在 `agents/openai.yaml` 中设置 `allow_implicit_invocation: false`；允许模型调用时使用默认值或设为 `true`，并在 `description` 中写清触发条件和排除条件；
-- 仓库 Marketplace：`.agents/plugins/marketplace.json`；
-- Manifest 组件路径以 `./` 开头，并相对 Plugin 根目录解析。
+## 共享文件与链接
 
-## 双平台
+跨 Skill 运行依赖不得假设客户端安装缓存会保留嵌套软链接。确需保留 Skill 内本地入口时，使用共享文件清单声明唯一规范源和普通镜像，并通过同步脚本逐字节校验。
 
-- `name` 与 `version` 默认保持一致；
-- 共用组件只维护一份；
-- Manifest 分开维护；
-- Claude 专属 Frontmatter 与 Codex 适配文件可以同时存在于共用 Skill 源；
-- Codex 独立安装副本只保留通用 Agent Skills Frontmatter，完整移除 Claude 专属字段及其嵌套内容；
-- 独立安装时，由安装器生成平台专用副本；
-- 平台无法支持的能力必须明确分支或降级。
+必要符号链接必须使用仓库内相对路径，最终解析位置仍在 Plugin 根目录。发布前检查真实安装产物；源仓库静态通过不能代替客户端加载结果。
 
-## 共享文件与软链接
+## 验证结果
 
-已在 Codex 的实际 Plugin 安装缓存中观察到嵌套软链接被省略，因此双平台 Plugin 的跨 Skill 运行依赖不得依赖软链接。使用清单声明的普通镜像，并检查镜像与唯一规范源逐字节一致。
-
-项目级 `CLAUDE.md` 等必要软链接仍应使用仓库内相对路径，并验证目标有效、没有越界。发布前必须检查真实安装缓存；只有源仓库静态检查时，不声称客户端已经支持。
+交付报告分别记录共用源静态检查、各平台 Manifest 检查、真实安装或加载结果，以及没有运行的平台和原因。
