@@ -1,7 +1,7 @@
 {
   "name": "@koco-co/dsh-build-goals",
-  "version": "2.1.0",
-  "description": "DeepSeek Harness plugin bundle distributing the build-goals skill collection (shape-idea, build-skill, build-plugin, build-prd, vibe-coding, build-readme, build-agents-md, handoff) as bundled user-invocable skills.",
+  "version": "2.2.0",
+  "description": "DeepSeek Harness plugin bundle distributing nine build-goals skills, including evidence-based technical learning in Obsidian.",
   "type": "module",
   "main": "lib/index.js",
   "exports": {

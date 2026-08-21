@@ -1,0 +1,47 @@
+{
+  "vault_name": "{{VAULT_NAME}}",
+  "vault_path": "{{VAULT_PATH}}",
+  "roadmap_kind": "repository",
+  "topic": {
+    "display": "{{TOPIC_DISPLAY}}",
+    "path_segment": "{{TOPIC_PATH_SEGMENT}}",
+    "tag": "{{TOPIC_TAG}}"
+  },
+  "repository": {
+    "provider": "github",
+    "name": "{{REPOSITORY_NAME}}",
+    "url": "{{REPOSITORY_URL}}",
+    "default_branch": "{{DEFAULT_BRANCH}}",
+    "target_ref": "{{TARGET_REF}}",
+    "commit": "{{FULL_COMMIT}}",
+    "license_spdx": "{{LICENSE_SPDX}}",
+    "verified_at": "{{VERIFIED_AT}}",
+    "scope": "{{REPOSITORY_SCOPE}}",
+    "core_slice": "{{CORE_SLICE}}",
+    "upstream_checked_at": "{{UPSTREAM_CHECKED_AT}}",
+    "upstream_status": "{{UPSTREAM_STATUS}}"
+  },
+  "learning_goal": "{{LEARNING_GOAL}}",
+  "version_scope": "{{VERSION_SCOPE}}",
+  "root": "{{ROADMAP_ROOT}}",
+  "base": {
+    "path": "{{ROADMAP_ROOT}}/{{TOPIC_PATH_SEGMENT}}-Roadmap.base",
+    "content_file": "{{TEMP_DIR}}/{{TOPIC_PATH_SEGMENT}}-Roadmap.base"
+  },
+  "directories": [
+    {"path": "{{ROADMAP_ROOT}}/01-项目概述", "role": "overview", "keep": false},
+    {"path": "{{ROADMAP_ROOT}}/02-运行与测试基线", "role": "formal", "keep": true},
+    {"path": "{{ROADMAP_ROOT}}/03-架构与模块地图", "role": "formal", "keep": true},
+    {"path": "{{ROADMAP_ROOT}}/04-核心调用链", "role": "formal", "keep": true},
+    {"path": "{{ROADMAP_ROOT}}/05-测试与质量体系", "role": "formal", "keep": true},
+    {"path": "{{ROADMAP_ROOT}}/06-Issue与PR考古", "role": "formal", "keep": true},
+    {"path": "{{ROADMAP_ROOT}}/07-最小修复实践", "role": "formal", "keep": true},
+    {"path": "{{ROADMAP_ROOT}}/08-深入与拓展", "role": "extension", "keep": true},
+    {"path": "{{ROADMAP_ROOT}}/09-复习与贡献准备", "role": "review", "keep": true},
+    {"path": "{{ROADMAP_ROOT}}/99-assets", "role": "assets", "keep": true}
+  ],
+  "notes": [
+    {"path": "{{ROADMAP_ROOT}}/01-项目概述/§01-前置准备.md", "content_file": "{{TEMP_DIR}}/§01-前置准备.md"},
+    {"path": "{{ROADMAP_ROOT}}/01-项目概述/§02-{{TOPIC_PATH_SEGMENT}}概述.md", "content_file": "{{TEMP_DIR}}/§02-{{TOPIC_PATH_SEGMENT}}概述.md"}
+  ]
+}

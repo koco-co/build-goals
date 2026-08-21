@@ -1,8 +1,8 @@
 # @koco-co/dsh-build-goals
 
-`build-goals` 的 **DeepSeek Harness** 插件包：把仓库 `skills/` 下的 8 个
+`build-goals` 的 **DeepSeek Harness** 插件包：把仓库 `skills/` 下的 9 个
 Skill 以 DSH 官方「内置技能 provider」模式（同 `dsh-skill-badge`）打包，
-通过 `dsh plugin add` 一条命令安装。7 个配套 Skill 既可由模型按描述调用，
+通过 `dsh plugin add` 一条命令安装。8 个配套 Skill 既可由模型按描述调用，
 也可通过 `/name` 显式调用；`vibe-coding` 仅通过 `/vibe-coding` 启动。
 
 ## 安装
@@ -15,7 +15,7 @@ dsh plugin --profile web add 'github:koco-co/build-goals#path:packages/dsh-build
   `dsh plugin --profile web add /path/to/build-goals/packages/dsh-build-goals`。
 - 安装后**重启**对应 profile 的 dsh 进程，新会话的 `/` 菜单即可看到
   `shape-idea`、`build-skill`、`build-plugin`、`build-prd`、`vibe-coding`、
-  `build-readme`、`build-agents-md`、`handoff`。
+  `build-readme`、`build-agents-md`、`handoff`、`obsidian-learn-topic`。
 - 升级 = 重跑 add（git 渠道装的是仓库快照）。npm 发布为预留渠道。
 - 用户可在 `~/.dsh/skills/<name>/` 放同名技能覆盖内置版本
   （filesystem provider rank 400 高于内置 rank 600）。

@@ -1,0 +1,53 @@
+{
+  "vault_name": "{{VAULT_NAME}}",
+  "vault_path": "{{VAULT_PATH}}",
+  "topic": {
+    "display": "{{TOPIC_DISPLAY}}",
+    "path_segment": "{{TOPIC_PATH_SEGMENT}}",
+    "tag": "{{TOPIC_TAG}}"
+  },
+  "learning_goal": "{{LEARNING_GOAL}}",
+  "version_scope": "{{VERSION_SCOPE}}",
+  "root": "{{ROADMAP_ROOT}}",
+  "base": {
+    "path": "{{ROADMAP_ROOT}}/{{TOPIC_PATH_SEGMENT}}-Roadmap.base",
+    "content_file": "{{TEMP_DIR}}/{{TOPIC_PATH_SEGMENT}}-Roadmap.base"
+  },
+  "directories": [
+    {
+      "path": "{{ROADMAP_ROOT}}/01-{{TOPIC_PATH_SEGMENT}}概述",
+      "role": "overview",
+      "keep": false
+    },
+    {
+      "path": "{{ROADMAP_ROOT}}/02-{{FIRST_FORMAL_STAGE}}",
+      "role": "formal",
+      "keep": true
+    },
+    {
+      "path": "{{ROADMAP_ROOT}}/03-深入与拓展",
+      "role": "extension",
+      "keep": true
+    },
+    {
+      "path": "{{ROADMAP_ROOT}}/04-复习与面试",
+      "role": "review",
+      "keep": true
+    },
+    {
+      "path": "{{ROADMAP_ROOT}}/99-assets",
+      "role": "assets",
+      "keep": true
+    }
+  ],
+  "notes": [
+    {
+      "path": "{{ROADMAP_ROOT}}/01-{{TOPIC_PATH_SEGMENT}}概述/§01-前置准备.md",
+      "content_file": "{{TEMP_DIR}}/§01-前置准备.md"
+    },
+    {
+      "path": "{{ROADMAP_ROOT}}/01-{{TOPIC_PATH_SEGMENT}}概述/§02-{{TOPIC_PATH_SEGMENT}}概述.md",
+      "content_file": "{{TEMP_DIR}}/§02-{{TOPIC_PATH_SEGMENT}}概述.md"
+    }
+  ]
+}

@@ -5,13 +5,13 @@
     "name": "koco-co",
     "url": "https://github.com/koco-co"
   },
-  "description": "Clarify goals and deliver verifiable software projects, Agent Skills, plugins, portable product requirement packages, GitHub READMEs, and project agent instructions.",
+  "description": "Clarify goals, deliver verifiable software artifacts, and manage evidence-based technical learning in Obsidian.",
   "plugins": [
     {
       "name": "build-goals",
       "source": "./",
-      "description": "Clarify goals and deliver verifiable software projects, Agent Skills, plugins, portable product requirement packages, GitHub READMEs, and project agent instructions.",
-      "version": "2.1.0",
+      "description": "Clarify goals, deliver verifiable software artifacts, and manage evidence-based technical learning in Obsidian.",
+      "version": "2.2.0",
       "author": {
         "name": "koco-co",
         "url": "https://github.com/koco-co"

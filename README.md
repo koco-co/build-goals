@@ -2,7 +2,7 @@
 
 # 𝓑𝓾𝓲𝓵𝓭 𝓖𝓸𝓪𝓵𝓼
 
-<p align="center">从目标澄清到可验证的软件项目、𝑺𝒌𝒊𝒍𝒍、𝑷𝒍𝒖𝒈𝒊𝒏、𝑷𝑹𝑫 与 𝑹𝑬𝑨𝑫𝑴𝑬 交付 · 𝑭𝒓𝒐𝒎 𝑰𝒅𝒆𝒂𝒔 𝒕𝒐 𝑽𝒆𝒓𝒊𝒇𝒊𝒂𝒃𝒍𝒆 𝑫𝒆𝒍𝒊𝒗𝒆𝒓𝒚</p>
+<p align="center">从目标澄清到可验证的软件交付与 𝑶𝒃𝒔𝒊𝒅𝒊𝒂𝒏 技术学习 · 𝑭𝒓𝒐𝒎 𝑰𝒅𝒆𝒂𝒔 𝒕𝒐 𝑽𝒆𝒓𝒊𝒇𝒊𝒂𝒃𝒍𝒆 𝑫𝒆𝒍𝒊𝒗𝒆𝒓𝒚 𝒂𝒏𝒅 𝑳𝒆𝒂𝒓𝒏𝒊𝒏𝒈</p>
 
 [![Claude Code](https://img.shields.io/badge/Claude_Code-Plugin-D97757?logo=anthropic&logoColor=white&cacheSeconds=3600)](https://code.claude.com/docs/en/plugins)
 [![Codex](https://img.shields.io/badge/Codex-Supported-000000?style=flat-square&logo=openai&logoColor=white&cacheSeconds=3600)](https://developers.openai.com/plugins/)
@@ -37,6 +37,7 @@
 | [`build-readme`](skills/build-readme/)       | 探索项目并创建或更新 <b>GitHub</b> 风格 <b>README</b>                    |
 | [`build-agents-md`](skills/build-agents-md/) | 初始化或整体重构跨平台 <b>AGENTS.md</b> 与 <b>CLAUDE.md</b>              |
 | [`handoff`](skills/handoff/)                 | 整理跨会话交接文档并生成可直接复制的接续提示词                           |
+| [`obsidian-learn-topic`](skills/obsidian-learn-topic/) | 在 <b>Obsidian</b> 中规划、教学、实践、复习并维护长期技术学习路线 |
 
 <p><code>build-prd</code> 支持从已有项目提取完整对外行为，也能把尚不完整的想法完善为产品需求包。它先确认功能域地图，再逐域确认用户输入、追问、输出固定结构与语义、对外契约、异常边界和行为样例；大项目可在 <code>.build-goals/build-prd/</code> 保存已确认的逐域检查点，最终生成可独立复制和校验的 <code>docs/产品需求/</code>。</p>
 
@@ -47,6 +48,8 @@
 <p><code>build-readme</code> 会先了解代码、命令、测试、<b>CI</b>、文档和资源并提供具体修改预览；用户确认后才创建或更新 <b>README</b>，并分别报告静态检查、<b>GitHub</b> 渲染和未验证内容。</p>
 
 <p><code>build-agents-md</code> 会根据仓库证据筛选项目特有指令，并按应用、库、<b>CLI</b> 或 <b>Monorepo</b> 的实际结构组织根目录和子目录 <code>AGENTS.md</code>；用户确认完整内容预览后，才创建同目录 <code>CLAUDE.md</code> 相对符号链接，供两个平台共用正文。</p>
+
+<p><code>obsidian-learn-topic</code> 把技术、框架、语言、知识点或 <b>GitHub</b> 开源仓库转化为可持久恢复的学习路线：先核验当前资料与 <b>Vault</b> 前置条件，再经目录预览确认创建 <b>Obsidian Base</b> 路线；后续每次只推进一个知识单元，并以真实练习、测验、<b>Patch</b>、测试与间隔复习证据判断掌握。作为 <b>Plugin</b> 使用时，<b>Codex</b> 可显式调用 <code>$build-goals:obsidian-learn-topic</code>，<b>Claude Code</b> 可调用 <code>/build-goals:obsidian-learn-topic</code>；符合描述的系统学习请求也允许模型直接路由。</p>
 
 <a id="workflow"></a>
 
@@ -119,7 +122,8 @@ build-goals/
 │   ├── vibe-coding/
 │   ├── build-readme/
 │   ├── build-agents-md/
-│   └── handoff/
+│   ├── handoff/
+│   └── obsidian-learn-topic/
 ├── packages/
 │   └── dsh-build-goals/
 │       ├── package.json
@@ -168,7 +172,7 @@ codex plugin add build-goals@build-goals
 dsh plugin --profile web add 'github:koco-co/build-goals#path:packages/dsh-build-goals'
 ```
 
-<p>需要 <b>pnpm</b> 9+；本地开发可用绝对路径替代 <b>git</b> 地址。安装后重启对应 <code>profile</code> 的 <code>dsh</code> 进程，新会话的 <code>/</code> 菜单即可调用 8 个 <b>Skill</b>。升级 = 重跑 <code>add</code>（<b>git</b> 渠道装的是仓库快照）；<b>npm</b> 注册表为预留发布渠道。</p>
+<p>需要 <b>pnpm</b> 9+；本地开发可用绝对路径替代 <b>git</b> 地址。安装后重启对应 <code>profile</code> 的 <code>dsh</code> 进程，新会话的 <code>/</code> 菜单即可调用 9 个 <b>Skill</b>。升级 = 重跑 <code>add</code>（<b>git</b> 渠道装的是仓库快照）；<b>npm</b> 注册表为预留发布渠道。</p>
 
 <a id="standalone-skills"></a>
 
@@ -200,7 +204,7 @@ python3 scripts/install_skill.py build-skill \
   --scope user
 ```
 
-<p>将 <code>build-skill</code> 替换为 <code>build-plugin</code>、<code>build-prd</code>、<code>vibe-coding</code>、<code>build-readme</code>、<code>build-agents-md</code>、<code>shape-idea</code> 或 <code>handoff</code> 即可安装另一个 <b>Skill</b>。目标目录已存在时默认拒绝覆盖；明确确认后添加 <code>--force</code>。</p>
+<p>将 <code>build-skill</code> 替换为 <code>build-plugin</code>、<code>build-prd</code>、<code>vibe-coding</code>、<code>build-readme</code>、<code>build-agents-md</code>、<code>shape-idea</code>、<code>handoff</code> 或 <code>obsidian-learn-topic</code> 即可安装另一个 <b>Skill</b>。目标目录已存在时默认拒绝覆盖；明确确认后添加 <code>--force</code>。</p>
 
 <a id="validation"></a>
 

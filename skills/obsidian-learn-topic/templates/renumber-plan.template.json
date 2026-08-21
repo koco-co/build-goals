@@ -1,0 +1,24 @@
+{
+  "vault_name": "{{VAULT_NAME}}",
+  "vault_path": "{{VAULT_PATH}}",
+  "root": "{{ROADMAP_ROOT}}",
+  "moves": [
+    {
+      "from": "{{ROADMAP_ROOT}}/02-旧阶段",
+      "to": "{{ROADMAP_ROOT}}/03-旧阶段"
+    }
+  ],
+  "add_directories": [
+    {
+      "path": "{{ROADMAP_ROOT}}/02-新增阶段",
+      "keep": true
+    }
+  ],
+  "expected_links": [],
+  "property_updates": [],
+  "base": {
+    "path": "{{ROADMAP_ROOT}}/{{TOPIC_PATH_SEGMENT}}-Roadmap.base",
+    "view": "学习路线",
+    "expected_paths": []
+  }
+}

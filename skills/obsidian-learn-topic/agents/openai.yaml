@@ -1,0 +1,6 @@
+interface:
+  display_name: "Obsidian Learn Topic"
+  short_description: "系统学习技术主题或 GitHub 仓库，并以实践证据验证掌握"
+  default_prompt: "使用 $obsidian-learn-topic 从零规划并开始学习一个技术主题或 GitHub 开源仓库。"
+policy:
+  allow_implicit_invocation: true

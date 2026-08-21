@@ -1,0 +1,17 @@
+{
+  "vault_name": "{{VAULT_NAME}}",
+  "vault_path": "{{VAULT_PATH}}",
+  "topic": {
+    "display": "{{TOPIC_DISPLAY}}",
+    "path_segment": "{{TOPIC_PATH_SEGMENT}}",
+    "tag": "{{TOPIC_TAG}}"
+  },
+  "learning_goal": "{{LEARNING_GOAL}}",
+  "version_scope": "{{VERSION_SCOPE}}",
+  "root": "{{ROADMAP_ROOT}}",
+  "path": "{{NOTE_PATH}}",
+  "content_file": "{{TEMP_DIR}}/{{NOTE_FILENAME}}",
+  "mode": "create",
+  "expected_current_file": null,
+  "remove_gitkeep": true
+}

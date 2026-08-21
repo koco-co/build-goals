@@ -1,7 +1,7 @@
 {
   "name": "build-goals",
-  "version": "2.1.0",
-  "description": "A focused toolkit for clarifying goals and delivering verifiable software projects, Agent Skills, plugins, portable product requirement packages, GitHub READMEs, and project agent instructions.",
+  "version": "2.2.0",
+  "description": "A focused toolkit for clarifying goals, delivering verifiable software artifacts, and managing evidence-based technical learning in Obsidian.",
   "author": {
     "name": "koco-co",
     "url": "https://github.com/koco-co"
@@ -17,6 +17,8 @@
     "readme-generation",
     "agents-md",
     "vibe-coding",
+    "obsidian",
+    "technical-learning",
     "software-delivery",
     "multi-agent-development",
     "tdd"
@@ -24,8 +26,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "Build Goals",
-    "shortDescription": "Deliver software, Skills, plugins, requirement packages, READMEs, and agent guides",
-    "longDescription": "A focused toolkit that turns clarified goals and repository facts into designed, implemented, tested, validated, and deliverable software projects, Agent Skills, Claude Code or Codex plugins, portable product requirement packages, GitHub READMEs, and project agent instructions.",
+    "shortDescription": "Deliver software artifacts and evidence-based Obsidian learning routes",
+    "longDescription": "A focused toolkit that turns clarified goals, repository facts, and technical learning targets into verifiable software artifacts, Agent Skills, plugins, requirement packages, project documentation, and evidence-based Obsidian learning routes.",
     "developerName": "koco-co",
     "category": "Productivity",
     "capabilities": [
@@ -40,6 +42,7 @@
       "Use build-prd to produce a research-backed, domain-sliced product requirement package with representative inputs, outputs, behavior samples, and acceptance contracts.",
       "Use vibe-coding to build from a confirmed requirement snapshot, optionally reference only user-authorized parts of an old project, continue an existing project, or migrate its architecture through two global approvals, TDD, multi-agent delivery, and cross-domain validation.",
       "Use build-readme to explore a repository and create or update its GitHub README after a confirmed preview.",
+      "Use obsidian-learn-topic to plan, persist, teach, practice, review, or maintain a technical learning route in an Obsidian Vault.",
       "Use build-agents-md to initialize or fully restructure AGENTS.md and its CLAUDE.md single-source link after a confirmed full preview, or handoff to prepare the next session."
     ],
     "brandColor": "#111827"

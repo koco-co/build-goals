@@ -1,9 +1,9 @@
 /**
  * Bundled build-goals skill provider.
  *
- * Registers the eight build-goals skills (shape-idea, build-skill,
+ * Registers the nine build-goals skills (shape-idea, build-skill,
  * build-plugin, build-prd, vibe-coding, build-readme, build-agents-md,
- * handoff) on the host `skills` registry. Summaries come from the generated
+ * handoff, obsidian-learn-topic) on the host `skills` registry. Summaries come from the generated
  * lib/skills.generated.js manifest; bodies are read lazily from the mirrored
  * assets. Users can override any bundled skill by placing a same-named
  * bundle in ~/.dsh/skills/ (filesystem provider rank 400 beats the bundled
