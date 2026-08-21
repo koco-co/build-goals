@@ -248,7 +248,10 @@ def validate_tracked_secrets(root: Path, issues: list[Issue]) -> None:
             if not path.is_file() or path.stat().st_size > 1_000_000:
                 continue
             content = path.read_text(encoding="utf-8")
-        except (OSError, UnicodeError) as exc:
+        except UnicodeError:
+            # 二进制文件（图片/字体等）不含文本秘密，跳过而不告警。
+            continue
+        except OSError as exc:
             add_issue(
                 issues,
                 "warning",

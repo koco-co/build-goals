@@ -1,0 +1,19 @@
+{
+  "topic": "{{TOPIC_DISPLAY}}",
+  "learning_goal": "{{LEARNING_GOAL}}",
+  "version_baseline": "{{VERSION_BASELINE}}",
+  "source_checked_at": "{{DATE}}",
+  "units": [
+    {
+      "unit_id": "{{UNIT_ID}}",
+      "stage": "{{STAGE_DIRECTORY}}",
+      "note_path": "{{NOTE_PATH}}",
+      "title": "{{LESSON_TITLE}}",
+      "document_type": "{{DOCUMENT_TYPE}}",
+      "learning_outcome": "{{ONE_MEASURABLE_OUTCOME}}",
+      "prerequisites": [],
+      "knowledge_ownership": ["{{KNOWLEDGE_POINT_ID}}"],
+      "assessment": "{{ONE_ACCEPTANCE_METHOD}}"
+    }
+  ]
+}

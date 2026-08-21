@@ -1,5 +1,5 @@
 ---
-title: "{{TOPIC_DISPLAY}} 前置准备"
+title: "{{TOPIC_DISPLAY}}前置准备"
 aliases: []
 tags:
   - "学习路线/{{TOPIC_TAG}}"
@@ -7,57 +7,57 @@ date: {{DATE}}
 updated: {{DATE}}
 status: 待核验
 category: "{{CATEGORY}}"
-note_type: 教程
+record_type: knowledge-note
+document_type: "操作指南"
 difficulty: 入门
 roadmap_topic: "{{TOPIC_DISPLAY}}"
 roadmap_kind: repository
 roadmap_root: "{{ROADMAP_ROOT}}"
-roadmap_status: 进行中
 learning_goal: "{{LEARNING_GOAL}}"
-knowledge_points_total: 0
-knowledge_points_covered: 0
-knowledge_points_pending: 0
-stage_title: "01-项目概述"
-stage_order: 1
-lesson_order: 1
-learning_status: 学习中
-mastery_score: 0
+unit_id: "{{PREREQUISITE_UNIT_ID}}"
+learning_outcome: "能验证仓库学习所需前置、源码隔离和受控运行条件"
+knowledge_ownership:
+  - "{{PREREQUISITE_KNOWLEDGE_POINT_ID}}"
 hard_prerequisites: []
 soft_prerequisites: []
 blocked_by: []
-mastery_evidence: []
-assessment_type:
-assessment_at:
-last_reviewed:
-next_review:
-review_count: 0
+assessment_method: "执行前置与受控环境检查并解释结果"
+evidence_note: "[[{{PREREQUISITE_EVIDENCE_PATH}}]]"
+stage_title: "01-项目概述"
+stage_order: 1
+lesson_order: 2
 verified_at: {{VERIFIED_AT}}
 version_scope: "{{VERSION_SCOPE}}"
 sources: []
-repository_provider: github
-repository_name: "{{REPOSITORY_NAME}}"
-repository_url: "{{REPOSITORY_URL}}"
-repository_default_branch: "{{DEFAULT_BRANCH}}"
-repository_target_ref: "{{TARGET_REF}}"
-repository_commit: "{{FULL_COMMIT}}"
-repository_license_spdx: "{{LICENSE_SPDX}}"
-repository_verified_at: {{VERIFIED_AT}}
-repository_scope: "{{REPOSITORY_SCOPE}}"
-core_slice: "{{CORE_SLICE}}"
-upstream_checked_at: {{UPSTREAM_CHECKED_AT}}
-upstream_status: {{UPSTREAM_STATUS}}
-graduation_status: pending
+coverage_status: 待核验
+content_audit_at: {{VERIFIED_AT}}
+content_audit_note:
 ---
 
-# {{TOPIC_DISPLAY}} 前置准备
+# {{TOPIC_DISPLAY}}前置准备
 
 > [!summary] 学习基线
-> 说明硬前置、受控运行环境、固定 Commit、核心切片和毕业证据。
+> {{REPOSITORY_BASELINE_SUMMARY}}
 
-## 硬前置与最低测验
+## 适用条件
+
+## 硬前置与最低验证
 
 ## 源码隔离与执行边界
 
-## 固定路线与阶段成果
+## 操作步骤
 
-## Commit、许可证与上游状态
+## 成功验证
+
+## 路线图中的 Commit、许可证与上游状态
+
+仓库身份、Commit、许可证、核心切片、上游状态和毕业状态只以 [[§01-学习路线图]] 为准；本篇不复制可变值。
+
+## 故障处理
+
+## 关联笔记
+
+- 学习路线：[[§01-学习路线图]]
+- 学习证据：[[{{PREREQUISITE_EVIDENCE_PATH}}]]
+
+## 来源与版本

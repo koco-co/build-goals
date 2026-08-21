@@ -167,6 +167,171 @@ class RoadmapContractTestCase(unittest.TestCase):
             ],
         }
 
+    def three_layer_scaffold_spec(self) -> dict[str, object]:
+        overview = f"{self.root}/01-Python概述"
+        records = f"{self.root}/05-学习记录"
+        base_template = (
+            Path(__file__).resolve().parents[1]
+            / "templates"
+            / "topic-roadmap.template.base"
+        ).read_text(encoding="utf-8")
+        folder_filter = f"file.inFolder({json.dumps(self.root, ensure_ascii=False)})"
+        base_content = base_template.replace(
+            "{{ROADMAP_FILTER_JSON}}",
+            json.dumps(folder_filter, ensure_ascii=False),
+        )
+        curriculum = {
+            "topic": "Python",
+            "learning_goal": self.learning_goal,
+            "version_baseline": "CPython 3.13.7",
+            "source_checked_at": "2026-08-21",
+            "units": [
+                {
+                    "unit_id": "PY-FOUND-01",
+                    "title": "前置准备",
+                    "stage": "01-Python概述",
+                    "note_path": "01-Python概述/§02-前置准备.md",
+                    "document_type": "操作指南",
+                    "learning_outcome": "能验证 Python 工具链",
+                    "knowledge_ownership": ["PY-ENV"],
+                    "prerequisites": [],
+                    "assessment": "执行版本检查并解释输出",
+                },
+                {
+                    "unit_id": "PY-OVERVIEW-01",
+                    "title": "Python概述",
+                    "stage": "01-Python概述",
+                    "note_path": "01-Python概述/§03-Python概述.md",
+                    "document_type": "原理解释",
+                    "learning_outcome": "能解释 Python 的运行模型",
+                    "knowledge_ownership": ["PY-RUNTIME"],
+                    "prerequisites": ["PY-FOUND-01"],
+                    "assessment": "分析一个新场景",
+                },
+            ],
+        }
+
+        def common(record_type: str, title: str, stage: str, lesson: int, status: str) -> list[str]:
+            return [
+                "---", f'title: "{title}"', "aliases: []", "tags:",
+                '  - "学习路线/Python"', "date: 2026-08-21", "updated: 2026-08-21",
+                f"status: {status}", 'category: "Learning"', f"record_type: {record_type}",
+                'roadmap_topic: "Python"', f"roadmap_root: {json.dumps(self.root, ensure_ascii=False)}",
+                f"learning_goal: {json.dumps(self.learning_goal, ensure_ascii=False)}",
+                f'stage_title: "{stage}"', f"stage_order: {int(stage[:2])}",
+                f"lesson_order: {lesson}", "verified_at: 2026-08-21",
+                f"version_scope: {json.dumps(self.version_scope, ensure_ascii=False)}", "sources: []",
+            ]
+
+        map_lines = common("curriculum-map", "Python学习路线图", "01-Python概述", 1, "待核验")
+        map_lines += [
+            "roadmap_status: 进行中", 'version_baseline: "CPython 3.13.7"',
+            "source_checked_at: 2026-08-21", "upstream_status: unchanged", "---", "", "# Python学习路线图", "",
+        ]
+        map_lines += [
+            "## 单元目录", "",
+            "| 单元 ID | 阶段与计划文件 | 正文类型 | 单项可验收成果 | 前置单元 | 验收方式 | 状态 |",
+            "| --- | --- | --- | --- | --- | --- | --- |",
+        ]
+        for unit in curriculum["units"]:
+            prerequisites = "、".join(f"`{item}`" for item in unit["prerequisites"]) or "无"
+            map_lines.append(
+                f"| `{unit['unit_id']}` | `{unit['note_path']}` | {unit['document_type']} | "
+                f"{unit['learning_outcome']} | {prerequisites} | {unit['assessment']} | 未创建 |"
+            )
+        map_lines += [
+            "", "## 知识点唯一归属", "",
+            "| 知识点 ID | 唯一所属单元 | 边界 |", "| --- | --- | --- |",
+        ]
+        for unit in curriculum["units"]:
+            for point in unit["knowledge_ownership"]:
+                map_lines.append(f"| `{point}` | `{unit['unit_id']}` | 仅在本单元权威讲授 |")
+        map_lines += [
+            "", "<!-- learn-topic-curriculum:start -->", "```json",
+            json.dumps(curriculum, ensure_ascii=False, indent=2),
+            "```", "<!-- learn-topic-curriculum:end -->",
+        ]
+
+        def knowledge_note(unit: dict[str, object], lesson: int, evidence_path: str) -> str:
+            lines = common("knowledge-note", str(unit["title"]), "01-Python概述", lesson, "待核验")
+            prerequisites = list(unit["prerequisites"])
+            hard_prerequisite_lines = (
+                ["hard_prerequisites:"]
+                + [f'  - "{prerequisite}"' for prerequisite in prerequisites]
+                if prerequisites
+                else ["hard_prerequisites: []"]
+            )
+            lines += [
+                f'document_type: "{unit["document_type"]}"', "difficulty: 入门",
+                f'unit_id: "{unit["unit_id"]}"', f'learning_outcome: "{unit["learning_outcome"]}"',
+                "knowledge_ownership:", f'  - "{unit["knowledge_ownership"][0]}"',
+                *hard_prerequisite_lines,
+                "soft_prerequisites: []", "blocked_by: []",
+                f'assessment_method: "{unit["assessment"]}"',
+                f'evidence_note: "[[{evidence_path}]]"', "coverage_status: 待核验",
+                "content_audit_at: 2026-08-21", "content_audit_note:", "---", "",
+                f'# {unit["title"]}',
+            ]
+            return "\n".join(lines) + "\n"
+
+        def learning_record(unit: dict[str, object], lesson: int, content_path: str, state: str) -> str:
+            lines = common("learning-evidence", f'{unit["title"]}学习记录', "05-学习记录", lesson, "草稿")
+            lines += [
+                f'unit_id: "{unit["unit_id"]}"', f'content_note: "[[{content_path}]]"',
+                f"learning_status: {state}", "knowledge_points_total: 0",
+                "knowledge_points_covered: 0", "knowledge_points_pending: 0", "mastery_score: 0",
+                "blocked_by: []", "mastery_evidence: []", "assessment_type:", "assessment_at:",
+                "last_reviewed:", "next_review:", "review_count: 0", "---", "",
+                f'# {unit["title"]}学习记录',
+            ]
+            return "\n".join(lines) + "\n"
+
+        paths = {
+            "map": f"{overview}/§01-学习路线图.md",
+            "content1": f"{overview}/§02-前置准备.md",
+            "content2": f"{overview}/§03-Python概述.md",
+            "record1": f"{records}/§01-前置准备-学习记录.md",
+            "record2": f"{records}/§02-Python概述-学习记录.md",
+        }
+        content_files = {
+            paths["map"]: self.write_text("v2-map.md", "\n".join(map_lines) + "\n"),
+            paths["content1"]: self.write_text(
+                "v2-content-1.md", knowledge_note(curriculum["units"][0], 2, paths["record1"][:-3])
+            ),
+            paths["content2"]: self.write_text(
+                "v2-content-2.md", knowledge_note(curriculum["units"][1], 3, paths["record2"][:-3])
+            ),
+            paths["record1"]: self.write_text(
+                "v2-record-1.md", learning_record(curriculum["units"][0], 1, paths["content1"][:-3], "学习中")
+            ),
+            paths["record2"]: self.write_text(
+                "v2-record-2.md", learning_record(curriculum["units"][1], 2, paths["content2"][:-3], "未开始")
+            ),
+        }
+        return {
+            "vault_name": "Test Vault", "vault_path": str(self.vault),
+            "topic": {"display": "Python", "path_segment": "Python", "tag": "Python"},
+            "learning_goal": self.learning_goal, "version_scope": self.version_scope,
+            "root": self.root,
+            "curriculum_plan_file": self.write_json("v2-curriculum.json", curriculum),
+            "base": {
+                "path": f"{self.root}/Python-Roadmap.base",
+                "content_file": self.write_text("v2-Python-Roadmap.base", base_content),
+            },
+            "directories": [
+                {"path": overview, "role": "overview", "keep": False},
+                {"path": f"{self.root}/02-语法基础", "role": "formal", "keep": True},
+                {"path": f"{self.root}/03-深入与拓展", "role": "extension", "keep": True},
+                {"path": f"{self.root}/04-复习与面试", "role": "review", "keep": True},
+                {"path": records, "role": "records", "keep": False},
+                {"path": f"{self.root}/99-assets", "role": "assets", "keep": True},
+            ],
+            "notes": [
+                {"path": path, "content_file": content_file}
+                for path, content_file in content_files.items()
+            ],
+        }
+
     def repository_scaffold_spec(self) -> dict[str, object]:
         spec = self.scaffold_spec()
         commit = "a" * 40
@@ -367,6 +532,137 @@ class RoadmapContractTestCase(unittest.TestCase):
 
     def load_write_note(self, plan: dict[str, object]) -> dict[str, object]:
         return roadmap_cli.load_write_note_plan(self.write_json("note.json", plan))
+
+    def three_layer_write_note_plan(
+        self, *, note_index: int = 1, mode: str = "create"
+    ) -> dict[str, object]:
+        scaffold = self.three_layer_scaffold_spec()
+        selected = scaffold["notes"][note_index]
+        plan: dict[str, object] = {
+            "vault_name": scaffold["vault_name"],
+            "vault_path": scaffold["vault_path"],
+            "content_contract": "three-layer",
+            "roadmap_kind": scaffold.get("roadmap_kind", "topic"),
+            "topic": scaffold["topic"],
+            "learning_goal": scaffold["learning_goal"],
+            "version_scope": scaffold["version_scope"],
+            "root": scaffold["root"],
+            "records_directory": f"{self.root}/05-学习记录",
+            "curriculum_plan_file": scaffold["curriculum_plan_file"],
+            "path": selected["path"],
+            "content_file": selected["content_file"],
+            "mode": mode,
+            "remove_gitkeep": False,
+        }
+        if mode == "replace":
+            plan["expected_current_file"] = self.write_text(
+                "v2-expected-current.md",
+                Path(selected["content_file"]).read_text(encoding="utf-8"),
+            )
+        return plan
+
+    def three_layer_repository_note_plan(
+        self,
+        *,
+        note_index: int,
+        current_commit: str,
+        planned_commit: str,
+        current_name: str = "python/cpython",
+        planned_name: str = "python/cpython",
+    ) -> tuple[dict[str, object], str]:
+        scaffold = self.three_layer_scaffold_spec()
+        curriculum_path = Path(scaffold["curriculum_plan_file"])
+        curriculum = json.loads(curriculum_path.read_text(encoding="utf-8"))
+        for unit in curriculum["units"]:
+            unit["stage"] = str(unit["stage"]).replace("01-Python概述", "01-项目概述")
+            unit["note_path"] = str(unit["note_path"]).replace(
+                "01-Python概述", "01-项目概述"
+            )
+        curriculum_path.write_text(
+            json.dumps(curriculum, ensure_ascii=False, indent=2), encoding="utf-8"
+        )
+
+        def repository_metadata(name: str, commit: str) -> dict[str, str]:
+            return {
+                "provider": "github",
+                "name": name,
+                "url": f"https://github.com/{name}",
+                "default_branch": "main",
+                "target_ref": "refs/heads/main",
+                "commit": commit,
+                "license_spdx": "PSF-2.0",
+                "verified_at": "2026-08-21",
+                "scope": "CPython 解释器主流程",
+                "core_slice": "源文件到字节码执行",
+                "upstream_checked_at": "2026-08-21",
+                "upstream_status": "unchanged",
+            }
+
+        def convert_note(content: str, metadata: dict[str, str], *, anchor: bool) -> str:
+            converted = content.replace("01-Python概述", "01-项目概述")
+            converted = converted.replace(
+                'roadmap_topic: "Python"\n',
+                'roadmap_topic: "Python"\nroadmap_kind: repository\n',
+            )
+            if anchor:
+                repository_lines = (
+                    f'repository_provider: {metadata["provider"]}\n'
+                    f'repository_name: {json.dumps(metadata["name"])}\n'
+                    f'repository_url: {json.dumps(metadata["url"])}\n'
+                    f'repository_default_branch: {json.dumps(metadata["default_branch"])}\n'
+                    f'repository_target_ref: {json.dumps(metadata["target_ref"])}\n'
+                    f'repository_commit: {json.dumps(metadata["commit"])}\n'
+                    f'repository_license_spdx: {json.dumps(metadata["license_spdx"])}\n'
+                    f'repository_verified_at: {metadata["verified_at"]}\n'
+                    f'repository_scope: {json.dumps(metadata["scope"], ensure_ascii=False)}\n'
+                    f'core_slice: {json.dumps(metadata["core_slice"], ensure_ascii=False)}\n'
+                    f'upstream_checked_at: {metadata["upstream_checked_at"]}\n'
+                    "graduation_status: pending\n"
+                )
+                converted = converted.replace(
+                    "roadmap_status: 进行中\n",
+                    "roadmap_status: 进行中\n" + repository_lines,
+                )
+            return converted
+
+        current_metadata = repository_metadata(current_name, current_commit)
+        planned_metadata = repository_metadata(planned_name, planned_commit)
+        raw_anchor = Path(scaffold["notes"][0]["content_file"]).read_text(encoding="utf-8")
+        current_anchor = convert_note(raw_anchor, current_metadata, anchor=True)
+        selected = scaffold["notes"][note_index]
+        selected_content = Path(selected["content_file"]).read_text(encoding="utf-8")
+        planned_content = convert_note(
+            selected_content,
+            planned_metadata,
+            anchor=note_index == 0,
+        )
+        planned_content_file = self.write_text(
+            f"v2-repository-planned-{note_index}.md", planned_content
+        )
+        selected_path = str(selected["path"]).replace("01-Python概述", "01-项目概述")
+        mode = "replace" if note_index == 0 else "create"
+        plan: dict[str, object] = {
+            "vault_name": scaffold["vault_name"],
+            "vault_path": scaffold["vault_path"],
+            "content_contract": "three-layer",
+            "roadmap_kind": "repository",
+            "repository": planned_metadata,
+            "topic": scaffold["topic"],
+            "learning_goal": scaffold["learning_goal"],
+            "version_scope": scaffold["version_scope"],
+            "root": scaffold["root"],
+            "records_directory": f"{self.root}/10-学习记录",
+            "curriculum_plan_file": scaffold["curriculum_plan_file"],
+            "path": selected_path,
+            "content_file": planned_content_file,
+            "mode": mode,
+            "remove_gitkeep": False,
+        }
+        if mode == "replace":
+            plan["expected_current_file"] = self.write_text(
+                "v2-repository-current-map.md", current_anchor
+            )
+        return plan, current_anchor
 
 
 class VaultPathTests(RoadmapContractTestCase):
@@ -690,7 +986,7 @@ class ScaffoldSpecTests(RoadmapContractTestCase):
         roles = [directory.get("role") for directory in template["directories"]]
         self.assertEqual(roles[0], "overview")
         self.assertGreaterEqual(roles.count("formal"), 1)
-        self.assertEqual(roles[-3:], ["extension", "review", "assets"])
+        self.assertEqual(roles[-4:], ["extension", "review", "records", "assets"])
         self.assertEqual(template["directories"][-1]["path"], "{{ROADMAP_ROOT}}/99-assets")
 
     def test_note_must_use_section_number_prefix(self) -> None:
@@ -892,6 +1188,228 @@ class ScaffoldSpecTests(RoadmapContractTestCase):
         spec["notes"][1]["path"] = f"{self.root}/01-Python概述/§02-简介.md"
         with self.assertRaisesRegex(roadmap_cli.ContractError, "required overview notes are missing"):
             self.load_scaffold(spec)
+
+
+class ThreeLayerScaffoldSpecTests(RoadmapContractTestCase):
+    def test_valid_three_layer_scaffold_persists_curriculum_content_and_records(self) -> None:
+        normalized = self.load_scaffold(self.three_layer_scaffold_spec())
+
+        self.assertEqual(normalized["contract_version"], 2)
+        self.assertEqual(len(normalized["curriculum_plan"]["units"]), 2)
+        self.assertEqual(
+            [item["role"] for item in normalized["directories"]][-2:],
+            ["records", "assets"],
+        )
+        self.assertEqual(len(normalized["notes"]), 5)
+
+    def test_three_layer_curriculum_rejects_duplicate_knowledge_ownership(self) -> None:
+        spec = self.three_layer_scaffold_spec()
+        path = Path(spec["curriculum_plan_file"])
+        curriculum = json.loads(path.read_text(encoding="utf-8"))
+        curriculum["units"][1]["knowledge_ownership"] = ["PY-ENV"]
+        path.write_text(json.dumps(curriculum, ensure_ascii=False), encoding="utf-8")
+
+        with self.assertRaisesRegex(roadmap_cli.ContractError, "multiple owners"):
+            self.load_scaffold(spec)
+
+    def test_three_layer_curriculum_rejects_forward_dependency(self) -> None:
+        spec = self.three_layer_scaffold_spec()
+        path = Path(spec["curriculum_plan_file"])
+        curriculum = json.loads(path.read_text(encoding="utf-8"))
+        curriculum["units"][0]["prerequisites"] = ["PY-OVERVIEW-01"]
+        path.write_text(json.dumps(curriculum, ensure_ascii=False), encoding="utf-8")
+
+        with self.assertRaisesRegex(roadmap_cli.ContractError, "earlier"):
+            self.load_scaffold(spec)
+
+    def test_three_layer_scaffold_rejects_content_record_unit_mismatch(self) -> None:
+        spec = self.three_layer_scaffold_spec()
+        record = Path(spec["notes"][3]["content_file"])
+        record.write_text(
+            record.read_text(encoding="utf-8").replace(
+                'unit_id: "PY-FOUND-01"', 'unit_id: "PY-WRONG-01"'
+            ),
+            encoding="utf-8",
+        )
+
+        with self.assertRaisesRegex(roadmap_cli.ContractError, "not declared|one-to-one"):
+            self.load_scaffold(spec)
+
+    def test_three_layer_scaffold_rejects_route_map_missing_planned_unit(self) -> None:
+        spec = self.three_layer_scaffold_spec()
+        route_map = Path(spec["notes"][0]["content_file"])
+        route_map.write_text(
+            route_map.read_text(encoding="utf-8").replace("PY-OVERVIEW-01", "MISSING-UNIT"),
+            encoding="utf-8",
+        )
+
+        with self.assertRaisesRegex(roadmap_cli.ContractError, "contract.*does not match|does not render"):
+            self.load_scaffold(spec)
+
+    def test_three_layer_scaffold_rejects_stale_visible_curriculum_row(self) -> None:
+        spec = self.three_layer_scaffold_spec()
+        route_map = Path(spec["notes"][0]["content_file"])
+        route_map.write_text(
+            route_map.read_text(encoding="utf-8").replace(
+                "能验证 Python 工具链", "能跳过工具链验证", 1
+            ),
+            encoding="utf-8",
+        )
+
+        with self.assertRaisesRegex(roadmap_cli.ContractError, "visible unit row"):
+            self.load_scaffold(spec)
+
+    def test_three_layer_scaffold_rejects_extra_visible_unit_or_ownership_row(self) -> None:
+        mutations = (
+            (
+                "\n\n## 知识点唯一归属",
+                "\n| `PY-STALE-99` | `02-语法基础/§99-旧单元.md` | 教程 | 旧成果 | 无 | 旧验收 | 已归档 |\n\n## 知识点唯一归属",
+                "visible unit rows",
+            ),
+            (
+                "\n\n<!-- learn-topic-curriculum:start -->",
+                "\n| `PY-STALE` | `PY-STALE-99` | 旧归属 |\n\n<!-- learn-topic-curriculum:start -->",
+                "visible ownership rows",
+            ),
+        )
+        for marker, replacement, message in mutations:
+            spec = self.three_layer_scaffold_spec()
+            route_map = Path(spec["notes"][0]["content_file"])
+            route_map.write_text(
+                route_map.read_text(encoding="utf-8").replace(marker, replacement, 1),
+                encoding="utf-8",
+            )
+            with self.subTest(message=message):
+                with self.assertRaisesRegex(roadmap_cli.ContractError, message):
+                    self.load_scaffold(spec)
+
+    def test_three_layer_scaffold_rejects_knowledge_metadata_drift(self) -> None:
+        replacements = (
+            ('document_type: "操作指南"', 'document_type: "教程"', "document_type"),
+            (
+                'learning_outcome: "能验证 Python 工具链"',
+                'learning_outcome: "能安装任意依赖"',
+                "learning_outcome",
+            ),
+            ('  - "PY-ENV"', '  - "PY-OTHER"', "knowledge_ownership"),
+        )
+        for old, new, label in replacements:
+            spec = self.three_layer_scaffold_spec()
+            note = Path(spec["notes"][1]["content_file"])
+            note.write_text(note.read_text(encoding="utf-8").replace(old, new), encoding="utf-8")
+            with self.subTest(label=label):
+                with self.assertRaisesRegex(roadmap_cli.ContractError, label):
+                    self.load_scaffold(spec)
+
+    def test_three_layer_scaffold_rejects_prerequisite_drift(self) -> None:
+        spec = self.three_layer_scaffold_spec()
+        note = Path(spec["notes"][2]["content_file"])
+        note.write_text(
+            note.read_text(encoding="utf-8").replace(
+                'hard_prerequisites:\n  - "PY-FOUND-01"',
+                "hard_prerequisites: []",
+            ),
+            encoding="utf-8",
+        )
+
+        with self.assertRaisesRegex(roadmap_cli.ContractError, "hard_prerequisites"):
+            self.load_scaffold(spec)
+
+    def test_three_layer_scaffold_rejects_learning_record_outside_records_stage(self) -> None:
+        spec = self.three_layer_scaffold_spec()
+        record = spec["notes"][3]
+        record["path"] = f"{self.root}/01-Python概述/§04-前置准备-学习记录.md"
+        content = Path(record["content_file"])
+        content.write_text(
+            content.read_text(encoding="utf-8")
+            .replace('stage_title: "05-学习记录"', 'stage_title: "01-Python概述"')
+            .replace("stage_order: 5", "stage_order: 1")
+            .replace("lesson_order: 1", "lesson_order: 4"),
+            encoding="utf-8",
+        )
+
+        with self.assertRaisesRegex(roadmap_cli.ContractError, "learning record must be inside"):
+            self.load_scaffold(spec)
+
+
+class ThreeLayerWriteNotePlanTests(RoadmapContractTestCase):
+    def test_valid_planned_knowledge_note_is_accepted(self) -> None:
+        normalized = self.load_write_note(self.three_layer_write_note_plan())
+
+        self.assertEqual(normalized["content_contract"], "three-layer")
+        self.assertEqual(normalized["records_directory"], f"{self.root}/05-学习记录")
+        self.assertEqual(normalized["curriculum_plan"]["units"][0]["unit_id"], "PY-FOUND-01")
+
+    def test_unplanned_or_drifted_knowledge_note_is_rejected(self) -> None:
+        replacements = (
+            ('unit_id: "PY-FOUND-01"', 'unit_id: "PY-UNKNOWN"', "not declared"),
+            ('document_type: "操作指南"', 'document_type: "教程"', "document_type"),
+            (
+                'learning_outcome: "能验证 Python 工具链"',
+                'learning_outcome: "能跳过路线"',
+                "learning_outcome",
+            ),
+            ('  - "PY-ENV"', '  - "PY-OTHER"', "knowledge_ownership"),
+        )
+        for old, new, message in replacements:
+            plan = self.three_layer_write_note_plan()
+            content = Path(plan["content_file"])
+            content.write_text(content.read_text(encoding="utf-8").replace(old, new), encoding="utf-8")
+            with self.subTest(message=message):
+                with self.assertRaisesRegex(roadmap_cli.ContractError, message):
+                    self.load_write_note(plan)
+
+    def test_knowledge_note_path_must_match_curriculum_and_stay_out_of_records(self) -> None:
+        plan = self.three_layer_write_note_plan()
+        plan["path"] = f"{self.root}/05-学习记录/§03-前置准备.md"
+        content = Path(plan["content_file"])
+        content.write_text(
+            content.read_text(encoding="utf-8")
+            .replace('stage_title: "01-Python概述"', 'stage_title: "05-学习记录"')
+            .replace("stage_order: 1", "stage_order: 5")
+            .replace("lesson_order: 2", "lesson_order: 3"),
+            encoding="utf-8",
+        )
+
+        with self.assertRaisesRegex(roadmap_cli.ContractError, "path does not match|records_directory"):
+            self.load_write_note(plan)
+
+    def test_learning_evidence_must_use_planned_unit_and_records_directory(self) -> None:
+        plan = self.three_layer_write_note_plan(note_index=3)
+        plan["path"] = f"{self.root}/04-复习与面试/§01-前置准备-学习记录.md"
+        content = Path(plan["content_file"])
+        content.write_text(
+            content.read_text(encoding="utf-8")
+            .replace('stage_title: "05-学习记录"', 'stage_title: "04-复习与面试"')
+            .replace("stage_order: 5", "stage_order: 4"),
+            encoding="utf-8",
+        )
+
+        with self.assertRaisesRegex(roadmap_cli.ContractError, "records_directory"):
+            self.load_write_note(plan)
+
+    def test_repository_curriculum_map_plan_accepts_a_new_commit_baseline(self) -> None:
+        plan, _current_anchor = self.three_layer_repository_note_plan(
+            note_index=0,
+            current_commit="a" * 40,
+            planned_commit="b" * 40,
+        )
+
+        normalized = self.load_write_note(plan)
+
+        self.assertEqual(normalized["repository"]["commit"], "b" * 40)
+        self.assertIn('repository_commit: "' + ("b" * 40) + '"', normalized["content"])
+
+    def test_repository_note_plan_requires_fixed_records_directory(self) -> None:
+        plan, _current_anchor = self.three_layer_repository_note_plan(
+            note_index=0,
+            current_commit="a" * 40,
+            planned_commit="b" * 40,
+        )
+        plan["records_directory"] = f"{self.root}/05-学习记录"
+
+        with self.assertRaisesRegex(roadmap_cli.ContractError, "10-学习记录"):
+            self.load_write_note(plan)
 
 
 class WriteNotePlanTests(RoadmapContractTestCase):
@@ -1454,8 +1972,8 @@ class WriteNotePlanTests(RoadmapContractTestCase):
 class PersistentRoadmapStateContractTests(unittest.TestCase):
     skill_root = Path(__file__).resolve().parents[1]
 
-    def test_prerequisite_template_persists_active_topic_status(self) -> None:
-        template = (self.skill_root / "templates" / "overview-prerequisites.template.md").read_text(
+    def test_curriculum_map_template_persists_active_topic_status(self) -> None:
+        template = (self.skill_root / "templates" / "curriculum-map.template.md").read_text(
             encoding="utf-8"
         )
         self.assertIn("roadmap_status: 进行中", template)
@@ -1467,9 +1985,9 @@ class PersistentRoadmapStateContractTests(unittest.TestCase):
         self.assertIn("note.roadmap_status:", base)
         self.assertIn("note.learning_status:", base)
 
-    def test_resume_contract_uses_the_prerequisite_anchor_for_active_topic_discovery(self) -> None:
+    def test_resume_contract_uses_the_curriculum_map_anchor_for_active_topic_discovery(self) -> None:
         resume = (self.skill_root / "workflows" / "§03-resume.md").read_text(encoding="utf-8")
-        self.assertIn("§01-前置准备.md", resume)
+        self.assertIn("§01-学习路线图.md", resume)
         self.assertIn("roadmap_status", resume)
         self.assertRegex(resume, "roadmap_status[^\n]*进行中")
 
@@ -2295,6 +2813,475 @@ global.app = {{
         self.assertEqual(harness["calls"]["create"], [])
         self.assertEqual(len(harness["calls"]["modify"]), 1)
         self.assertEqual(harness["calls"]["adapterRemove"], [])
+
+
+class ThreeLayerScaffoldEvalDriverTests(RoadmapContractTestCase):
+    """Exercise contract-v2 checks inside the embedded Obsidian eval runtime."""
+
+    def parsed_base_document(self) -> dict[str, object]:
+        flat_filters = {
+            "课程路线": ['record_type == "curriculum-map"'],
+            "知识正文": ['record_type == "knowledge-note"'],
+            "学习记录": ['record_type == "learning-evidence"'],
+            "学习中": ['record_type == "learning-evidence"', 'learning_status == "学习中"'],
+            "阻塞": ['record_type == "learning-evidence"', 'learning_status == "阻塞"'],
+            "已掌握": [
+                'record_type == "learning-evidence"',
+                'learning_status == "已掌握"',
+                'list(mastery_evidence).length > 0',
+            ],
+            "待核验": ['record_type == "knowledge-note"', 'status == "待核验"'],
+            "待补齐": ['record_type == "knowledge-note"', 'coverage_status == "部分覆盖"'],
+        }
+        views: list[dict[str, object]] = [{"name": "学习路线"}]
+        views.extend(
+            {"name": name, "filters": {"and": filters}}
+            for name, filters in flat_filters.items()
+            if name not in {"已掌握"}
+        )
+        views.append(
+            {
+                "name": "待复习",
+                "filters": {
+                    "and": [
+                        'record_type == "learning-evidence"',
+                        "formula.review_due == true",
+                        {
+                            "or": [
+                                'learning_status == "已掌握"',
+                                'learning_status == "待复习"',
+                            ]
+                        },
+                    ]
+                },
+            }
+        )
+        views.append({"name": "已掌握", "filters": {"and": flat_filters["已掌握"]}})
+        return {
+            "filters": {
+                "and": [
+                    'file.ext == "md"',
+                    f"file.inFolder({json.dumps(self.root, ensure_ascii=False)})",
+                ]
+            },
+            "properties": {
+                key: {}
+                for key in (
+                    "note.record_type", "note.document_type", "note.unit_id",
+                    "note.content_note", "note.evidence_note", "note.learning_status",
+                    "note.roadmap_status",
+                )
+            },
+            "views": views,
+        }
+
+    def run_preflight(
+        self,
+        *,
+        mutate_payload: object | None = None,
+        mutate_base: object | None = None,
+    ) -> dict[str, object]:
+        node = shutil.which("node")
+        if not node:
+            self.skipTest("node is required to execute the embedded Obsidian eval driver")
+        payload = self.load_scaffold(self.three_layer_scaffold_spec())
+        if callable(mutate_payload):
+            mutate_payload(payload)
+        parsed_base = self.parsed_base_document()
+        if callable(mutate_base):
+            mutate_base(parsed_base)
+        payload["op"] = "scaffold_preflight"
+        encoded = base64.b64encode(
+            json.dumps(payload, ensure_ascii=False).encode("utf-8")
+        ).decode("ascii")
+        driver = roadmap_cli.EVAL_DRIVER.replace("__LEARN_TOPIC_PAYLOAD__", encoded)
+        harness = f"""
+const parsedBase = {json.dumps(parsed_base, ensure_ascii=False)};
+const baseContent = {json.dumps(payload["base"]["content"], ensure_ascii=False)};
+const parseScalar = (raw) => {{
+  if (raw === "") return null;
+  if (raw === "[]") return [];
+  if (raw === "true") return true;
+  if (raw === "false") return false;
+  if (/^-?\\d+$/.test(raw)) return Number(raw);
+  if (raw.startsWith('"') && raw.endsWith('"')) return JSON.parse(raw);
+  return raw;
+}};
+global.parseYaml = (text) => {{
+  if (text === baseContent) return parsedBase;
+  const result = {{}};
+  let listKey = null;
+  for (const rawLine of text.split(/\\r?\\n/)) {{
+    if (rawLine === "---" || rawLine.trim() === "") continue;
+    const listMatch = rawLine.match(/^\\s+-\\s+(.+)$/);
+    if (listMatch && listKey) {{
+      if (!Array.isArray(result[listKey])) result[listKey] = [];
+      result[listKey].push(parseScalar(listMatch[1]));
+      continue;
+    }}
+    const propertyMatch = rawLine.match(/^([A-Za-z_][A-Za-z0-9_]*):(?:\\s*(.*))?$/);
+    if (!propertyMatch) continue;
+    listKey = propertyMatch[1];
+    result[listKey] = parseScalar(propertyMatch[2] || "");
+  }}
+  return result;
+}};
+const adapter = {{
+  exists: async () => false,
+  write: async () => undefined,
+  read: async () => "",
+  list: async () => ({{files: [], folders: []}}),
+}};
+global.app = {{
+  vault: {{
+    adapter,
+    createFolder: async () => undefined,
+    create: async () => undefined,
+    getFolderByPath: () => null,
+    getFileByPath: () => null,
+    getAbstractFileByPath: () => null,
+    getConfig: (key) => key === "trashOption" ? "system" : true,
+  }},
+  fileManager: {{
+    renameFile: async () => undefined,
+    trashFile: async () => undefined,
+    processFrontMatter: async () => undefined,
+  }},
+}};
+(async () => {{
+  const output = await eval({json.dumps(driver)});
+  process.stdout.write(String(output));
+}})().catch((error) => {{
+  process.stderr.write(error?.stack || String(error));
+  process.exit(1);
+}});
+"""
+        completed = subprocess.run(
+            [node, "-e", harness], capture_output=True, text=True, check=False
+        )
+        output = completed.stdout + completed.stderr
+        sentinel_lines = [
+            line for line in output.splitlines() if line.startswith(roadmap_cli.SENTINEL)
+        ]
+        self.assertEqual(completed.returncode, 0, output)
+        self.assertEqual(len(sentinel_lines), 1, output)
+        return json.loads(sentinel_lines[0][len(roadmap_cli.SENTINEL) :])
+
+    def test_v2_scaffold_runtime_accepts_exact_curriculum_and_base_contract(self) -> None:
+        result = self.run_preflight()
+
+        self.assertTrue(result["ok"], result)
+
+    def test_v2_scaffold_runtime_rejects_curriculum_metadata_drift(self) -> None:
+        def mutate(payload: dict[str, object]) -> None:
+            payload["notes"][1]["content"] = payload["notes"][1]["content"].replace(
+                'document_type: "操作指南"', 'document_type: "教程"'
+            )
+
+        result = self.run_preflight(mutate_payload=mutate)
+
+        self.assertFalse(result["ok"], result)
+        self.assertRegex(str(result.get("error")), "document_type.*curriculum")
+
+    def test_v2_scaffold_runtime_rejects_semantically_wrong_base_view(self) -> None:
+        def mutate(base: dict[str, object]) -> None:
+            view = next(item for item in base["views"] if item["name"] == "待补齐")
+            view["filters"]["and"] = ['record_type == "learning-evidence"']
+
+        result = self.run_preflight(mutate_base=mutate)
+
+        self.assertFalse(result["ok"], result)
+        self.assertRegex(str(result.get("error")), "wrong three-layer filters: 待补齐")
+
+    def test_v2_scaffold_runtime_rejects_stale_visible_curriculum_row(self) -> None:
+        def mutate(payload: dict[str, object]) -> None:
+            payload["notes"][0]["content"] = payload["notes"][0]["content"].replace(
+                "能验证 Python 工具链", "能跳过工具链验证", 1
+            )
+
+        result = self.run_preflight(mutate_payload=mutate)
+
+        self.assertFalse(result["ok"], result)
+        self.assertRegex(str(result.get("error")), "visible unit row")
+
+    def test_v2_scaffold_runtime_rejects_extra_visible_rows(self) -> None:
+        mutations = (
+            (
+                "\n\n## 知识点唯一归属",
+                "\n| `PY-STALE-99` | `02-语法基础/§99-旧单元.md` | 教程 | 旧成果 | 无 | 旧验收 | 已归档 |\n\n## 知识点唯一归属",
+                "visible unit rows",
+            ),
+            (
+                "\n\n<!-- learn-topic-curriculum:start -->",
+                "\n| `PY-STALE` | `PY-STALE-99` | 旧归属 |\n\n<!-- learn-topic-curriculum:start -->",
+                "visible ownership rows",
+            ),
+        )
+        for marker, replacement, message in mutations:
+            def mutate(payload: dict[str, object]) -> None:
+                payload["notes"][0]["content"] = payload["notes"][0]["content"].replace(
+                    marker, replacement, 1
+                )
+
+            with self.subTest(message=message):
+                result = self.run_preflight(mutate_payload=mutate)
+                self.assertFalse(result["ok"], result)
+                self.assertRegex(str(result.get("error")), message)
+
+    def run_write_preflight(
+        self,
+        *,
+        note_index: int = 1,
+        mode: str = "create",
+        plan_override: dict[str, object] | None = None,
+        anchor_content_override: str | None = None,
+        mutate_plan: object | None = None,
+        mutate_payload: object | None = None,
+        mutate_base: object | None = None,
+    ) -> dict[str, object]:
+        node = shutil.which("node")
+        if not node:
+            self.skipTest("node is required to execute the embedded Obsidian eval driver")
+        plan = plan_override or self.three_layer_write_note_plan(
+            note_index=note_index, mode=mode
+        )
+        mode = str(plan["mode"])
+        if callable(mutate_plan):
+            mutate_plan(plan)
+        payload = self.load_write_note(plan)
+        if callable(mutate_payload):
+            mutate_payload(payload)
+        parsed_base = self.parsed_base_document()
+        if callable(mutate_base):
+            mutate_base(parsed_base)
+        payload["op"] = "write_note_preflight"
+        encoded = base64.b64encode(
+            json.dumps(payload, ensure_ascii=False).encode("utf-8")
+        ).decode("ascii")
+        driver = roadmap_cli.EVAL_DRIVER.replace("__LEARN_TOPIC_PAYLOAD__", encoded)
+        base_path = f"{self.root}/Python-Roadmap.base"
+        base_content = (self.inputs / "v2-Python-Roadmap.base").read_text(encoding="utf-8")
+        overview = "01-项目概述" if payload["roadmap_kind"] == "repository" else "01-Python概述"
+        anchor_path = f"{self.root}/{overview}/§01-学习路线图.md"
+        anchor_content = (
+            anchor_content_override
+            if anchor_content_override is not None
+            else (
+                payload["expected_current"]
+                if payload["path"] == anchor_path and mode == "replace"
+                else (self.inputs / "v2-map.md").read_text(encoding="utf-8")
+            )
+        )
+        parent_path = PurePosixPath(payload["path"]).parent.as_posix()
+        stage_names = (
+            [
+                "01-项目概述", "02-运行与测试基线", "03-架构与模块地图",
+                "04-核心调用链", "05-测试与质量体系", "06-Issue与PR考古",
+                "07-最小修复实践", "08-深入与拓展", "09-复习与贡献准备",
+                "10-学习记录", "99-assets",
+            ]
+            if payload["roadmap_kind"] == "repository"
+            else [
+                "01-Python概述", "02-语法基础", "03-深入与拓展",
+                "04-复习与面试", "05-学习记录", "99-assets",
+            ]
+        )
+        stage_paths = [f"{self.root}/{name}" for name in stage_names]
+        harness = f"""
+const parsedBase = {json.dumps(parsed_base, ensure_ascii=False)};
+const basePath = {json.dumps(base_path, ensure_ascii=False)};
+const baseContent = {json.dumps(base_content, ensure_ascii=False)};
+const anchorPath = {json.dumps(anchor_path, ensure_ascii=False)};
+const anchorContent = {json.dumps(anchor_content, ensure_ascii=False)};
+const rootPath = {json.dumps(self.root, ensure_ascii=False)};
+const parentPath = {json.dumps(parent_path, ensure_ascii=False)};
+const anchorFile = {{path: anchorPath, extension: "md"}};
+const baseFile = {{path: basePath, extension: "base"}};
+const stagePaths = {json.dumps(stage_paths, ensure_ascii=False)};
+const stageFolders = stagePaths.map((path) => ({{path, children: []}}));
+const folders = new Map(stageFolders.map((folder) => [folder.path, folder]));
+folders.set(rootPath, {{path: rootPath, children: [baseFile, ...stageFolders]}});
+folders.get(anchorPath.split("/").slice(0, -1).join("/")).children.push(anchorFile);
+const files = new Map([[basePath, baseFile], [anchorPath, anchorFile]]);
+const contents = new Map([[basePath, baseContent], [anchorPath, anchorContent]]);
+const parseScalar = (raw) => {{
+  if (raw === "") return null;
+  if (raw === "[]") return [];
+  if (raw === "true") return true;
+  if (raw === "false") return false;
+  if (/^-?\\d+$/.test(raw)) return Number(raw);
+  if (raw.startsWith('"') && raw.endsWith('"')) return JSON.parse(raw);
+  return raw;
+}};
+global.parseYaml = (text) => {{
+  if (text === baseContent) return parsedBase;
+  const result = {{}};
+  let listKey = null;
+  for (const rawLine of text.split(/\\r?\\n/)) {{
+    if (rawLine === "---" || rawLine.trim() === "") continue;
+    const listMatch = rawLine.match(/^\\s+-\\s+(.+)$/);
+    if (listMatch && listKey) {{
+      if (!Array.isArray(result[listKey])) result[listKey] = [];
+      result[listKey].push(parseScalar(listMatch[1]));
+      continue;
+    }}
+    const propertyMatch = rawLine.match(/^([A-Za-z_][A-Za-z0-9_]*):(?:\\s*(.*))?$/);
+    if (!propertyMatch) continue;
+    listKey = propertyMatch[1];
+    result[listKey] = parseScalar(propertyMatch[2] || "");
+  }}
+  return result;
+}};
+const adapter = {{
+  exists: async (path) => folders.has(path) || files.has(path),
+  write: async () => undefined,
+  read: async (path) => contents.get(path),
+  list: async () => ({{files: [], folders: []}}),
+}};
+global.app = {{
+  vault: {{
+    adapter,
+    createFolder: async () => undefined,
+    create: async () => undefined,
+    modify: async () => undefined,
+    read: async (file) => contents.get(file.path),
+    getMarkdownFiles: () => [anchorFile],
+    getFolderByPath: (path) => folders.get(path) || null,
+    getFileByPath: (path) => files.get(path) || null,
+    getAbstractFileByPath: (path) => folders.get(path) || files.get(path) || null,
+    getConfig: (key) => key === "trashOption" ? "system" : true,
+  }},
+  metadataCache: {{
+    getFirstLinkpathDest: () => null,
+  }},
+  fileManager: {{
+    renameFile: async () => undefined,
+    trashFile: async () => undefined,
+    processFrontMatter: async () => undefined,
+  }},
+}};
+(async () => {{
+  const output = await eval({json.dumps(driver)});
+  process.stdout.write(String(output));
+}})().catch((error) => {{
+  process.stderr.write(error?.stack || String(error));
+  process.exit(1);
+}});
+"""
+        completed = subprocess.run(
+            [node, "-e", harness], capture_output=True, text=True, check=False
+        )
+        output = completed.stdout + completed.stderr
+        self.assertEqual(completed.returncode, 0, output)
+        marker_index = completed.stdout.rfind(roadmap_cli.SENTINEL)
+        self.assertGreaterEqual(marker_index, 0, output)
+        return json.loads(completed.stdout[marker_index + len(roadmap_cli.SENTINEL) :])
+
+    def test_v2_write_runtime_accepts_exact_route_map_and_base_identity(self) -> None:
+        result = self.run_write_preflight()
+
+        self.assertTrue(result["ok"], result)
+
+    def test_v2_write_runtime_rejects_wrong_base_view_filter(self) -> None:
+        def mutate(base: dict[str, object]) -> None:
+            view = next(item for item in base["views"] if item["name"] == "知识正文")
+            view["filters"]["and"] = ['record_type == "learning-evidence"']
+
+        result = self.run_write_preflight(mutate_base=mutate)
+
+        self.assertFalse(result["ok"], result)
+        self.assertRegex(str(result.get("error")), "wrong three-layer filters: 知识正文")
+
+    def test_v2_write_runtime_rejects_an_alternate_records_directory(self) -> None:
+        def mutate(payload: dict[str, object]) -> None:
+            payload["records_directory"] = f"{self.root}/06-学习记录"
+
+        result = self.run_write_preflight(mutate_payload=mutate)
+
+        self.assertFalse(result["ok"], result)
+        self.assertRegex(str(result.get("error")), "one planned records_directory")
+
+    def test_v2_write_runtime_rejects_content_drift_from_route_map(self) -> None:
+        def mutate(payload: dict[str, object]) -> None:
+            payload["content"] = payload["content"].replace(
+                'assessment_method: "执行版本检查并解释输出"',
+                'assessment_method: "只做一道回忆题"',
+            )
+
+        result = self.run_write_preflight(mutate_payload=mutate)
+
+        self.assertFalse(result["ok"], result)
+        self.assertRegex(str(result.get("error")), "assessment_method.*curriculum")
+
+    def test_v2_write_runtime_allows_cas_curriculum_map_migration(self) -> None:
+        def migrate(plan: dict[str, object]) -> None:
+            curriculum_path = Path(plan["curriculum_plan_file"])
+            curriculum = json.loads(curriculum_path.read_text(encoding="utf-8"))
+            old_outcome = curriculum["units"][0]["learning_outcome"]
+            new_outcome = "能验证并解释 Python 工具链"
+            curriculum["units"][0]["learning_outcome"] = new_outcome
+            curriculum_path.write_text(
+                json.dumps(curriculum, ensure_ascii=False, indent=2), encoding="utf-8"
+            )
+            content_path = Path(plan["content_file"])
+            content_path.write_text(
+                content_path.read_text(encoding="utf-8").replace(old_outcome, new_outcome),
+                encoding="utf-8",
+            )
+
+        result = self.run_write_preflight(
+            note_index=0,
+            mode="replace",
+            mutate_plan=migrate,
+        )
+
+        self.assertTrue(result["ok"], result)
+
+    def test_v2_repository_map_runtime_allows_confirmed_commit_migration(self) -> None:
+        plan, current_anchor = self.three_layer_repository_note_plan(
+            note_index=0,
+            current_commit="a" * 40,
+            planned_commit="b" * 40,
+        )
+
+        result = self.run_write_preflight(
+            plan_override=plan,
+            anchor_content_override=current_anchor,
+        )
+
+        self.assertTrue(result["ok"], result)
+
+    def test_v2_repository_knowledge_runtime_rejects_commit_drift(self) -> None:
+        plan, current_anchor = self.three_layer_repository_note_plan(
+            note_index=1,
+            current_commit="a" * 40,
+            planned_commit="b" * 40,
+        )
+
+        result = self.run_write_preflight(
+            plan_override=plan,
+            anchor_content_override=current_anchor,
+        )
+
+        self.assertFalse(result["ok"], result)
+        self.assertRegex(str(result.get("error")), "repository_commit")
+
+    def test_v2_repository_map_runtime_rejects_identity_change(self) -> None:
+        plan, current_anchor = self.three_layer_repository_note_plan(
+            note_index=0,
+            current_commit="a" * 40,
+            planned_commit="b" * 40,
+            current_name="python/cpython",
+            planned_name="example/cpython",
+        )
+
+        result = self.run_write_preflight(
+            plan_override=plan,
+            anchor_content_override=current_anchor,
+        )
+
+        self.assertFalse(result["ok"], result)
+        self.assertRegex(str(result.get("error")), "repository_name|repository_url")
 
 
 class ScaffoldEvalDriverTests(unittest.TestCase):

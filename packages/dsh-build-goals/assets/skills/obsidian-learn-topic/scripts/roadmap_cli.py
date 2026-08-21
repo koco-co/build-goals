@@ -59,8 +59,11 @@ REPOSITORY_STAGE_CONTRACT = (
     ("07-最小修复实践", "formal"),
     ("08-深入与拓展", "extension"),
     ("09-复习与贡献准备", "review"),
+    ("10-学习记录", "records"),
     ("99-assets", "assets"),
 )
+DOCUMENT_TYPES = {"教程", "原理解释", "操作指南", "参考资料"}
+RECORD_TYPES = {"curriculum-map", "knowledge-note", "learning-evidence"}
 REPOSITORY_UPSTREAM_STATES = {
     "unchanged",
     "fixed-baseline",
@@ -186,6 +189,127 @@ def frontmatter_list_has_item(lines: list[str], key: str) -> bool:
             if normalized is not None and normalized.strip():
                 return True
     return False
+
+
+def frontmatter_list_values(
+    lines: list[str], key: str, *, label: str
+) -> list[str]:
+    prefix = f"{key}:"
+    try:
+        start = next(index for index, line in enumerate(lines) if line.startswith(prefix))
+    except StopIteration as error:
+        raise ContractError(f"{label} is missing list property: {key}") from error
+    if lines[start].strip() == f"{key}: []":
+        return []
+    values: list[str] = []
+    for line in lines[start + 1 :]:
+        if line and not line[0].isspace():
+            break
+        item_match = re.fullmatch(r"\s+-\s+(.+)", line)
+        if item_match:
+            value = frontmatter_scalar(item_match.group(1).strip())
+            if value is None or not value.strip():
+                raise ContractError(f"{label} has an empty {key} item")
+            values.append(value)
+    return values
+
+
+def extract_curriculum_contract(content: str, *, label: str) -> dict[str, Any]:
+    pattern = re.compile(
+        r"<!-- learn-topic-curriculum:start -->\s*"
+        r"```json\s*\n(?P<body>.*?)\n```\s*"
+        r"<!-- learn-topic-curriculum:end -->",
+        re.DOTALL,
+    )
+    matches = list(pattern.finditer(content))
+    if len(matches) != 1:
+        raise ContractError(f"{label} must contain exactly one machine-readable curriculum contract")
+    try:
+        parsed = json.loads(matches[0].group("body"))
+    except json.JSONDecodeError as error:
+        raise ContractError(f"{label} curriculum contract is invalid JSON: {error}") from error
+    if not isinstance(parsed, dict):
+        raise ContractError(f"{label} curriculum contract must be a JSON object")
+    return parsed
+
+
+def markdown_table_cell(value: str) -> str:
+    return value.replace("|", r"\|")
+
+
+def markdown_table_rows(content: str, heading: str, *, label: str) -> list[list[str]]:
+    heading_pattern = re.compile(rf"^## {re.escape(heading)}\s*$", re.MULTILINE)
+    headings = list(heading_pattern.finditer(content))
+    if len(headings) != 1:
+        raise ContractError(f"{label} must contain exactly one {heading} section")
+    section_start = headings[0].end()
+    next_heading = re.search(r"^## \S.*$", content[section_start:], re.MULTILINE)
+    section_end = (
+        section_start + next_heading.start() if next_heading else len(content)
+    )
+    rows: list[list[str]] = []
+    for line in content[section_start:section_end].splitlines():
+        stripped = line.strip()
+        if not stripped.startswith("|") or not stripped.endswith("|"):
+            continue
+        cells = [
+            cell.strip()
+            for cell in re.split(r"(?<!\\)\|", stripped[1:-1])
+        ]
+        rows.append(cells)
+    if len(rows) < 2:
+        raise ContractError(f"{label} {heading} must contain a Markdown table")
+    separator = rows[1]
+    if not separator or not all(re.fullmatch(r":?-{3,}:?", cell) for cell in separator):
+        raise ContractError(f"{label} {heading} has an invalid table separator")
+    return rows[2:]
+
+
+def validate_rendered_curriculum(
+    content: str, curriculum_plan: dict[str, Any], *, label: str
+) -> None:
+    expected_unit_rows: list[list[str]] = []
+    expected_ownership_rows: list[list[str]] = []
+    for unit in curriculum_plan["units"]:
+        prerequisites = (
+            "、".join(f"`{markdown_table_cell(item)}`" for item in unit["prerequisites"])
+            or "无"
+        )
+        expected_unit_rows.append(
+            [
+                f"`{markdown_table_cell(unit['unit_id'])}`",
+                f"`{markdown_table_cell(unit['note_path'])}`",
+                markdown_table_cell(unit["document_type"]),
+                markdown_table_cell(unit["learning_outcome"]),
+                prerequisites,
+                markdown_table_cell(unit["assessment"]),
+            ]
+        )
+        for point in unit["knowledge_ownership"]:
+            expected_ownership_rows.append(
+                [
+                    f"`{markdown_table_cell(point)}`",
+                    f"`{markdown_table_cell(unit['unit_id'])}`",
+                ]
+            )
+    actual_unit_rows = markdown_table_rows(content, "单元目录", label=label)
+    if (
+        len(actual_unit_rows) != len(expected_unit_rows)
+        or any(len(row) != 7 or not row[6] for row in actual_unit_rows)
+        or [row[:6] for row in actual_unit_rows] != expected_unit_rows
+    ):
+        raise ContractError(f"{label} visible unit rows do not exactly match curriculum")
+    actual_ownership_rows = markdown_table_rows(
+        content, "知识点唯一归属", label=label
+    )
+    if (
+        len(actual_ownership_rows) != len(expected_ownership_rows)
+        or any(len(row) != 3 or not row[2] for row in actual_ownership_rows)
+        or [row[:2] for row in actual_ownership_rows] != expected_ownership_rows
+    ):
+        raise ContractError(
+            f"{label} visible ownership rows do not exactly match curriculum"
+        )
 
 
 def frontmatter_scalar(value: str | None) -> str | None:
@@ -409,6 +533,194 @@ def normalize_repository_metadata(raw: dict[str, Any]) -> dict[str, str]:
     return normalized
 
 
+def normalize_curriculum_plan(
+    raw: dict[str, Any],
+    *,
+    topic_display: str,
+    learning_goal: str,
+    declared_stages: set[str],
+) -> dict[str, Any]:
+    """Validate the persistent lesson-level plan used by three-layer routes."""
+
+    require_keys(
+        raw,
+        ("topic", "learning_goal", "version_baseline", "source_checked_at", "units"),
+        label="curriculum plan",
+    )
+    if raw["topic"] != topic_display:
+        raise ContractError("curriculum plan topic does not match scaffold topic")
+    if raw["learning_goal"] != learning_goal:
+        raise ContractError("curriculum plan learning_goal does not match scaffold goal")
+    version_baseline = raw["version_baseline"]
+    if not isinstance(version_baseline, str) or not version_baseline.strip():
+        raise ContractError("curriculum plan version_baseline must be non-empty")
+    source_checked_at = raw["source_checked_at"]
+    if not isinstance(source_checked_at, str):
+        raise ContractError("curriculum plan source_checked_at must be an ISO date")
+    require_iso_date(source_checked_at, label="curriculum plan source_checked_at")
+    units = raw["units"]
+    if not isinstance(units, list) or not units:
+        raise ContractError("curriculum plan units must be a non-empty array")
+
+    normalized_units: list[dict[str, Any]] = []
+    unit_ids: set[str] = set()
+    note_paths: set[str] = set()
+    ownership: dict[str, str] = {}
+    for index, unit in enumerate(units):
+        if not isinstance(unit, dict):
+            raise ContractError(f"curriculum plan units[{index}] must be an object")
+        require_keys(
+            unit,
+            (
+                "unit_id",
+                "stage",
+                "note_path",
+                "title",
+                "document_type",
+                "learning_outcome",
+                "prerequisites",
+                "knowledge_ownership",
+                "assessment",
+            ),
+            label=f"curriculum plan units[{index}]",
+        )
+        for key in (
+            "unit_id",
+            "stage",
+            "note_path",
+            "title",
+            "document_type",
+            "learning_outcome",
+            "assessment",
+        ):
+            value = unit[key]
+            if not isinstance(value, str) or not value.strip() or value != value.strip():
+                raise ContractError(
+                    f"curriculum plan units[{index}].{key} must be normalized and non-empty"
+                )
+            if has_control_characters(value):
+                raise ContractError(
+                    f"curriculum plan units[{index}].{key} contains a control character"
+                )
+            ensure_no_placeholders(value, label=f"curriculum plan units[{index}].{key}")
+        unit_id = unit["unit_id"]
+        if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_.-]*", unit_id):
+            raise ContractError(f"curriculum plan unit_id is unsafe: {unit_id}")
+        if unit_id in unit_ids:
+            raise ContractError(f"curriculum plan duplicate unit_id: {unit_id}")
+        unit_ids.add(unit_id)
+        stage = unit["stage"]
+        if stage not in declared_stages:
+            raise ContractError(f"curriculum plan unit stage is not declared: {stage}")
+        if stage.endswith("学习记录") or stage == "99-assets":
+            raise ContractError("curriculum plan units cannot target records or assets")
+        note_path = validate_vault_path(unit["note_path"], label=f"curriculum plan units[{index}].note_path")
+        relative = PurePosixPath(note_path)
+        if len(relative.parts) != 2 or relative.parts[0] != stage:
+            raise ContractError(
+                f"curriculum plan note_path must be a stage-relative Markdown path: {note_path}"
+            )
+        if not NUMBERED_NOTE_RE.fullmatch(relative.parts[1]):
+            raise ContractError(f"curriculum plan note_path must use a §NN filename: {note_path}")
+        if note_path in note_paths:
+            raise ContractError(f"curriculum plan duplicate note_path: {note_path}")
+        note_paths.add(note_path)
+        if unit["document_type"] not in DOCUMENT_TYPES:
+            raise ContractError(
+                f"curriculum plan has unsupported document_type: {unit['document_type']}"
+            )
+        prerequisites = unit["prerequisites"]
+        knowledge_points = unit["knowledge_ownership"]
+        if not isinstance(prerequisites, list) or not all(
+            isinstance(value, str) and value and not has_control_characters(value)
+            for value in prerequisites
+        ):
+            raise ContractError(f"curriculum plan units[{index}].prerequisites must be strings")
+        if not isinstance(knowledge_points, list) or not knowledge_points or not all(
+            isinstance(value, str) and value and not has_control_characters(value)
+            for value in knowledge_points
+        ):
+            raise ContractError(
+                f"curriculum plan units[{index}].knowledge_ownership must be non-empty strings"
+            )
+        for point in knowledge_points:
+            if point in ownership:
+                raise ContractError(
+                    f"curriculum plan knowledge point {point} has multiple owners: "
+                    f"{ownership[point]}, {unit_id}"
+                )
+            ownership[point] = unit_id
+        normalized_units.append(
+            {
+                **unit,
+                "note_path": note_path,
+                "prerequisites": list(prerequisites),
+                "knowledge_ownership": list(knowledge_points),
+            }
+        )
+
+    positions = {unit["unit_id"]: index for index, unit in enumerate(normalized_units)}
+    for unit in normalized_units:
+        for prerequisite in unit["prerequisites"]:
+            if prerequisite not in positions:
+                raise ContractError(
+                    f"curriculum plan prerequisite does not exist: {prerequisite}"
+                )
+            if positions[prerequisite] >= positions[unit["unit_id"]]:
+                raise ContractError(
+                    f"curriculum plan prerequisite must appear earlier: {prerequisite} -> {unit['unit_id']}"
+                )
+
+    return {
+        "topic": topic_display,
+        "learning_goal": learning_goal,
+        "version_baseline": version_baseline,
+        "source_checked_at": source_checked_at,
+        "units": normalized_units,
+    }
+
+
+def curriculum_unit_by_id(curriculum_plan: dict[str, Any], unit_id: str) -> dict[str, Any]:
+    for unit in curriculum_plan["units"]:
+        if unit["unit_id"] == unit_id:
+            return unit
+    raise ContractError(f"unit_id is not declared in the curriculum plan: {unit_id}")
+
+
+def validate_knowledge_note_curriculum_binding(
+    *,
+    note_path: str,
+    root: str,
+    frontmatter_lines: list[str],
+    frontmatter_values: dict[str, str | None],
+    curriculum_plan: dict[str, Any],
+    label: str,
+) -> dict[str, Any]:
+    unit_id = frontmatter_scalar(frontmatter_values.get("unit_id")) or ""
+    unit = curriculum_unit_by_id(curriculum_plan, unit_id)
+    expected_path = f"{root}/{unit['note_path']}"
+    if note_path != expected_path:
+        raise ContractError(f"{label} path does not match curriculum unit {unit_id}")
+    scalar_checks = {
+        "document_type": unit["document_type"],
+        "learning_outcome": unit["learning_outcome"],
+        "assessment_method": unit["assessment"],
+    }
+    for key, expected in scalar_checks.items():
+        actual = frontmatter_scalar(frontmatter_values.get(key))
+        if actual != expected:
+            raise ContractError(f"{label} {key} does not match curriculum unit {unit_id}")
+    list_checks = {
+        "knowledge_ownership": unit["knowledge_ownership"],
+        "hard_prerequisites": unit["prerequisites"],
+    }
+    for key, expected in list_checks.items():
+        actual = frontmatter_list_values(frontmatter_lines, key, label=label)
+        if actual != expected:
+            raise ContractError(f"{label} {key} does not match curriculum unit {unit_id}")
+    return unit
+
+
 def load_scaffold_spec(path: str, *, actual_vault_path: str | None = None) -> dict[str, Any]:
     spec_path = Path(path).expanduser()
     if spec_path.is_symlink():
@@ -427,6 +739,7 @@ def load_scaffold_spec(path: str, *, actual_vault_path: str | None = None) -> di
         ("topic", "learning_goal", "version_scope", "root", "base", "directories", "notes"),
         label="scaffold spec",
     )
+    contract_version = 2 if "curriculum_plan_file" in raw else 1
     topic = normalize_topic_metadata(raw)
     roadmap_kind = raw.get("roadmap_kind", "topic")
     if roadmap_kind not in {"topic", "repository"}:
@@ -450,6 +763,21 @@ def load_scaffold_spec(path: str, *, actual_vault_path: str | None = None) -> di
         ensure_no_placeholders(value, label=key)
     root = validate_vault_path(raw["root"], label="root")
     ensure_no_placeholders(root, label="root")
+    raw_curriculum_plan: dict[str, Any] | None = None
+    if contract_version == 2:
+        curriculum_content = read_external_content(
+            raw["curriculum_plan_file"],
+            label="curriculum_plan_file",
+            vault_path=vault_path,
+            content_root=content_root,
+        )
+        try:
+            parsed_curriculum = json.loads(curriculum_content)
+        except json.JSONDecodeError as error:
+            raise ContractError(f"curriculum_plan_file is invalid JSON: {error}") from error
+        if not isinstance(parsed_curriculum, dict):
+            raise ContractError("curriculum_plan_file must contain a JSON object")
+        raw_curriculum_plan = parsed_curriculum
 
     base = raw["base"]
     if not isinstance(base, dict):
@@ -467,7 +795,7 @@ def load_scaffold_spec(path: str, *, actual_vault_path: str | None = None) -> di
         content_root=content_root,
     )
     base_filter_expression = f"file.inFolder({json.dumps(root, ensure_ascii=False)})"
-    required_base_fragments = (
+    required_base_fragments = [
         json.dumps('file.ext == "md"'),
         json.dumps(base_filter_expression, ensure_ascii=False),
         "route_order:",
@@ -482,7 +810,19 @@ def load_scaffold_spec(path: str, *, actual_vault_path: str | None = None) -> di
         "note.learning_status:",
         "note.roadmap_status:",
         "note.mastery_evidence:",
-    )
+    ]
+    if contract_version == 2:
+        required_base_fragments.extend(
+            (
+                "name: 课程路线",
+                "name: 知识正文",
+                "name: 学习记录",
+                "note.record_type:",
+                "note.document_type:",
+                "note.content_note:",
+                "note.evidence_note:",
+            )
+        )
     for fragment in required_base_fragments:
         if fragment not in base_content:
             raise ContractError(f"base content missing required fragment: {fragment}")
@@ -508,7 +848,10 @@ def load_scaffold_spec(path: str, *, actual_vault_path: str | None = None) -> di
                 raise ContractError(f"directory segment must use 01-99 prefix: {part}")
         role = item.get("role")
         if len(relative_parts) == 1:
-            if role not in {"overview", "formal", "extension", "review", "assets"}:
+            allowed_roles = {"overview", "formal", "extension", "review", "assets"}
+            if contract_version == 2:
+                allowed_roles.add("records")
+            if role not in allowed_roles:
                 raise ContractError(
                     f"directories[{index}].role must classify the top-level stage"
                 )
@@ -538,9 +881,12 @@ def load_scaffold_spec(path: str, *, actual_vault_path: str | None = None) -> di
         keep = item["keep"]
         if not isinstance(keep, bool):
             raise ContractError(f"directories[{index}].keep must be boolean")
-        if len(relative_parts) == 1 and role == "overview":
+        populated_roles = {"overview"}
+        if contract_version == 2:
+            populated_roles.add("records")
+        if len(relative_parts) == 1 and role in populated_roles:
             if keep:
-                raise ContractError("overview directory contains notes and must not use .gitkeep")
+                raise ContractError(f"{role} directory contains notes and must not use .gitkeep")
         elif not keep:
             raise ContractError(f"empty initialized directory must use .gitkeep: {directory_path}")
         normalized_item: dict[str, Any] = {"path": directory_path, "keep": keep}
@@ -548,18 +894,26 @@ def load_scaffold_spec(path: str, *, actual_vault_path: str | None = None) -> di
             normalized_item["role"] = role
         normalized_directories.append(normalized_item)
     if roadmap_kind == "repository":
+        expected_repository_contract = REPOSITORY_STAGE_CONTRACT
+        if contract_version == 1:
+            expected_repository_contract = tuple(
+                item for item in REPOSITORY_STAGE_CONTRACT if item[1] != "records"
+            )
         actual_outer_route = tuple(
             (PurePosixPath(item["path"]).name, item.get("role"))
             for item in normalized_directories
             if PurePosixPath(item["path"]).parent.as_posix() == root
         )
-        if actual_outer_route != REPOSITORY_STAGE_CONTRACT:
+        if actual_outer_route != expected_repository_contract:
             raise ContractError(
-                "repository outer route must use the fixed 01-09 and 99-assets contract"
+                "repository outer route must use the fixed staged contract"
             )
     if overview_directory is None:
         raise ContractError("directories must contain an overview stage")
-    for required_role in ("overview", "extension", "review", "assets"):
+    required_roles = ["overview", "extension", "review", "assets"]
+    if contract_version == 2:
+        required_roles.append("records")
+    for required_role in required_roles:
         if len(top_level_roles.get(required_role, [])) != 1:
             raise ContractError(f"directories must contain exactly one {required_role} stage")
     formal_stages = top_level_roles.get("formal", [])
@@ -569,15 +923,23 @@ def load_scaffold_spec(path: str, *, actual_vault_path: str | None = None) -> di
     extension_number = top_level_roles["extension"][0][0]
     review_number = top_level_roles["review"][0][0]
     asset_number = top_level_roles["assets"][0][0]
+    records_number = (
+        top_level_roles["records"][0][0] if contract_version == 2 else None
+    )
     formal_numbers = sorted(number for number, _path in formal_stages)
     if not (
         overview_number == 1
         and formal_numbers[0] == 2
-        and max(formal_numbers) < extension_number < review_number < asset_number
+        and max(formal_numbers) < extension_number < review_number
+        and (
+            review_number < asset_number
+            if records_number is None
+            else review_number < records_number < asset_number
+        )
         and asset_number == 99
     ):
         raise ContractError(
-            "stage roles must follow overview, formal, extension, review, then 99-assets"
+            "stage roles must follow overview, formal, extension, review, optional records, then 99-assets"
         )
     if sorted(top_level_numbers)[0] != "01":
         raise ContractError("top-level directory numbering must start at 01")
@@ -596,27 +958,54 @@ def load_scaffold_spec(path: str, *, actual_vault_path: str | None = None) -> di
             if name.startswith("99-") and parent == root and name != "99-assets":
                 raise ContractError("top-level 99 directory must be named 99-assets")
 
+    curriculum_plan = None
+    if contract_version == 2:
+        assert raw_curriculum_plan is not None
+        curriculum_plan = normalize_curriculum_plan(
+            raw_curriculum_plan,
+            topic_display=topic["display"],
+            learning_goal=learning_goal,
+            declared_stages={
+                PurePosixPath(item["path"]).name
+                for item in normalized_directories
+                if PurePosixPath(item["path"]).parent.as_posix() == root
+            },
+        )
+
     notes = raw["notes"]
     if not isinstance(notes, list) or not notes:
         raise ContractError("notes must be a non-empty array")
     normalized_notes: list[dict[str, str]] = []
-    note_numbers: set[str] = set()
+    note_numbers_by_parent: dict[str, set[str]] = {}
+    records_directory = (
+        top_level_roles["records"][0][1] if contract_version == 2 else None
+    )
     for index, item in enumerate(notes):
         if not isinstance(item, dict):
             raise ContractError(f"notes[{index}] must be an object")
         require_keys(item, ("path", "content_file"), label=f"notes[{index}]")
         note_path = validate_vault_path(item["path"], label=f"notes[{index}].path")
         ensure_no_placeholders(note_path, label=f"notes[{index}].path")
-        ensure_descendant(note_path, overview_directory, label=f"notes[{index}].path")
+        note_parent = PurePosixPath(note_path).parent.as_posix()
+        allowed_note_parents = {overview_directory}
+        if records_directory:
+            allowed_note_parents.add(records_directory)
+        if note_parent not in allowed_note_parents:
+            raise ContractError(
+                f"notes[{index}].path must be in the overview or learning-records directory"
+            )
         if PurePosixPath(note_path).parent.as_posix() not in directory_paths:
             raise ContractError(f"notes[{index}] parent directory is not declared")
         filename = PurePosixPath(note_path).name
         match = NUMBERED_NOTE_RE.fullmatch(filename)
         if not match:
             raise ContractError(f"Markdown note must use §01-§99 prefix: {filename}")
-        if match.group(1) in note_numbers:
-            raise ContractError(f"duplicate overview note number {match.group(1)}")
-        note_numbers.add(match.group(1))
+        parent_numbers = note_numbers_by_parent.setdefault(note_parent, set())
+        if match.group(1) in parent_numbers:
+            raise ContractError(
+                f"duplicate note number {match.group(1)} under {note_parent}"
+            )
+        parent_numbers.add(match.group(1))
         if note_path in seen_paths:
             raise ContractError(f"duplicate target path {note_path}")
         seen_paths.add(note_path)
@@ -634,40 +1023,52 @@ def load_scaffold_spec(path: str, *, actual_vault_path: str | None = None) -> di
             for line in frontmatter_lines
             if line and not line[0].isspace() and ":" in line
         }
-        for required_property in (
-            "title",
-            "aliases",
-            "tags",
-            "date",
-            "updated",
-            "status",
-            "category",
-            "note_type",
-            "difficulty",
-            "roadmap_root",
-            "roadmap_topic",
-            "learning_goal",
-            "knowledge_points_total",
-            "knowledge_points_covered",
-            "knowledge_points_pending",
-            "stage_title",
-            "stage_order",
-            "lesson_order",
-            "learning_status",
-            "mastery_score",
-            "hard_prerequisites",
-            "soft_prerequisites",
-            "blocked_by",
-            "mastery_evidence",
-            "assessment_type",
-            "assessment_at",
-            "last_reviewed",
-            "next_review",
-            "review_count",
-            "verified_at",
-            "version_scope",
-            "sources",
-        ):
+        common_properties = {
+            "title", "aliases", "tags", "date", "updated", "status", "category",
+            "roadmap_root", "roadmap_topic", "stage_title", "stage_order",
+            "lesson_order", "verified_at", "version_scope", "sources",
+        }
+        if contract_version == 1:
+            required_properties = common_properties | {
+                "note_type", "difficulty", "learning_goal", "knowledge_points_total",
+                "knowledge_points_covered", "knowledge_points_pending", "learning_status",
+                "mastery_score", "hard_prerequisites", "soft_prerequisites", "blocked_by",
+                "mastery_evidence", "assessment_type", "assessment_at", "last_reviewed",
+                "next_review", "review_count",
+            }
+        else:
+            required_properties = common_properties | {"record_type", "learning_goal"}
+            values = frontmatter_top_level_raw(
+                frontmatter_lines, label=f"notes[{index}] content"
+            )
+            record_type = frontmatter_scalar(values.get("record_type"))
+            if record_type not in RECORD_TYPES:
+                raise ContractError(f"notes[{index}] has invalid record_type: {record_type}")
+            if record_type == "curriculum-map":
+                required_properties |= {
+                    "roadmap_status", "version_baseline", "source_checked_at",
+                    "upstream_status",
+                }
+            elif record_type == "knowledge-note":
+                required_properties |= {
+                    "document_type", "difficulty", "unit_id", "learning_outcome",
+                    "knowledge_ownership", "hard_prerequisites", "soft_prerequisites",
+                    "blocked_by", "assessment_method", "evidence_note", "coverage_status",
+                    "content_audit_at", "content_audit_note",
+                }
+                document_type = frontmatter_scalar(values.get("document_type"))
+                if document_type not in DOCUMENT_TYPES:
+                    raise ContractError(
+                        f"notes[{index}] has invalid document_type: {document_type}"
+                    )
+            else:
+                required_properties |= {
+                    "unit_id", "content_note", "learning_status", "knowledge_points_total",
+                    "knowledge_points_covered", "knowledge_points_pending", "mastery_score",
+                    "blocked_by", "mastery_evidence", "assessment_type", "assessment_at",
+                    "last_reviewed", "next_review", "review_count",
+                }
+        for required_property in sorted(required_properties):
             if required_property not in frontmatter_keys:
                 raise ContractError(
                     f"notes[{index}] content missing property {required_property}"
@@ -677,7 +1078,7 @@ def load_scaffold_spec(path: str, *, actual_vault_path: str | None = None) -> di
             f"roadmap_root: {json.dumps(root, ensure_ascii=False)}",
             f"learning_goal: {json.dumps(learning_goal, ensure_ascii=False)}",
             f"version_scope: {json.dumps(version_scope, ensure_ascii=False)}",
-            f"stage_title: {json.dumps(PurePosixPath(overview_directory).name, ensure_ascii=False)}",
+            f"stage_title: {json.dumps(PurePosixPath(note_parent).name, ensure_ascii=False)}",
             f"  - {json.dumps('学习路线/' + topic['tag'], ensure_ascii=False)}",
         )
         content_lines = set(frontmatter_lines)
@@ -690,53 +1091,108 @@ def load_scaffold_spec(path: str, *, actual_vault_path: str | None = None) -> di
             raise ContractError(
                 f"notes[{index}] content missing canonical roadmap_kind: repository"
             )
-        required_initial_lines = {
-            "status: 待核验",
-            "knowledge_points_total: 0",
-            "knowledge_points_covered: 0",
-            "knowledge_points_pending: 0",
-            "mastery_score: 0",
-            "mastery_evidence: []",
-            "assessment_type:",
-            "assessment_at:",
-            "last_reviewed:",
-            "next_review:",
-            "review_count: 0",
-        }
+        if contract_version == 1:
+            required_initial_lines = {
+                "status: 待核验", "knowledge_points_total: 0",
+                "knowledge_points_covered: 0", "knowledge_points_pending: 0",
+                "mastery_score: 0", "mastery_evidence: []", "assessment_type:",
+                "assessment_at:", "last_reviewed:", "next_review:", "review_count: 0",
+            }
+        elif record_type == "learning-evidence":
+            required_initial_lines = {
+                "status: 草稿", "knowledge_points_total: 0",
+                "knowledge_points_covered: 0", "knowledge_points_pending: 0",
+                "mastery_score: 0", "mastery_evidence: []", "assessment_type:",
+                "assessment_at:", "last_reviewed:", "next_review:", "review_count: 0",
+            }
+        else:
+            required_initial_lines = {"status: 待核验"}
         missing_initial = sorted(required_initial_lines - content_lines)
         if missing_initial:
             raise ContractError(
                 "initial scaffold note must use an unmastered publication state: "
                 f"{missing_initial[0]}"
             )
-        try:
-            knowledge_total = int(frontmatter_top_level_raw(frontmatter_lines, label=f"notes[{index}] content").get("knowledge_points_total") or "")
-            knowledge_covered = int(frontmatter_top_level_raw(frontmatter_lines, label=f"notes[{index}] content").get("knowledge_points_covered") or "")
-            knowledge_pending = int(frontmatter_top_level_raw(frontmatter_lines, label=f"notes[{index}] content").get("knowledge_points_pending") or "")
-        except ValueError as error:
-            raise ContractError(f"notes[{index}] knowledge point counts must be non-negative integers") from error
-        if min(knowledge_total, knowledge_covered, knowledge_pending) < 0 or knowledge_covered + knowledge_pending != knowledge_total:
-            raise ContractError(f"notes[{index}] knowledge point counts must satisfy covered + pending = total")
+        if contract_version == 2:
+            assert curriculum_plan is not None
+            values = frontmatter_top_level_raw(
+                frontmatter_lines, label=f"notes[{index}] content"
+            )
+            if record_type == "knowledge-note":
+                validate_knowledge_note_curriculum_binding(
+                    note_path=note_path,
+                    root=root,
+                    frontmatter_lines=frontmatter_lines,
+                    frontmatter_values=values,
+                    curriculum_plan=curriculum_plan,
+                    label=f"notes[{index}] knowledge note",
+                )
+            elif record_type == "learning-evidence":
+                unit_id = frontmatter_scalar(values.get("unit_id")) or ""
+                curriculum_unit_by_id(curriculum_plan, unit_id)
+                if note_parent != records_directory:
+                    raise ContractError(
+                        f"notes[{index}] learning record must be inside {records_directory}"
+                    )
+        if contract_version == 1 or record_type == "learning-evidence":
+            values = frontmatter_top_level_raw(
+                frontmatter_lines, label=f"notes[{index}] content"
+            )
+            try:
+                knowledge_total = int(values.get("knowledge_points_total") or "")
+                knowledge_covered = int(values.get("knowledge_points_covered") or "")
+                knowledge_pending = int(values.get("knowledge_points_pending") or "")
+            except ValueError as error:
+                raise ContractError(
+                    f"notes[{index}] knowledge point counts must be non-negative integers"
+                ) from error
+            if (
+                min(knowledge_total, knowledge_covered, knowledge_pending) < 0
+                or knowledge_covered + knowledge_pending != knowledge_total
+            ):
+                raise ContractError(
+                    f"notes[{index}] knowledge point counts must satisfy covered + pending = total"
+                )
         normalized_notes.append({"path": note_path, "content": content})
-    ordered_note_numbers = sorted(int(number) for number in note_numbers)
-    if ordered_note_numbers[0] != 1:
-        raise ContractError("overview note numbering must start at §01")
-    if ordered_note_numbers != list(range(1, max(ordered_note_numbers) + 1)):
-        raise ContractError("overview note numbering must be contiguous from §01")
+    for parent, numbers in note_numbers_by_parent.items():
+        ordered_note_numbers = sorted(int(number) for number in numbers)
+        if ordered_note_numbers[0] != 1:
+            raise ContractError(f"note numbering under {parent} must start at §01")
+        if ordered_note_numbers != list(range(1, max(ordered_note_numbers) + 1)):
+            raise ContractError(f"note numbering under {parent} must be contiguous from §01")
     note_paths = {item["path"] for item in normalized_notes}
-    required_overview_notes = {
-        f"{overview_directory}/§01-前置准备.md",
-        f"{overview_directory}/§02-{topic['path_segment']}概述.md",
-    }
+    if contract_version == 1:
+        required_overview_notes = {
+            f"{overview_directory}/§01-前置准备.md",
+            f"{overview_directory}/§02-{topic['path_segment']}概述.md",
+        }
+        anchor_path = f"{overview_directory}/§01-前置准备.md"
+    else:
+        assert records_directory is not None
+        required_overview_notes = {
+            f"{overview_directory}/§01-学习路线图.md",
+            f"{overview_directory}/§02-前置准备.md",
+            f"{overview_directory}/§03-{topic['path_segment']}概述.md",
+            f"{records_directory}/§01-前置准备-学习记录.md",
+            f"{records_directory}/§02-{topic['path_segment']}概述-学习记录.md",
+        }
+        anchor_path = f"{overview_directory}/§01-学习路线图.md"
     missing_overview_notes = sorted(required_overview_notes - note_paths)
     if missing_overview_notes:
         raise ContractError(
             f"required overview notes are missing: {', '.join(missing_overview_notes)}"
         )
-    expected_learning_states = {
-        f"{overview_directory}/§01-前置准备.md": "学习中",
-        f"{overview_directory}/§02-{topic['path_segment']}概述.md": "未开始",
-    }
+    expected_learning_states = (
+        {
+            f"{overview_directory}/§01-前置准备.md": "学习中",
+            f"{overview_directory}/§02-{topic['path_segment']}概述.md": "未开始",
+        }
+        if contract_version == 1
+        else {
+            f"{records_directory}/§01-前置准备-学习记录.md": "学习中",
+            f"{records_directory}/§02-{topic['path_segment']}概述-学习记录.md": "未开始",
+        }
+    )
     for note in normalized_notes:
         expected_state = expected_learning_states.get(note["path"])
         note_frontmatter = set(
@@ -746,13 +1202,86 @@ def load_scaffold_spec(path: str, *, actual_vault_path: str | None = None) -> di
             raise ContractError(
                 f"{note['path']} must start with learning_status: {expected_state}"
             )
-    anchor_path = f"{overview_directory}/§01-前置准备.md"
     anchor = next(note for note in normalized_notes if note["path"] == anchor_path)
     anchor_frontmatter = set(
         markdown_frontmatter_lines(anchor["content"], label="topic anchor content")
     )
     if "roadmap_status: 进行中" not in anchor_frontmatter:
         raise ContractError("topic anchor must start with roadmap_status: 进行中")
+    if contract_version == 2:
+        if "record_type: curriculum-map" not in anchor_frontmatter:
+            raise ContractError("three-layer topic anchor must be a curriculum-map")
+        assert curriculum_plan is not None
+        embedded_curriculum = normalize_curriculum_plan(
+            extract_curriculum_contract(anchor["content"], label="curriculum map"),
+            topic_display=topic["display"],
+            learning_goal=learning_goal,
+            declared_stages={unit["stage"] for unit in curriculum_plan["units"]},
+        )
+        if embedded_curriculum != curriculum_plan:
+            raise ContractError(
+                "curriculum map machine-readable contract does not match curriculum_plan_file"
+            )
+        validate_rendered_curriculum(
+            anchor["content"], curriculum_plan, label="curriculum map"
+        )
+        anchor_values = frontmatter_top_level_raw(
+            markdown_frontmatter_lines(anchor["content"], label="curriculum map"),
+            label="curriculum map",
+        )
+        upstream_status = frontmatter_scalar(anchor_values.get("upstream_status"))
+        allowed_upstream_states = (
+            REPOSITORY_UPSTREAM_STATES
+            if roadmap_kind == "repository"
+            else {"unchanged", "changed", "unknown"}
+        )
+        if upstream_status not in allowed_upstream_states:
+            raise ContractError(
+                f"curriculum map has invalid upstream_status: {upstream_status}"
+            )
+        for unit in curriculum_plan["units"]:
+            for marker in (
+                unit["unit_id"], unit["title"], unit["note_path"], unit["document_type"]
+            ):
+                if marker not in anchor["content"]:
+                    raise ContractError(
+                        f"curriculum map does not render planned unit marker: {marker}"
+                    )
+        knowledge_notes: dict[str, dict[str, str]] = {}
+        evidence_notes: dict[str, dict[str, str]] = {}
+        for note in normalized_notes:
+            lines = markdown_frontmatter_lines(note["content"], label=note["path"])
+            values = frontmatter_top_level_raw(lines, label=note["path"])
+            note_record_type = frontmatter_scalar(values.get("record_type"))
+            unit_id = frontmatter_scalar(values.get("unit_id"))
+            if note_record_type == "knowledge-note" and unit_id:
+                knowledge_notes[unit_id] = note
+            elif note_record_type == "learning-evidence" and unit_id:
+                evidence_notes[unit_id] = note
+        if set(knowledge_notes) != set(evidence_notes):
+            raise ContractError(
+                "initial knowledge notes and learning records must have one-to-one unit_id pairs"
+            )
+        for unit_id, knowledge_note in knowledge_notes.items():
+            evidence_note = evidence_notes[unit_id]
+            knowledge_values = frontmatter_top_level_raw(
+                markdown_frontmatter_lines(knowledge_note["content"], label=knowledge_note["path"]),
+                label=knowledge_note["path"],
+            )
+            evidence_values = frontmatter_top_level_raw(
+                markdown_frontmatter_lines(evidence_note["content"], label=evidence_note["path"]),
+                label=evidence_note["path"],
+            )
+            expected_evidence_links = {
+                f"[[{evidence_note['path']}]]", f"[[{evidence_note['path'][:-3]}]]"
+            }
+            expected_content_links = {
+                f"[[{knowledge_note['path']}]]", f"[[{knowledge_note['path'][:-3]}]]"
+            }
+            if frontmatter_scalar(knowledge_values.get("evidence_note")) not in expected_evidence_links:
+                raise ContractError(f"knowledge note has wrong evidence_note link: {unit_id}")
+            if frontmatter_scalar(evidence_values.get("content_note")) not in expected_content_links:
+                raise ContractError(f"learning record has wrong content_note link: {unit_id}")
     if roadmap_kind == "repository":
         assert repository is not None
         repository_anchor_lines = {
@@ -789,6 +1318,8 @@ def load_scaffold_spec(path: str, *, actual_vault_path: str | None = None) -> di
         "vault_path": vault_path,
         "topic": topic,
         "roadmap_kind": roadmap_kind,
+        "contract_version": contract_version,
+        "curriculum_plan": curriculum_plan,
         "repository": repository,
         "learning_goal": learning_goal,
         "version_scope": version_scope,
@@ -834,6 +1365,9 @@ def load_write_note_plan(path: str, *, actual_vault_path: str | None = None) -> 
         label="note plan",
     )
     topic = normalize_topic_metadata(raw)
+    content_contract = raw.get("content_contract", "legacy")
+    if content_contract not in {"legacy", "three-layer"}:
+        raise ContractError("note plan content_contract must be legacy or three-layer")
     roadmap_kind = raw.get("roadmap_kind", "topic")
     if roadmap_kind not in {"topic", "repository"}:
         raise ContractError("note plan roadmap_kind must be topic or repository")
@@ -849,6 +1383,63 @@ def load_write_note_plan(path: str, *, actual_vault_path: str | None = None) -> 
             raise ContractError(f"note plan {key} contains a control character")
         ensure_no_placeholders(value, label=f"note plan {key}")
     root = validate_vault_path(raw["root"], label="note plan root")
+    curriculum_plan: dict[str, Any] | None = None
+    records_directory: str | None = None
+    if content_contract == "three-layer":
+        require_keys(
+            raw,
+            ("curriculum_plan_file", "records_directory"),
+            label="three-layer note plan",
+        )
+        curriculum_content = read_external_content(
+            raw["curriculum_plan_file"],
+            label="note plan curriculum_plan_file",
+            vault_path=vault_path,
+            content_root=content_root,
+            content_root_label="note plan directory",
+        )
+        try:
+            raw_curriculum = json.loads(curriculum_content)
+        except json.JSONDecodeError as error:
+            raise ContractError(f"note plan curriculum is invalid JSON: {error}") from error
+        if not isinstance(raw_curriculum, dict):
+            raise ContractError("note plan curriculum must be a JSON object")
+        raw_units = raw_curriculum.get("units")
+        if not isinstance(raw_units, list):
+            raise ContractError("note plan curriculum units must be an array")
+        declared_stages = {
+            unit.get("stage")
+            for unit in raw_units
+            if isinstance(unit, dict) and isinstance(unit.get("stage"), str)
+        }
+        curriculum_plan = normalize_curriculum_plan(
+            raw_curriculum,
+            topic_display=topic["display"],
+            learning_goal=learning_goal,
+            declared_stages=declared_stages,
+        )
+        records_directory = validate_vault_path(
+            raw["records_directory"], label="note plan records_directory"
+        )
+        ensure_descendant(
+            records_directory, root, label="note plan records_directory"
+        )
+        records_relative = PurePosixPath(records_directory).relative_to(
+            PurePosixPath(root)
+        )
+        if (
+            len(records_relative.parts) != 1
+            or not NUMBERED_DIRECTORY_RE.fullmatch(records_relative.parts[0])
+            or not records_relative.parts[0].endswith("学习记录")
+            or records_relative.parts[0] == "99-assets"
+        ):
+            raise ContractError(
+                "note plan records_directory must be a top-level NN-学习记录 directory"
+            )
+        if roadmap_kind == "repository" and records_relative.parts[0] != "10-学习记录":
+            raise ContractError(
+                "repository note plan records_directory must be 10-学习记录"
+            )
     note_path = validate_vault_path(raw["path"], label="note plan path")
     ensure_descendant(note_path, root, label="note plan path")
     relative = PurePosixPath(note_path).relative_to(PurePosixPath(root))
@@ -890,7 +1481,7 @@ def load_write_note_plan(path: str, *, actual_vault_path: str | None = None) -> 
         for line in frontmatter_lines
         if line and not line[0].isspace() and ":" in line
     }
-    required_properties = {
+    legacy_required_properties = {
         "title",
         "aliases",
         "tags",
@@ -924,6 +1515,41 @@ def load_write_note_plan(path: str, *, actual_vault_path: str | None = None) -> 
         "version_scope",
         "sources",
     }
+    common_properties = {
+        "title", "aliases", "tags", "date", "updated", "status", "category",
+        "record_type", "roadmap_root", "roadmap_topic", "learning_goal",
+        "stage_title", "stage_order", "lesson_order", "verified_at",
+        "version_scope", "sources",
+    }
+    if content_contract == "legacy":
+        required_properties = legacy_required_properties
+        record_type = "legacy"
+    else:
+        record_type = frontmatter_scalar(frontmatter_values.get("record_type")) or ""
+        if record_type not in RECORD_TYPES:
+            raise ContractError(f"note plan has invalid record_type: {record_type}")
+        required_properties = set(common_properties)
+        if record_type == "curriculum-map":
+            required_properties |= {
+                "roadmap_status", "version_baseline", "source_checked_at", "upstream_status",
+            }
+        elif record_type == "knowledge-note":
+            required_properties |= {
+                "document_type", "difficulty", "unit_id", "learning_outcome",
+                "knowledge_ownership", "hard_prerequisites", "soft_prerequisites",
+                "blocked_by", "assessment_method", "evidence_note", "coverage_status",
+                "content_audit_at", "content_audit_note",
+            }
+            document_type = frontmatter_scalar(frontmatter_values.get("document_type"))
+            if document_type not in DOCUMENT_TYPES:
+                raise ContractError(f"note plan has invalid document_type: {document_type}")
+        else:
+            required_properties |= {
+                "unit_id", "content_note", "learning_status", "knowledge_points_total",
+                "knowledge_points_covered", "knowledge_points_pending", "mastery_score",
+                "blocked_by", "mastery_evidence", "assessment_type", "assessment_at",
+                "last_reviewed", "next_review", "review_count",
+            }
     missing_properties = sorted(required_properties - frontmatter_keys)
     if missing_properties:
         raise ContractError(
@@ -947,7 +1573,7 @@ def load_write_note_plan(path: str, *, actual_vault_path: str | None = None) -> 
     if roadmap_kind == "repository" and "roadmap_kind: repository" not in frontmatter_lines:
         raise ContractError("repository note must preserve roadmap_kind: repository")
     frontmatter_set = set(frontmatter_lines)
-    if mode == "create":
+    if mode == "create" and content_contract == "legacy":
         required_initial_lines = {
             "status: 待核验",
             "learning_status: 学习中",
@@ -967,36 +1593,116 @@ def load_write_note_plan(path: str, *, actual_vault_path: str | None = None) -> 
             )
     status_value = frontmatter_scalar(frontmatter_values.get("status"))
     learning_status_value = frontmatter_scalar(frontmatter_values.get("learning_status"))
-    try:
-        mastery_score = int(frontmatter_values.get("mastery_score") or "")
-    except ValueError as error:
-        raise ContractError("mastery_score must be an integer between 0 and 100") from error
-    if mastery_score < 0 or mastery_score > 100:
-        raise ContractError("mastery_score must be an integer between 0 and 100")
-    try:
-        knowledge_total = int(frontmatter_values.get("knowledge_points_total") or "")
-        knowledge_covered = int(frontmatter_values.get("knowledge_points_covered") or "")
-        knowledge_pending = int(frontmatter_values.get("knowledge_points_pending") or "")
-    except ValueError as error:
-        raise ContractError("knowledge point counts must be non-negative integers") from error
-    if min(knowledge_total, knowledge_covered, knowledge_pending) < 0:
-        raise ContractError("knowledge point counts must be non-negative integers")
-    if knowledge_covered + knowledge_pending != knowledge_total:
-        raise ContractError("knowledge point counts must satisfy covered + pending = total")
-    try:
-        review_count = int(frontmatter_values.get("review_count") or "")
-    except ValueError as error:
-        raise ContractError("review_count must be a non-negative integer") from error
-    if review_count < 0:
-        raise ContractError("review_count must be a non-negative integer")
-    if status_value == "已发布":
+    if content_contract == "legacy" or record_type == "learning-evidence":
+        try:
+            mastery_score = int(frontmatter_values.get("mastery_score") or "")
+        except ValueError as error:
+            raise ContractError("mastery_score must be an integer between 0 and 100") from error
+        if mastery_score < 0 or mastery_score > 100:
+            raise ContractError("mastery_score must be an integer between 0 and 100")
+        try:
+            knowledge_total = int(frontmatter_values.get("knowledge_points_total") or "")
+            knowledge_covered = int(frontmatter_values.get("knowledge_points_covered") or "")
+            knowledge_pending = int(frontmatter_values.get("knowledge_points_pending") or "")
+        except ValueError as error:
+            raise ContractError("knowledge point counts must be non-negative integers") from error
+        if min(knowledge_total, knowledge_covered, knowledge_pending) < 0:
+            raise ContractError("knowledge point counts must be non-negative integers")
+        if knowledge_covered + knowledge_pending != knowledge_total:
+            raise ContractError("knowledge point counts must satisfy covered + pending = total")
+        try:
+            review_count = int(frontmatter_values.get("review_count") or "")
+        except ValueError as error:
+            raise ContractError("review_count must be a non-negative integer") from error
+        if review_count < 0:
+            raise ContractError("review_count must be a non-negative integer")
+    if mode == "create" and content_contract == "three-layer":
+        if record_type == "knowledge-note" and status_value != "待核验":
+            raise ContractError("new knowledge note must start with status: 待核验")
+        if record_type == "learning-evidence":
+            required_initial_lines = {
+                "status: 草稿", "learning_status: 学习中", "mastery_score: 0",
+                "review_count: 0", "mastery_evidence: []", "assessment_type:",
+                "assessment_at:", "last_reviewed:", "next_review:",
+            }
+            missing_initial = sorted(required_initial_lines - frontmatter_set)
+            if missing_initial:
+                raise ContractError(
+                    "new learning record requires an unmastered initial state: "
+                    f"{missing_initial[0]}"
+                )
+    if content_contract == "three-layer":
+        assert curriculum_plan is not None
+        assert records_directory is not None
+        if record_type == "curriculum-map":
+            expected_overview = (
+                "01-项目概述"
+                if roadmap_kind == "repository"
+                else f"01-{topic['path_segment']}概述"
+            )
+            expected_map_path = f"{root}/{expected_overview}/§01-学习路线图.md"
+            if note_path != expected_map_path:
+                raise ContractError(
+                    "curriculum-map must use the canonical §01-学习路线图.md path"
+                )
+            embedded_curriculum = normalize_curriculum_plan(
+                extract_curriculum_contract(content, label="curriculum-map note"),
+                topic_display=topic["display"],
+                learning_goal=learning_goal,
+                declared_stages={unit["stage"] for unit in curriculum_plan["units"]},
+            )
+            if embedded_curriculum != curriculum_plan:
+                raise ContractError(
+                    "curriculum-map contract does not match note plan curriculum"
+                )
+            validate_rendered_curriculum(
+                content, curriculum_plan, label="curriculum-map note"
+            )
+            upstream_status = frontmatter_scalar(
+                frontmatter_values.get("upstream_status")
+            )
+            allowed_upstream_states = (
+                REPOSITORY_UPSTREAM_STATES
+                if roadmap_kind == "repository"
+                else {"unchanged", "changed", "unknown"}
+            )
+            if upstream_status not in allowed_upstream_states:
+                raise ContractError(
+                    f"curriculum-map has invalid upstream_status: {upstream_status}"
+                )
+        elif record_type == "knowledge-note":
+            validate_knowledge_note_curriculum_binding(
+                note_path=note_path,
+                root=root,
+                frontmatter_lines=frontmatter_lines,
+                frontmatter_values=frontmatter_values,
+                curriculum_plan=curriculum_plan,
+                label="note plan knowledge note",
+            )
+            if PurePosixPath(note_path).parent.as_posix() == records_directory:
+                raise ContractError("knowledge-note cannot be written into records_directory")
+        else:
+            unit_id = frontmatter_scalar(frontmatter_values.get("unit_id")) or ""
+            unit = curriculum_unit_by_id(curriculum_plan, unit_id)
+            if PurePosixPath(note_path).parent.as_posix() != records_directory:
+                raise ContractError("learning-evidence must be written into records_directory")
+            expected_content_path = f"{root}/{unit['note_path']}"
+            expected_content_links = {
+                f"[[{expected_content_path}]]",
+                f"[[{expected_content_path[:-3]}]]",
+            }
+            if frontmatter_scalar(frontmatter_values.get("content_note")) not in expected_content_links:
+                raise ContractError(
+                    f"learning-evidence content_note does not match curriculum unit {unit_id}"
+                )
+    if status_value == "已发布" and record_type != "learning-evidence":
         if not frontmatter_list_has_item(frontmatter_lines, "sources"):
             raise ContractError("已发布 requires at least one meaningful source")
         require_iso_date(
             frontmatter_values.get("verified_at"), label="已发布 verified_at"
         )
     if mode == "replace" and learning_status_value == "已掌握":
-        if status_value != "已发布":
+        if content_contract == "legacy" and status_value != "已发布":
             raise ContractError("已掌握 requires published content status: 已发布")
         if not frontmatter_list_has_item(frontmatter_lines, "mastery_evidence"):
             raise ContractError("已掌握 requires non-empty mastery evidence")
@@ -1140,6 +1846,9 @@ def load_write_note_plan(path: str, *, actual_vault_path: str | None = None) -> 
         "vault_path": vault_path,
         "topic": topic,
         "roadmap_kind": roadmap_kind,
+        "content_contract": content_contract,
+        "curriculum_plan": curriculum_plan,
+        "records_directory": records_directory,
         "repository": repository,
         "learning_goal": learning_goal,
         "version_scope": version_scope,
@@ -1748,9 +2457,353 @@ EVAL_DRIVER = r'''
       const parsed = new Date(`${value}T00:00:00Z`);
       return !Number.isNaN(parsed.getTime()) && parsed.toISOString().slice(0, 10) === value;
     };
-    const validateScaffoldDocuments = () => {
+    const parseMarkdownFrontmatter = (content, path) => {
+      const match = content.match(/^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/);
+      if (!match) throw new Error(`note frontmatter delimiters are invalid: ${path}`);
+      return parseYamlObject(match[1], `note frontmatter ${path}`);
+    };
+    const parseCurriculumContract = (source, label) => {
+      const pattern = /<!-- learn-topic-curriculum:start -->\s*```json\s*\n([\s\S]*?)\n```\s*<!-- learn-topic-curriculum:end -->/g;
+      const matches = [...source.matchAll(pattern)];
+      if (matches.length !== 1) {
+        throw new Error(`${label} must contain exactly one machine-readable curriculum contract`);
+      }
+      let parsed;
+      try {
+        parsed = JSON.parse(matches[0][1]);
+      } catch (error) {
+        throw new Error(`${label} curriculum contract is invalid JSON: ${error.message}`);
+      }
+      if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+        throw new Error(`${label} curriculum contract must be a JSON object`);
+      }
+      return parsed;
+    };
+    const curriculumUnit = (unitId) => {
+      const units = payload.curriculum_plan?.units;
+      if (!Array.isArray(units)) throw new Error("three-layer payload is missing curriculum_plan.units");
+      const matches = units.filter((unit) => unit?.unit_id === unitId);
+      if (matches.length !== 1) throw new Error(`unit_id is not declared exactly once: ${unitId}`);
+      return matches[0];
+    };
+    const sameArray = (actual, expected) => Array.isArray(actual)
+      && Array.isArray(expected)
+      && actual.length === expected.length
+      && actual.every((value, index) => value === expected[index]);
+    const canonicalJson = (value) => {
+      if (Array.isArray(value)) return value.map((item) => canonicalJson(item));
+      if (value && typeof value === "object") {
+        return Object.fromEntries(
+          Object.keys(value).sort().map((key) => [key, canonicalJson(value[key])]),
+        );
+      }
+      return value;
+    };
+    const sameJson = (actual, expected) => JSON.stringify(canonicalJson(actual))
+      === JSON.stringify(canonicalJson(expected));
+    const markdownTableCell = (value) => String(value).replaceAll("|", "\\|");
+    const markdownTableRows = (source, heading, label) => {
+      const lines = source.split(/\r?\n/);
+      const headingIndexes = lines
+        .map((line, index) => line.trim() === `## ${heading}` ? index : -1)
+        .filter((index) => index >= 0);
+      if (headingIndexes.length !== 1) {
+        throw new Error(`${label} must contain exactly one ${heading} section`);
+      }
+      const rows = [];
+      for (let index = headingIndexes[0] + 1; index < lines.length; index += 1) {
+        const line = lines[index].trim();
+        if (line.startsWith("## ")) break;
+        if (!line.startsWith("|") || !line.endsWith("|")) continue;
+        const cells = [];
+        let cell = "";
+        const body = line.slice(1, -1);
+        for (let offset = 0; offset < body.length; offset += 1) {
+          const character = body[offset];
+          if (character === "|" && body[offset - 1] !== "\\") {
+            cells.push(cell.trim());
+            cell = "";
+          } else {
+            cell += character;
+          }
+        }
+        cells.push(cell.trim());
+        rows.push(cells);
+      }
+      if (rows.length < 2
+        || rows[1].length === 0
+        || !rows[1].every((cellValue) => /^:?-{3,}:?$/.test(cellValue))) {
+        throw new Error(`${label} ${heading} must contain a valid Markdown table`);
+      }
+      return rows.slice(2);
+    };
+    const validateRenderedCurriculum = (source, curriculum, label) => {
+      const expectedUnitRows = [];
+      const expectedOwnershipRows = [];
+      for (const unit of curriculum.units || []) {
+        const prerequisites = unit.prerequisites.length > 0
+          ? unit.prerequisites.map((item) => `\`${markdownTableCell(item)}\``).join("、")
+          : "无";
+        expectedUnitRows.push([
+          `\`${markdownTableCell(unit.unit_id)}\``,
+          `\`${markdownTableCell(unit.note_path)}\``,
+          markdownTableCell(unit.document_type),
+          markdownTableCell(unit.learning_outcome),
+          prerequisites,
+          markdownTableCell(unit.assessment),
+        ]);
+        for (const point of unit.knowledge_ownership || []) {
+          expectedOwnershipRows.push([
+            `\`${markdownTableCell(point)}\``, `\`${markdownTableCell(unit.unit_id)}\``,
+          ]);
+        }
+      }
+      const actualUnitRows = markdownTableRows(source, "单元目录", label);
+      if (actualUnitRows.length !== expectedUnitRows.length
+        || actualUnitRows.some((row) => row.length !== 7 || !isMeaningfulString(row[6]))
+        || !sameJson(actualUnitRows.map((row) => row.slice(0, 6)), expectedUnitRows)) {
+        throw new Error(`${label} visible unit rows do not exactly match curriculum`);
+      }
+      const actualOwnershipRows = markdownTableRows(source, "知识点唯一归属", label);
+      if (actualOwnershipRows.length !== expectedOwnershipRows.length
+        || actualOwnershipRows.some((row) => row.length !== 3 || !isMeaningfulString(row[2]))
+        || !sameJson(actualOwnershipRows.map((row) => row.slice(0, 2)), expectedOwnershipRows)) {
+        throw new Error(`${label} visible ownership rows do not exactly match curriculum`);
+      }
+    };
+    const validateKnowledgeCurriculumBinding = (frontmatter, path) => {
+      const unit = curriculumUnit(frontmatter.unit_id);
+      const expectedPath = `${payload.root}/${unit.note_path}`;
+      if (path !== expectedPath) {
+        throw new Error(`knowledge note path does not match curriculum unit ${unit.unit_id}`);
+      }
+      const scalarChecks = [
+        ["document_type", unit.document_type],
+        ["learning_outcome", unit.learning_outcome],
+        ["assessment_method", unit.assessment],
+      ];
+      for (const [property, expected] of scalarChecks) {
+        if (frontmatter[property] !== expected) {
+          throw new Error(`knowledge note ${property} does not match curriculum unit ${unit.unit_id}`);
+        }
+      }
+      for (const [property, expected] of [
+        ["knowledge_ownership", unit.knowledge_ownership],
+        ["hard_prerequisites", unit.prerequisites],
+      ]) {
+        if (!sameArray(frontmatter[property], expected)) {
+          throw new Error(`knowledge note ${property} does not match curriculum unit ${unit.unit_id}`);
+        }
+      }
+      return unit;
+    };
+    const validateThreeLayerScaffoldDocuments = () => {
       const baseDocument = parseYamlObject(payload.base.content, "Base document");
-      const requiredViews = ["学习路线", "学习中", "阻塞", "待复习", "已掌握", "待核验"];
+      const requiredViews = [
+        "学习路线", "课程路线", "知识正文", "学习记录", "学习中",
+        "阻塞", "待复习", "已掌握", "待核验", "待补齐",
+      ];
+      if (!Array.isArray(baseDocument.views)) throw new Error("Base document views must be an array");
+      const viewNames = baseDocument.views.map((view) => view?.name);
+      for (const name of requiredViews) {
+        if (viewNames.filter((candidate) => candidate === name).length !== 1) {
+          throw new Error(`Base document must contain one required view: ${name}`);
+        }
+      }
+      if (new Set(viewNames).size !== viewNames.length) {
+        throw new Error("Base document view names must be unique");
+      }
+      const expectedRootFilter = `file.inFolder(${JSON.stringify(payload.root)})`;
+      const expectedFilters = ['file.ext == "md"', expectedRootFilter];
+      if (!Array.isArray(baseDocument.filters?.and)
+        || Object.keys(baseDocument.filters).length !== 1
+        || baseDocument.filters.and.length !== expectedFilters.length
+        || !expectedFilters.every((filter) => baseDocument.filters.and.includes(filter))) {
+        throw new Error("Base document root filter does not match the roadmap root");
+      }
+      for (const property of [
+        "note.record_type", "note.document_type", "note.unit_id", "note.content_note",
+        "note.evidence_note", "note.learning_status", "note.roadmap_status",
+      ]) {
+        if (!baseDocument.properties?.[property]) {
+          throw new Error(`Base document is missing required property: ${property}`);
+        }
+      }
+      const requiredFilters = {
+        "课程路线": ['record_type == "curriculum-map"'],
+        "知识正文": ['record_type == "knowledge-note"'],
+        "学习记录": ['record_type == "learning-evidence"'],
+        "学习中": ['record_type == "learning-evidence"', 'learning_status == "学习中"'],
+        "阻塞": ['record_type == "learning-evidence"', 'learning_status == "阻塞"'],
+        "已掌握": [
+          'record_type == "learning-evidence"',
+          'learning_status == "已掌握"',
+          'list(mastery_evidence).length > 0',
+        ],
+        "待核验": ['record_type == "knowledge-note"', 'status == "待核验"'],
+        "待补齐": ['record_type == "knowledge-note"', 'coverage_status == "部分覆盖"'],
+      };
+      for (const [name, expected] of Object.entries(requiredFilters)) {
+        const filters = baseDocument.views.find((view) => view?.name === name)?.filters?.and;
+        if (!sameArray(filters, expected)) {
+          throw new Error(`Base view has the wrong three-layer filters: ${name}`);
+        }
+      }
+      const reviewFilters = baseDocument.views.find((view) => view?.name === "待复习")?.filters?.and;
+      const reviewGroup = Array.isArray(reviewFilters)
+        ? reviewFilters.find((item) => item && typeof item === "object" && Array.isArray(item.or))
+        : null;
+      if (!Array.isArray(reviewFilters)
+        || reviewFilters.length !== 3
+        || reviewFilters[0] !== 'record_type == "learning-evidence"'
+        || reviewFilters[1] !== "formula.review_due == true"
+        || !reviewGroup
+        || !sameArray(
+          reviewGroup.or,
+          ['learning_status == "已掌握"', 'learning_status == "待复习"'],
+        )) {
+        throw new Error("Base view has the wrong three-layer filters: 待复习");
+      }
+      const requiredCommon = [
+        "title", "aliases", "tags", "date", "updated", "status", "category",
+        "record_type", "roadmap_topic", "roadmap_root", "learning_goal",
+        "stage_title", "stage_order", "lesson_order", "verified_at", "version_scope", "sources",
+      ];
+      const unitLinks = new Map();
+      let mapCount = 0;
+      let activeEvidenceCount = 0;
+      const recordsDirectory = payload.directories.find((item) => item?.role === "records")?.path;
+      if (!isMeaningfulString(recordsDirectory)) {
+        throw new Error("three-layer scaffold requires one records directory");
+      }
+      for (const note of payload.notes) {
+        const frontmatter = parseMarkdownFrontmatter(note.content, note.path);
+        for (const property of requiredCommon) {
+          if (!Object.prototype.hasOwnProperty.call(frontmatter, property)) {
+            throw new Error(`note frontmatter ${note.path} is missing property: ${property}`);
+          }
+        }
+        for (const property of ["aliases", "tags", "sources"]) {
+          if (!Array.isArray(frontmatter[property])) {
+            throw new Error(`note frontmatter ${note.path} property must be an array: ${property}`);
+          }
+        }
+        const relativePath = note.path.slice(payload.root.length + 1);
+        const stageDirectory = relativePath.split("/")[0];
+        const filename = relativePath.split("/").pop();
+        const lessonMatch = filename.match(/^§(\d{2})-/);
+        if (!lessonMatch) throw new Error(`note filename has no lesson order: ${note.path}`);
+        const canonicalChecks = [
+          ["roadmap_topic", payload.topic?.display], ["roadmap_root", payload.root],
+          ["learning_goal", payload.learning_goal], ["version_scope", payload.version_scope],
+          ["stage_title", stageDirectory], ["stage_order", Number(stageDirectory.slice(0, 2))],
+          ["lesson_order", Number(lessonMatch[1])],
+        ];
+        for (const [property, expected] of canonicalChecks) {
+          if (frontmatter[property] !== expected) {
+            throw new Error(`note frontmatter canonical value mismatch ${note.path}: ${property}`);
+          }
+        }
+        if (!frontmatter.tags.includes(`学习路线/${payload.topic?.tag}`)) {
+          throw new Error(`note frontmatter canonical tag mismatch: ${note.path}`);
+        }
+        if (frontmatter.record_type === "curriculum-map") {
+          mapCount += 1;
+          const expectedOverview = payload.roadmap_kind === "repository"
+            ? "01-项目概述" : `01-${payload.topic?.path_segment}概述`;
+          if (note.path !== `${payload.root}/${expectedOverview}/§01-学习路线图.md`) {
+            throw new Error(`curriculum map has a non-canonical path: ${note.path}`);
+          }
+          const embedded = parseCurriculumContract(note.content, `curriculum map ${note.path}`);
+          if (!sameJson(embedded, payload.curriculum_plan)) {
+            throw new Error(`curriculum map contract does not match curriculum_plan: ${note.path}`);
+          }
+          validateRenderedCurriculum(
+            note.content, payload.curriculum_plan, `curriculum map ${note.path}`,
+          );
+          const allowedUpstream = payload.roadmap_kind === "repository"
+            ? ["unchanged", "fixed-baseline", "changed", "blocked", "archived"]
+            : ["unchanged", "changed", "unknown"];
+          if (frontmatter.roadmap_status !== "进行中"
+            || !isMeaningfulString(frontmatter.version_baseline)
+            || !isIsoDate(frontmatter.source_checked_at)
+            || !allowedUpstream.includes(frontmatter.upstream_status)) {
+            throw new Error(`curriculum map has invalid baseline state: ${note.path}`);
+          }
+        } else if (frontmatter.record_type === "knowledge-note") {
+          for (const property of [
+            "document_type", "unit_id", "learning_outcome", "knowledge_ownership",
+            "assessment_method", "evidence_note", "coverage_status",
+          ]) {
+            if (!Object.prototype.hasOwnProperty.call(frontmatter, property)) {
+              throw new Error(`knowledge note is missing property ${property}: ${note.path}`);
+            }
+          }
+          if (!["教程", "原理解释", "操作指南", "参考资料"].includes(frontmatter.document_type)
+            || frontmatter.status !== "待核验" || !Array.isArray(frontmatter.knowledge_ownership)) {
+            throw new Error(`knowledge note has invalid initial state: ${note.path}`);
+          }
+          validateKnowledgeCurriculumBinding(frontmatter, note.path);
+          if (note.path.startsWith(`${recordsDirectory}/`)) {
+            throw new Error(`knowledge note cannot be inside records directory: ${note.path}`);
+          }
+          const links = unitLinks.get(frontmatter.unit_id) || {};
+          links.content = note.path;
+          links.evidenceLink = frontmatter.evidence_note;
+          unitLinks.set(frontmatter.unit_id, links);
+        } else if (frontmatter.record_type === "learning-evidence") {
+          for (const property of [
+            "unit_id", "content_note", "learning_status", "knowledge_points_total",
+            "knowledge_points_covered", "knowledge_points_pending", "mastery_score",
+            "mastery_evidence", "review_count",
+          ]) {
+            if (!Object.prototype.hasOwnProperty.call(frontmatter, property)) {
+              throw new Error(`learning record is missing property ${property}: ${note.path}`);
+            }
+          }
+          if (frontmatter.status !== "草稿" || !["学习中", "未开始"].includes(frontmatter.learning_status)
+            || frontmatter.mastery_score !== 0 || frontmatter.review_count !== 0
+            || !Array.isArray(frontmatter.mastery_evidence) || frontmatter.mastery_evidence.length !== 0) {
+            throw new Error(`learning record has invalid initial state: ${note.path}`);
+          }
+          const unit = curriculumUnit(frontmatter.unit_id);
+          if (!note.path.startsWith(`${recordsDirectory}/`)
+            || note.path.split("/").slice(0, -1).join("/") !== recordsDirectory) {
+            throw new Error(`learning record must be directly inside records directory: ${note.path}`);
+          }
+          const expectedContent = `${payload.root}/${unit.note_path}`.replace(/\.md$/, "");
+          if (!String(frontmatter.content_note).includes(expectedContent)) {
+            throw new Error(`learning record content_note does not match curriculum unit ${unit.unit_id}`);
+          }
+          if (frontmatter.learning_status === "学习中") activeEvidenceCount += 1;
+          const links = unitLinks.get(frontmatter.unit_id) || {};
+          links.evidence = note.path;
+          links.contentLink = frontmatter.content_note;
+          unitLinks.set(frontmatter.unit_id, links);
+        } else {
+          throw new Error(`note has invalid record_type: ${note.path}`);
+        }
+      }
+      if (mapCount !== 1 || activeEvidenceCount !== 1) {
+        throw new Error("initial scaffold requires one curriculum map and one active learning record");
+      }
+      for (const [unitId, links] of unitLinks.entries()) {
+        if (!links.content || !links.evidence
+          || !String(links.evidenceLink).includes(links.evidence.replace(/\.md$/, ""))
+          || !String(links.contentLink).includes(links.content.replace(/\.md$/, ""))) {
+          throw new Error(`unit must have bidirectional content/evidence links: ${unitId}`);
+        }
+      }
+    };
+    const validateScaffoldDocuments = () => {
+      if (payload.contract_version === 2) {
+        validateThreeLayerScaffoldDocuments();
+        return;
+      }
+      const baseDocument = parseYamlObject(payload.base.content, "Base document");
+      const requiredViews = payload.content_contract === "three-layer"
+        ? ["学习路线", "课程路线", "知识正文", "学习记录", "学习中", "阻塞", "待复习", "已掌握", "待核验", "待补齐"]
+        : ["学习路线", "学习中", "阻塞", "待复习", "已掌握", "待核验"];
       if (!Array.isArray(baseDocument.views)) {
         throw new Error("Base document views must be an array");
       }
@@ -1932,7 +2985,158 @@ EVAL_DRIVER = r'''
         }
       }
     };
+    const validateThreeLayerWriteNoteDocument = () => {
+      const frontmatter = parseMarkdownFrontmatter(payload.content, payload.path);
+      const requiredCommon = [
+        "title", "aliases", "tags", "date", "updated", "status", "category",
+        "record_type", "roadmap_topic", "roadmap_root", "learning_goal",
+        "stage_title", "stage_order", "lesson_order", "verified_at", "version_scope", "sources",
+      ];
+      for (const property of requiredCommon) {
+        if (!Object.prototype.hasOwnProperty.call(frontmatter, property)) {
+          throw new Error(`note frontmatter ${payload.path} is missing property: ${property}`);
+        }
+      }
+      for (const property of ["aliases", "tags", "sources"]) {
+        if (!Array.isArray(frontmatter[property])) {
+          throw new Error(`note frontmatter ${payload.path} property must be an array: ${property}`);
+        }
+      }
+      const relativePath = payload.path.slice(payload.root.length + 1);
+      const stageDirectory = relativePath.split("/")[0];
+      const filename = relativePath.split("/").pop();
+      const lessonMatch = filename.match(/^§(\d{2})-/);
+      if (!lessonMatch) throw new Error(`note filename has no lesson order: ${payload.path}`);
+      const canonicalChecks = [
+        ["roadmap_topic", payload.topic?.display], ["roadmap_root", payload.root],
+        ["learning_goal", payload.learning_goal], ["version_scope", payload.version_scope],
+        ["stage_title", stageDirectory], ["stage_order", Number(stageDirectory.slice(0, 2))],
+        ["lesson_order", Number(lessonMatch[1])],
+      ];
+      for (const [property, expected] of canonicalChecks) {
+        if (frontmatter[property] !== expected) {
+          throw new Error(`note frontmatter canonical value mismatch ${payload.path}: ${property}`);
+        }
+      }
+      if (!frontmatter.tags.includes(`学习路线/${payload.topic?.tag}`)) {
+        throw new Error(`note frontmatter canonical tag mismatch: ${payload.path}`);
+      }
+      const allowedContentStates = ["草稿", "待核验", "已发布", "已归档"];
+      if (!allowedContentStates.includes(frontmatter.status)) {
+        throw new Error(`note frontmatter has an invalid status: ${payload.path}`);
+      }
+      if (frontmatter.record_type === "curriculum-map") {
+        const allowedUpstream = payload.roadmap_kind === "repository"
+          ? ["unchanged", "fixed-baseline", "changed", "blocked", "archived"]
+          : ["unchanged", "changed", "unknown"];
+        if (!isMeaningfulString(frontmatter.version_baseline)
+          || !isIsoDate(frontmatter.source_checked_at)
+          || !allowedUpstream.includes(frontmatter.upstream_status)) {
+          throw new Error(`curriculum map has an invalid version baseline: ${payload.path}`);
+        }
+      } else if (frontmatter.record_type === "knowledge-note") {
+        const required = [
+          "document_type", "difficulty", "unit_id", "learning_outcome", "knowledge_ownership",
+          "hard_prerequisites", "soft_prerequisites", "blocked_by", "assessment_method",
+          "evidence_note", "coverage_status", "content_audit_at", "content_audit_note",
+        ];
+        for (const property of required) {
+          if (!Object.prototype.hasOwnProperty.call(frontmatter, property)) {
+            throw new Error(`knowledge note is missing property ${property}: ${payload.path}`);
+          }
+        }
+        for (const property of [
+          "knowledge_ownership", "hard_prerequisites", "soft_prerequisites", "blocked_by",
+        ]) {
+          if (!Array.isArray(frontmatter[property])) {
+            throw new Error(`knowledge note property must be an array ${property}: ${payload.path}`);
+          }
+        }
+        if (!["教程", "原理解释", "操作指南", "参考资料"].includes(frontmatter.document_type)
+          || !isMeaningfulString(frontmatter.unit_id)
+          || !isMeaningfulString(frontmatter.learning_outcome)
+          || !isMeaningfulString(frontmatter.assessment_method)
+          || !isMeaningfulString(frontmatter.evidence_note)) {
+          throw new Error(`knowledge note has invalid curriculum metadata: ${payload.path}`);
+        }
+        if (payload.mode === "create" && frontmatter.status !== "待核验") {
+          throw new Error(`new knowledge note must start as 待核验: ${payload.path}`);
+        }
+        if (frontmatter.status === "已发布"
+          && (!isMeaningfulStringList(frontmatter.sources) || !isIsoDate(frontmatter.verified_at))) {
+          throw new Error(`published knowledge note requires sources and verified_at: ${payload.path}`);
+        }
+      } else if (frontmatter.record_type === "learning-evidence") {
+        const required = [
+          "unit_id", "content_note", "learning_status", "knowledge_points_total",
+          "knowledge_points_covered", "knowledge_points_pending", "mastery_score", "blocked_by",
+          "mastery_evidence", "assessment_type", "assessment_at", "last_reviewed", "next_review",
+          "review_count",
+        ];
+        for (const property of required) {
+          if (!Object.prototype.hasOwnProperty.call(frontmatter, property)) {
+            throw new Error(`learning record is missing property ${property}: ${payload.path}`);
+          }
+        }
+        for (const property of ["blocked_by", "mastery_evidence"]) {
+          if (!Array.isArray(frontmatter[property])) {
+            throw new Error(`learning record property must be an array ${property}: ${payload.path}`);
+          }
+        }
+        const allowedLearningStates = ["未开始", "学习中", "已掌握", "阻塞", "待复习", "已归档"];
+        if (!allowedLearningStates.includes(frontmatter.learning_status)
+          || !Number.isInteger(frontmatter.mastery_score)
+          || frontmatter.mastery_score < 0 || frontmatter.mastery_score > 100
+          || !Number.isInteger(frontmatter.review_count) || frontmatter.review_count < 0) {
+          throw new Error(`learning record has invalid progress values: ${payload.path}`);
+        }
+        const counts = [
+          frontmatter.knowledge_points_total,
+          frontmatter.knowledge_points_covered,
+          frontmatter.knowledge_points_pending,
+        ];
+        if (!counts.every((value) => Number.isInteger(value) && value >= 0)
+          || counts[1] + counts[2] !== counts[0]) {
+          throw new Error(`learning record has inconsistent knowledge counts: ${payload.path}`);
+        }
+        if (payload.mode === "create"
+          && (frontmatter.status !== "草稿" || frontmatter.learning_status !== "学习中"
+            || frontmatter.mastery_score !== 0 || frontmatter.review_count !== 0
+            || frontmatter.mastery_evidence.length !== 0)) {
+          throw new Error(`new learning record must use the active unmastered state: ${payload.path}`);
+        }
+        if (frontmatter.learning_status === "已掌握"
+          && (!isMeaningfulStringList(frontmatter.mastery_evidence)
+            || !isMeaningfulString(frontmatter.assessment_type)
+            || !isIsoDate(frontmatter.assessment_at)
+            || !isIsoDate(frontmatter.last_reviewed)
+            || !isIsoDate(frontmatter.next_review))) {
+          throw new Error(`mastered learning record requires evidence and review dates: ${payload.path}`);
+        }
+      } else {
+        throw new Error(`note has invalid record_type: ${payload.path}`);
+      }
+      const isAnchor = Number(frontmatter.stage_order) === 1 && Number(frontmatter.lesson_order) === 1;
+      const allowedRoadmapStates = ["进行中", "阻塞", "已完成", "已归档"];
+      if (isAnchor && (frontmatter.record_type !== "curriculum-map"
+        || !allowedRoadmapStates.includes(frontmatter.roadmap_status))) {
+        throw new Error(`topic anchor must be a curriculum map with roadmap_status: ${payload.path}`);
+      }
+      if (!isAnchor && Object.prototype.hasOwnProperty.call(frontmatter, "roadmap_status")) {
+        throw new Error(`roadmap_status is reserved for the curriculum map: ${payload.path}`);
+      }
+      if (payload.roadmap_kind === "repository" && frontmatter.roadmap_kind !== "repository") {
+        throw new Error(`repository note must preserve roadmap_kind: ${payload.path}`);
+      }
+      if (!/^# \S/m.test(payload.content)) {
+        throw new Error(`note content must contain a non-empty H1: ${payload.path}`);
+      }
+      return frontmatter;
+    };
     const validateWriteNoteDocument = () => {
+      if (payload.content_contract === "three-layer") {
+        return validateThreeLayerWriteNoteDocument();
+      }
       const match = payload.content.match(/^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/);
       if (!match) throw new Error(`note frontmatter delimiters are invalid: ${payload.path}`);
       const frontmatter = parseYamlObject(match[1], `note frontmatter ${payload.path}`);
@@ -2098,9 +3302,13 @@ EVAL_DRIVER = r'''
       const source = await app.vault.read(candidates[0]);
       const match = source.match(/^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/);
       if (!match) throw new Error(`roadmap anchor frontmatter is invalid: ${candidates[0].path}`);
-      return parseYamlObject(match[1], `roadmap anchor ${candidates[0].path}`);
+      return {
+        frontmatter: parseYamlObject(match[1], `roadmap anchor ${candidates[0].path}`),
+        source,
+        path: candidates[0].path,
+      };
     };
-    const validateRoadmapIdentity = async () => {
+    const validateRoadmapIdentity = async (plannedFrontmatter) => {
       const rootName = payload.root.split("/").pop();
       const basePath = `${payload.root}/${rootName}-Roadmap.base`;
       const baseFile = getFile(basePath);
@@ -2117,7 +3325,12 @@ EVAL_DRIVER = r'''
         || !expectedFilters.every((filter) => baseDocument.filters.and.includes(filter))) {
         throw new Error(`roadmap Base root filter does not match: ${basePath}`);
       }
-      const requiredViews = ["学习路线", "学习中", "阻塞", "待复习", "已掌握", "待核验"];
+      const requiredViews = payload.content_contract === "three-layer"
+        ? [
+          "学习路线", "课程路线", "知识正文", "学习记录", "学习中",
+          "阻塞", "待复习", "已掌握", "待核验", "待补齐",
+        ]
+        : ["学习路线", "学习中", "阻塞", "待复习", "已掌握", "待核验"];
       if (!Array.isArray(baseDocument.views)) {
         throw new Error(`roadmap Base views are missing: ${basePath}`);
       }
@@ -2127,26 +3340,133 @@ EVAL_DRIVER = r'''
           throw new Error(`roadmap Base required view is missing or duplicated: ${name}`);
         }
       }
-      const anchor = await readRoadmapAnchor();
+      if (new Set(viewNames).size !== viewNames.length) {
+        throw new Error("roadmap Base view names must be unique");
+      }
+      if (payload.content_contract === "three-layer") {
+        const rootFolder = getFolder(payload.root);
+        if (!rootFolder) throw new Error(`roadmap root is not a folder: ${payload.root}`);
+        const topStageFolders = (rootFolder.children || []).filter((child) =>
+          Array.isArray(child?.children) && /^(0[1-9]|[1-9][0-9])-.+/.test(
+            child.path.split("/").pop(),
+          ));
+        const recordsFolders = topStageFolders.filter((child) =>
+          /^\d{2}-学习记录$/.test(child.path.split("/").pop()));
+        if (recordsFolders.length !== 1 || recordsFolders[0].path !== payload.records_directory) {
+          throw new Error("roadmap must contain the one planned records_directory");
+        }
+        const numberedCourseStages = topStageFolders
+          .map((child) => Number(child.path.split("/").pop().slice(0, 2)))
+          .filter((number) => number !== 99)
+          .sort((left, right) => left - right);
+        const expectedStageNumbers = Array.from(
+          {length: numberedCourseStages.length}, (_, index) => index + 1,
+        );
+        const recordsNumber = Number(recordsFolders[0].path.split("/").pop().slice(0, 2));
+        if (!sameArray(numberedCourseStages, expectedStageNumbers)
+          || recordsNumber !== numberedCourseStages[numberedCourseStages.length - 1]
+          || !topStageFolders.some((child) => child.path.endsWith("/99-assets"))) {
+          throw new Error("records_directory must be the final contiguous course stage before 99-assets");
+        }
+        const requireFlatFilters = (name, expected) => {
+          const actual = baseDocument.views.find((view) => view?.name === name)?.filters?.and;
+          if (!sameArray(actual, expected)) {
+            throw new Error(`roadmap Base view has wrong three-layer filters: ${name}`);
+          }
+        };
+        requireFlatFilters("课程路线", ['record_type == "curriculum-map"']);
+        requireFlatFilters("知识正文", ['record_type == "knowledge-note"']);
+        requireFlatFilters("学习记录", ['record_type == "learning-evidence"']);
+        requireFlatFilters(
+          "学习中",
+          ['record_type == "learning-evidence"', 'learning_status == "学习中"'],
+        );
+        requireFlatFilters(
+          "阻塞",
+          ['record_type == "learning-evidence"', 'learning_status == "阻塞"'],
+        );
+        requireFlatFilters(
+          "已掌握",
+          [
+            'record_type == "learning-evidence"',
+            'learning_status == "已掌握"',
+            'list(mastery_evidence).length > 0',
+          ],
+        );
+        requireFlatFilters(
+          "待核验",
+          ['record_type == "knowledge-note"', 'status == "待核验"'],
+        );
+        requireFlatFilters(
+          "待补齐",
+          ['record_type == "knowledge-note"', 'coverage_status == "部分覆盖"'],
+        );
+        const reviewFilters = baseDocument.views.find((view) => view?.name === "待复习")?.filters?.and;
+        const reviewGroup = Array.isArray(reviewFilters)
+          ? reviewFilters.find((item) => item && typeof item === "object" && Array.isArray(item.or))
+          : null;
+        if (!Array.isArray(reviewFilters)
+          || reviewFilters.length !== 3
+          || reviewFilters[0] !== 'record_type == "learning-evidence"'
+          || reviewFilters[1] !== "formula.review_due == true"
+          || !reviewGroup
+          || !sameArray(
+            reviewGroup.or,
+            ['learning_status == "已掌握"', 'learning_status == "待复习"'],
+          )) {
+          throw new Error("roadmap Base view has wrong three-layer filters: 待复习");
+        }
+      }
+      const anchorDocument = await readRoadmapAnchor();
+      const anchor = anchorDocument.frontmatter;
+      let curriculum = null;
+      let isCurriculumMapMigration = false;
+      if (payload.content_contract === "three-layer" && anchor.record_type !== "curriculum-map") {
+        throw new Error("three-layer roadmap anchor must be a curriculum-map");
+      }
+      if (payload.content_contract === "three-layer") {
+        curriculum = parseCurriculumContract(anchorDocument.source, `roadmap anchor ${anchorDocument.path}`);
+        isCurriculumMapMigration = payload.mode === "replace"
+          && plannedFrontmatter?.record_type === "curriculum-map";
+        if (!isCurriculumMapMigration && !sameJson(curriculum, payload.curriculum_plan)) {
+          throw new Error("note plan curriculum does not match the Vault route map");
+        }
+      }
       const actualKind = anchor.roadmap_kind === "repository" ? "repository" : "topic";
       if (payload.roadmap_kind !== actualKind) {
         throw new Error(`note plan roadmap_kind does not match the Vault anchor: ${actualKind}`);
       }
       if (actualKind === "repository") {
-        const repositoryChecks = [
+        const stableRepositoryChecks = [
           ["repository_provider", payload.repository?.provider],
           ["repository_name", payload.repository?.name],
           ["repository_url", payload.repository?.url],
-          ["repository_commit", payload.repository?.commit],
-          ["core_slice", payload.repository?.core_slice],
         ];
-        for (const [property, expected] of repositoryChecks) {
+        for (const [property, expected] of stableRepositoryChecks) {
           if (anchor[property] !== expected) {
             throw new Error(`repository note plan does not match Vault anchor: ${property}`);
           }
         }
+        if (!isCurriculumMapMigration) {
+          const baselineChecks = [
+            ["repository_default_branch", payload.repository?.default_branch],
+            ["repository_target_ref", payload.repository?.target_ref],
+            ["repository_commit", payload.repository?.commit],
+            ["repository_license_spdx", payload.repository?.license_spdx],
+            ["repository_verified_at", payload.repository?.verified_at],
+            ["repository_scope", payload.repository?.scope],
+            ["core_slice", payload.repository?.core_slice],
+            ["upstream_checked_at", payload.repository?.upstream_checked_at],
+            ["upstream_status", payload.repository?.upstream_status],
+          ];
+          for (const [property, expected] of baselineChecks) {
+            if (anchor[property] !== expected) {
+              throw new Error(`repository note plan does not match Vault anchor: ${property}`);
+            }
+          }
+        }
       }
-      return {basePath, anchor};
+      return {basePath, anchor, curriculum};
     };
     const assertNoOtherActiveUnit = async () => {
       if (typeof app.vault.getMarkdownFiles !== "function") {
@@ -2170,9 +3490,82 @@ EVAL_DRIVER = r'''
         if (frontmatter.roadmap_root !== payload.root) {
           throw new Error(`roadmap note has the wrong roadmap_root: ${file.path}`);
         }
+        if (payload.content_contract === "three-layer"
+          && frontmatter.record_type !== "learning-evidence") continue;
         if (frontmatter.learning_status === "学习中") {
           throw new Error(`another learning unit is already active: ${file.path}`);
         }
+      }
+    };
+    const resolveWikiLinkFile = (value, sourcePath) => {
+      if (!isMeaningfulString(value)) return null;
+      const match = value.match(/^\[\[([^\]|#]+)(?:#[^\]|]+)?(?:\|[^\]]+)?\]\]$/);
+      if (!match) return null;
+      const linkpath = match[1];
+      if (typeof app.metadataCache?.getFirstLinkpathDest === "function") {
+        const resolved = app.metadataCache.getFirstLinkpathDest(linkpath, sourcePath);
+        if (resolved) return resolved;
+      }
+      return getFile(linkpath) || getFile(`${linkpath}.md`);
+    };
+    const validateThreeLayerCounterpart = async (frontmatter, curriculum) => {
+      if (frontmatter.record_type === "curriculum-map") {
+        const expectedOverview = payload.roadmap_kind === "repository"
+          ? "01-项目概述" : `01-${payload.topic?.path_segment}概述`;
+        if (payload.path !== `${payload.root}/${expectedOverview}/§01-学习路线图.md`) {
+          throw new Error("curriculum-map must use the canonical §01-学习路线图.md path");
+        }
+        const embedded = parseCurriculumContract(payload.content, `curriculum-map ${payload.path}`);
+        if (!sameJson(embedded, payload.curriculum_plan)) {
+          throw new Error("curriculum-map content does not match the authoritative curriculum");
+        }
+        validateRenderedCurriculum(
+          payload.content, payload.curriculum_plan, `curriculum-map ${payload.path}`,
+        );
+        return;
+      }
+      if (frontmatter.record_type !== "knowledge-note"
+        && frontmatter.record_type !== "learning-evidence") return;
+      if (!sameJson(curriculum, payload.curriculum_plan)) {
+        throw new Error("Vault curriculum and note-plan curriculum disagree");
+      }
+      const unit = curriculumUnit(frontmatter.unit_id);
+      if (frontmatter.record_type === "knowledge-note") {
+        validateKnowledgeCurriculumBinding(frontmatter, payload.path);
+        if (payload.path.startsWith(`${payload.records_directory}/`)) {
+          throw new Error("knowledge-note cannot be written into records_directory");
+        }
+      } else {
+        const parentPath = payload.path.split("/").slice(0, -1).join("/");
+        if (parentPath !== payload.records_directory) {
+          throw new Error("learning-evidence must be written into records_directory");
+        }
+        const expectedContent = `${payload.root}/${unit.note_path}`.replace(/\.md$/, "");
+        if (!String(frontmatter.content_note).includes(expectedContent)) {
+          throw new Error(`learning-evidence content_note does not match curriculum unit ${unit.unit_id}`);
+        }
+      }
+      const linkProperty = frontmatter.record_type === "knowledge-note" ? "evidence_note" : "content_note";
+      const counterpart = resolveWikiLinkFile(frontmatter[linkProperty], payload.path);
+      if (!counterpart) {
+        if (frontmatter.record_type === "knowledge-note" && payload.mode === "create") return;
+        throw new Error(`linked counterpart is missing for ${payload.path}: ${linkProperty}`);
+      }
+      const counterpartSource = await app.vault.read(counterpart);
+      const counterpartFrontmatter = parseMarkdownFrontmatter(counterpartSource, counterpart.path);
+      const expectedType = frontmatter.record_type === "knowledge-note"
+        ? "learning-evidence" : "knowledge-note";
+      const reverseProperty = frontmatter.record_type === "knowledge-note" ? "content_note" : "evidence_note";
+      if (counterpartFrontmatter.record_type !== expectedType
+        || counterpartFrontmatter.unit_id !== frontmatter.unit_id
+        || !String(counterpartFrontmatter[reverseProperty]).includes(payload.path.replace(/\.md$/, ""))) {
+        throw new Error(`content and learning record links are not bidirectional: ${payload.path}`);
+      }
+      if (frontmatter.record_type === "learning-evidence"
+        && frontmatter.learning_status === "已掌握"
+        && (counterpartFrontmatter.status !== "已发布"
+          || counterpartFrontmatter.coverage_status !== "完整")) {
+        throw new Error("mastery requires linked knowledge content to be published and complete");
       }
     };
     const validateWriteNotePreflight = async () => {
@@ -2185,7 +3578,10 @@ EVAL_DRIVER = r'''
       }
       const frontmatter = validateWriteNoteDocument();
       if (!getFolder(payload.root)) throw new Error(`roadmap root is not a folder: ${payload.root}`);
-      await validateRoadmapIdentity();
+      const roadmapIdentity = await validateRoadmapIdentity(frontmatter);
+      if (payload.content_contract === "three-layer") {
+        await validateThreeLayerCounterpart(frontmatter, roadmapIdentity.curriculum);
+      }
       if (frontmatter.learning_status === "学习中") await assertNoOtherActiveUnit();
       const parentPath = payload.path.split("/").slice(0, -1).join("/");
       const parentFolder = getFolder(parentPath);
@@ -2301,7 +3697,7 @@ EVAL_DRIVER = r'''
       if (alwaysUpdateLinks !== true) throw new Error("alwaysUpdateLinks must be enabled");
       const root = getFolder(payload.root);
       if (!root) throw new Error(`roadmap root is not a folder: ${payload.root}`);
-      const anchor = await readRoadmapAnchor();
+      const anchor = (await readRoadmapAnchor()).frontmatter;
       if (anchor.roadmap_kind === "repository") {
         throw new Error("repository outer route is fixed and cannot be renumbered");
       }

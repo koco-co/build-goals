@@ -7,38 +7,38 @@ date: {{DATE}}
 updated: {{DATE}}
 status: 待核验
 category: "{{CATEGORY}}"
-note_type: 教程
+record_type: knowledge-note
+document_type: "操作指南"
 difficulty: 入门
 roadmap_topic: "{{TOPIC_DISPLAY}}"
 roadmap_root: "{{ROADMAP_ROOT}}"
 learning_goal: "{{LEARNING_GOAL}}"
-knowledge_points_total: 0
-knowledge_points_covered: 0
-knowledge_points_pending: 0
-roadmap_status: 进行中
-stage_title: "01-{{TOPIC_PATH_SEGMENT}}概述"
-stage_order: 1
-lesson_order: 1
-learning_status: 学习中
-mastery_score: 0
+unit_id: "{{PREREQUISITE_UNIT_ID}}"
+learning_outcome: "能验证硬前置、工具链和最小运行环境"
+knowledge_ownership:
+  - "{{PREREQUISITE_KNOWLEDGE_POINT_ID}}"
 hard_prerequisites: []
 soft_prerequisites: []
 blocked_by: []
-mastery_evidence: []
-assessment_type:
-assessment_at:
-last_reviewed:
-next_review:
-review_count: 0
+assessment_method: "执行前置检查并解释结果"
+evidence_note: "[[{{PREREQUISITE_EVIDENCE_PATH}}]]"
+stage_title: "01-{{TOPIC_PATH_SEGMENT}}概述"
+stage_order: 1
+lesson_order: 2
 verified_at: {{DATE}}
 version_scope: "{{VERSION_SCOPE}}"
 sources: []
+coverage_status: 待核验
+content_audit_at: {{DATE}}
+content_audit_note:
 ---
 
 # {{TOPIC_DISPLAY}}前置准备
 
 > [!abstract] 准备结论
-> {{一句话说明开始学习前必须具备和准备什么。}}
+> {{PREREQUISITE_CONCLUSION}}
+
+## 适用条件
 
 ## 硬前置
 
@@ -48,14 +48,15 @@ sources: []
 
 ## 环境与配置
 
-## 环境配置踩坑、原因与解决方案
+## 操作步骤
 
-## 前置测验
+## 成功验证
 
-## 通过标准
-
-## 重点与面试追问
+## 故障处理
 
 ## 关联笔记
 
-## 来源与核验
+- 学习路线：[[§01-学习路线图]]
+- 学习证据：[[{{PREREQUISITE_EVIDENCE_PATH}}]]
+
+## 来源与版本

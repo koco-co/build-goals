@@ -10,23 +10,31 @@ properties:
   formula.route_order:
     displayName: 路线序号
   file.name:
-    displayName: 学习单元
+    displayName: 文件
+  note.record_type:
+    displayName: 记录层
+  note.document_type:
+    displayName: 正文类型
+  note.unit_id:
+    displayName: 单元 ID
   note.stage_title:
     displayName: 阶段
-  note.difficulty:
-    displayName: 难度
+  note.learning_outcome:
+    displayName: 单项成果
+  note.assessment_method:
+    displayName: 验收方式
+  note.content_note:
+    displayName: 对应正文
+  note.evidence_note:
+    displayName: 学习证据
   note.learning_status:
     displayName: 学习状态
   note.roadmap_status:
     displayName: 主题状态
-  note.repository_commit:
-    displayName: 仓库 Commit
-  note.core_slice:
-    displayName: 核心切片
-  note.upstream_status:
-    displayName: 上游状态
-  note.graduation_status:
-    displayName: 毕业状态
+  note.mastery_score:
+    displayName: 掌握分
+  note.mastery_evidence:
+    displayName: 掌握证据
   note.knowledge_points_total:
     displayName: 知识点总数
   note.knowledge_points_covered:
@@ -37,37 +45,29 @@ properties:
     displayName: 内容覆盖
   note.content_audit_note:
     displayName: 内容审计说明
-  note.mastery_score:
-    displayName: 掌握分
-  note.mastery_evidence:
-    displayName: 掌握证据
-  note.assessment_type:
-    displayName: 验收方式
-  note.assessment_at:
-    displayName: 验收时间
-  formula.mastery_label:
-    displayName: 掌握程度
-  note.blocked_by:
-    displayName: 阻塞项
   note.next_review:
     displayName: 下次复习
   note.last_reviewed:
     displayName: 上次复习
   note.review_count:
     displayName: 复习次数
+  note.version_baseline:
+    displayName: 版本基线
+  note.source_checked_at:
+    displayName: 资料核验
+  note.upstream_status:
+    displayName: 上游状态
   note.verified_at:
     displayName: 核验日期
   note.version_scope:
     displayName: 适用版本
   note.status:
     displayName: 内容状态
-  file.mtime:
-    displayName: 最近更新
 views:
   - type: table
     name: 学习路线
     groupBy:
-      property: note.stage_title
+      property: note.record_type
       direction: ASC
     sort:
       - property: formula.route_order
@@ -75,26 +75,65 @@ views:
     order:
       - formula.route_order
       - file.name
-      - note.difficulty
+      - note.record_type
+      - note.document_type
+      - note.unit_id
+      - note.stage_title
+      - note.learning_outcome
       - note.learning_status
+      - note.status
+  - type: table
+    name: 课程路线
+    filters:
+      and:
+        - 'record_type == "curriculum-map"'
+    order:
+      - file.name
       - note.roadmap_status
-      - note.repository_commit
-      - note.core_slice
+      - note.version_baseline
+      - note.source_checked_at
       - note.upstream_status
-      - note.graduation_status
-      - note.knowledge_points_total
+  - type: table
+    name: 知识正文
+    filters:
+      and:
+        - 'record_type == "knowledge-note"'
+    sort:
+      - property: formula.route_order
+        direction: ASC
+    order:
+      - formula.route_order
+      - file.name
+      - note.document_type
+      - note.unit_id
+      - note.learning_outcome
+      - note.assessment_method
+      - note.coverage_status
+      - note.evidence_note
+      - note.status
+  - type: table
+    name: 学习记录
+    filters:
+      and:
+        - 'record_type == "learning-evidence"'
+    sort:
+      - property: formula.route_order
+        direction: ASC
+    order:
+      - formula.route_order
+      - file.name
+      - note.unit_id
+      - note.content_note
+      - note.learning_status
       - note.knowledge_points_covered
       - note.knowledge_points_pending
-      - note.coverage_status
       - note.mastery_score
-      - note.mastery_evidence
       - note.next_review
-      - note.verified_at
-      - note.version_scope
   - type: table
     name: 学习中
     filters:
       and:
+        - 'record_type == "learning-evidence"'
         - 'learning_status == "学习中"'
     sort:
       - property: formula.route_order
@@ -102,28 +141,24 @@ views:
     order:
       - formula.route_order
       - file.name
-      - note.stage_title
-      - note.mastery_score
+      - note.content_note
       - note.knowledge_points_pending
-      - note.coverage_status
-      - file.mtime
+      - note.mastery_score
   - type: table
     name: 阻塞
     filters:
       and:
+        - 'record_type == "learning-evidence"'
         - 'learning_status == "阻塞"'
-    sort:
-      - property: formula.route_order
-        direction: ASC
     order:
-      - formula.route_order
       - file.name
+      - note.content_note
       - note.blocked_by
-      - file.mtime
   - type: table
     name: 待复习
     filters:
       and:
+        - 'record_type == "learning-evidence"'
         - 'formula.review_due == true'
         - or:
             - 'learning_status == "已掌握"'
@@ -132,8 +167,8 @@ views:
       - property: note.next_review
         direction: ASC
     order:
-      - formula.route_order
       - file.name
+      - note.content_note
       - note.mastery_score
       - note.next_review
       - note.review_count
@@ -141,25 +176,21 @@ views:
     name: 已掌握
     filters:
       and:
+        - 'record_type == "learning-evidence"'
         - 'learning_status == "已掌握"'
-        - 'status == "已发布"'
         - 'list(mastery_evidence).length > 0'
-    sort:
-      - property: formula.route_order
-        direction: ASC
     order:
-      - formula.route_order
       - file.name
+      - note.content_note
       - note.mastery_score
       - note.mastery_evidence
       - note.assessment_type
       - note.assessment_at
-      - note.last_reviewed
-      - note.next_review
   - type: table
     name: 待核验
     filters:
       and:
+        - 'record_type == "knowledge-note"'
         - 'status == "待核验"'
     sort:
       - property: formula.route_order
@@ -167,19 +198,17 @@ views:
     order:
       - formula.route_order
       - file.name
+      - note.document_type
       - note.verified_at
       - note.version_scope
   - type: table
     name: 待补齐
     filters:
       and:
+        - 'record_type == "knowledge-note"'
         - 'coverage_status == "部分覆盖"'
-    sort:
-      - property: formula.route_order
-        direction: ASC
     order:
       - formula.route_order
       - file.name
-      - note.knowledge_points_pending
       - note.content_audit_note
       - file.mtime

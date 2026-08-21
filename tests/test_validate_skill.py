@@ -431,7 +431,7 @@ class ValidateSkillTests(unittest.TestCase):
             "build-readme": 'version: "2.1.0"',
             "build-skill": 'version: "2.1.0"',
             "handoff": 'version: "2.1.0"',
-            "obsidian-learn-topic": 'version: "1.0.0"',
+            "obsidian-learn-topic": 'version: "2.0.0"',
             "shape-idea": 'version: "2.1.0"',
             "vibe-coding": 'version: "2.0.1"',
         }

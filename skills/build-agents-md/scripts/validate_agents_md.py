@@ -24,6 +24,7 @@ IGNORED_DIRECTORIES = {
     ".mypy_cache",
     ".next",
     ".pytest_cache",
+    ".repos",
     ".ruff_cache",
     ".svn",
     ".turbo",

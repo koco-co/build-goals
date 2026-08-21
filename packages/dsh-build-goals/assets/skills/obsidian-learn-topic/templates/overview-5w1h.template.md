@@ -7,39 +7,38 @@ date: {{DATE}}
 updated: {{DATE}}
 status: 待核验
 category: "{{CATEGORY}}"
-note_type: 概念
+record_type: knowledge-note
+document_type: "原理解释"
 difficulty: 入门
 roadmap_topic: "{{TOPIC_DISPLAY}}"
 roadmap_root: "{{ROADMAP_ROOT}}"
 learning_goal: "{{LEARNING_GOAL}}"
-knowledge_points_total: 0
-knowledge_points_covered: 0
-knowledge_points_pending: 0
-stage_title: "01-{{TOPIC_PATH_SEGMENT}}概述"
-stage_order: 1
-lesson_order: 2
-learning_status: 未开始
-mastery_score: 0
+unit_id: "{{OVERVIEW_UNIT_ID}}"
+learning_outcome: "能用 5W1H 解释主题价值、机制、边界和主要替代方案"
+knowledge_ownership:
+  - "{{OVERVIEW_KNOWLEDGE_POINT_ID}}"
 hard_prerequisites: []
 soft_prerequisites: []
 blocked_by: []
-mastery_evidence: []
-assessment_type:
-assessment_at:
-last_reviewed:
-next_review:
-review_count: 0
+assessment_method: "分析一个新场景并判断是否适用"
+evidence_note: "[[{{OVERVIEW_EVIDENCE_PATH}}]]"
+stage_title: "01-{{TOPIC_PATH_SEGMENT}}概述"
+stage_order: 1
+lesson_order: 3
 verified_at: {{DATE}}
 version_scope: "{{VERSION_SCOPE}}"
 sources: []
+coverage_status: 待核验
+content_audit_at: {{DATE}}
+content_audit_note:
 ---
 
 # {{TOPIC_DISPLAY}}概述
 
 > [!abstract] 核心结论
-> {{一句话定义主题及其价值。}}
+> {{OVERVIEW_CONCLUSION}}
 
-## 基础信息卡
+## 核心问题
 
 ## What：它是什么
 
@@ -53,30 +52,24 @@ sources: []
 
 ## How：如何运作
 
-## 类比及边界
-
-> [!example] 直观类比
-> {{给出类比，并明确不能类推的部分。}}
-
-## 与替代方案比较
-
-## 学习路线与阶段成果
-
-## 关键流程图
+## 心智模型
 
 ```mermaid
 flowchart LR
-  A["输入"] --> B["核心机制"] --> C["可验证输出"]
+  A["输入"] --> B["核心机制"] --> C["可验证结果"]
 ```
 
-## 常见误区与踩坑
+## 工作机制
 
-## 重点与面试追问
+## 适用边界与主要替代方案
 
-## 扫盲检查
+## 错误心智模型
 
-## 拓展方向与权威链接
+## 新场景分析
 
 ## 关联笔记
 
-## 来源与核验
+- 学习路线：[[§01-学习路线图]]
+- 学习证据：[[{{OVERVIEW_EVIDENCE_PATH}}]]
+
+## 来源与版本

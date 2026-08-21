@@ -61,9 +61,10 @@ python3 "<SKILL_DIR>/scripts/roadmap_cli.py" --vault "<VAULT_NAME>" trash-valida
 - `root` 必须是安全的 Vault 相对路径。
 - `base.path` 必须是根目录下的 `<根目录名>-Roadmap.base`；例如主题根为 `.../Playwright` 时，Base 为 `.../Playwright/Playwright-Roadmap.base`。
 - 主题根内所有目录（包括正式阶段子目录）都使用两位数字前缀；初始化固定预留 `99-assets`，资产统一进入其中。
-- 顶层目录通过 `role` 明确标记 `overview`、一个或多个 `formal`、`extension`、`review` 和 `assets`；除含概述笔记的 overview 外，初始化空目录都设置 `keep: true`。
-- 初始化 Markdown 只能位于 `01-<主题>概述`，文件使用 `§NN-`。
-- 其他目录设置 `keep: true`，脚本写入 `.gitkeep`。
+- 顶层目录通过 `role` 明确标记 `overview`、一个或多个 `formal`、`extension`、`review`、`records` 和 `assets`。学习记录目录位于 `99-assets` 前最后一个连续编号；仓库路线固定为 `10-学习记录`。
+- 初始化 Markdown 只能位于 `01-<主题>概述` 与学习记录目录，文件使用各自连续的 `§NN-`；概述中创建路线图、前置与主题概述，记录目录中为两篇正文各创建独立记录。
+- 已填充的 overview 与 records 不保留 `.gitkeep`；其余空目录设置 `keep: true`。
+- `curriculum_plan_file` 必须指向 Vault 外的完整课程计划 JSON；脚手架验证其单元 ID、计划路径、知识点唯一归属、前置拓扑、正文类型和验收方式，并要求 `§01-学习路线图.md` 在确定性可见表格与 `learn-topic-curriculum` 机器合同中完整保存同一计划；任一可见行漂移都会阻断。
 - 主题必须拆分为 `topic.display`、安全的 `topic.path_segment` 与 Obsidian-safe 的 `topic.tag`；JSON/YAML 用安全序列化生成，不对原始主题名做裸替换。
 - Base 根过滤器先生成 `file.inFolder(<JSON 编码的 root>)`，再把整个表达式 JSON 编码后填入 `{{ROADMAP_FILTER_JSON}}`。例如 root 为 `Learning/Python` 时填入 `"file.inFolder(\"Learning/Python\")"`；含单引号的合法路径也必须通过同一序列化过程处理。Vault 路径和主题路径段拒绝双引号、反引号、`$`、反斜杠和控制字符。
 - 目标存在、路径逃逸、保护区路径、重复路径或未替换占位符都会阻断。
@@ -71,7 +72,7 @@ python3 "<SKILL_DIR>/scripts/roadmap_cli.py" --vault "<VAULT_NAME>" trash-valida
 
 ## Repository workspace plan
 
-从 `templates/repository-workspace-plan.template.json` 复制到 Vault 外独立计划目录。先运行 `audit` 或 dry-run `prepare`；Apply 只对精确 `checkout_path` 创建 detached Commit checkout，不递归 submodule、不执行 hooks 或安装脚本。`audit` 只回传脱敏 canonical 身份与 hash，错误 origin 直接阻断。Patch 验收仅接受批准文件、非空二进制 Patch、`git diff --check` 和 argv 形式的相关测试；测试使用清洁环境且前后重新核对 HEAD、文件集合与 Patch hash。证据输出必须留在计划目录，且不得包含凭据、完整日志或机器路径写回 Vault。
+从 `templates/repository-workspace-plan.template.json` 复制到 Vault 外独立计划目录。`checkout_path` 的外部根位置必须由用户提供并最终确认，模型只可推荐；先运行 `audit` 或 dry-run `prepare`。Apply 只对该精确路径创建 detached Commit checkout，不递归 submodule、不执行 hooks 或安装脚本。`audit` 只回传脱敏 canonical 身份与 hash，错误 origin 直接阻断。Patch 验收仅接受批准文件、非空二进制 Patch、`git diff --check` 和 argv 形式的相关测试；测试使用清洁环境且前后重新核对 HEAD、文件集合与 Patch hash。证据输出必须留在计划目录，且不得包含凭据、完整日志或机器路径写回 Vault。
 
 ## Ordinary code exercise plan
 
@@ -92,10 +93,12 @@ python3 "<SKILL_DIR>/scripts/roadmap_cli.py" --vault "<VAULT_NAME>" trash-valida
 
 - `mode: create` 要求目标不存在；首次写入空阶段时可设 `remove_gitkeep: true`。
 - `mode: replace` 要求 `expected_current_file`，且 Vault 当前内容必须与快照逐字一致；发现并发变化时停止。
-- 两种模式都要求主题根存在 `<根目录名>-Roadmap.base`，且 Base 的精确根过滤器和六个必需视图仍有效；普通编号目录不能伪装成学习路线。
+- 两种模式都要求主题根存在 `<根目录名>-Roadmap.base`，且 Base 的精确根过滤器和十个三层视图仍有效；普通编号目录不能伪装成学习路线。
 - Create 只接受该阶段下一个连续 `§NN`：空阶段必须从 `§01` 开始并同时移除现有 `.gitkeep`；已有课程笔记时 `.gitkeep` 必须已经不存在。实验项目的生态文件名不参与课程编号。
-- 新内容为 `学习中` 时，路线内不能还有另一个 `learning_status: 学习中` 的课程笔记；`99-assets` 和非 `§NN` 实验 Markdown 不参与这项扫描。
-- `已发布` 要求非空来源和有效 `verified_at`；`已掌握` 还要求真实掌握证据、验收方式、验收日期及复习日期。`§01` 主题锚点必须保留合法 `roadmap_status`。
+- 三层合同用 `content_contract: three-layer`。路线图、知识正文、学习记录分别使用 `curriculum-map`、`knowledge-note`、`learning-evidence`；四类正文还必须声明 `document_type`。旧 note plan 未声明时只用于既有合同兼容，不作为新路线模板。
+- 三层 note plan 必须同时提供 `curriculum_plan_file` 与 `records_directory`。驱动先把外部计划与 Vault 内路线图的机器合同逐字段比较，再校验正文的计划路径、类型、成果、知识点归属、硬前置和验收方式；学习记录只能直属于指定记录目录并链接计划正文。Base 的十个视图不仅要同名存在，其记录层过滤器也必须保持正确。
+- 新学习记录为 `学习中` 时，路线内不能还有另一个 `learning-evidence` 处于 `学习中`；正文、路线图、`99-assets` 和非 `§NN` 实验 Markdown 不参与这项扫描。
+- 知识正文 `已发布` 要求非空来源和有效 `verified_at`；学习记录 `已掌握` 还要求双向链接的正文已发布且 `coverage_status: 完整`，并具有真实掌握证据、验收方式、验收日期及复习日期。`§01-学习路线图.md` 必须保留合法 `roadmap_status`。
 - 仓库锚点不得通过省略 `roadmap_kind` 降级为普通主题。写入 `graduation_status: passed` 或 `roadmap_status: 已完成` 时，note plan 必须同时提供本轮计划目录内的 `repository_patch_file` 和 `repository_evidence_file`；驱动核对仓库、Commit、许可证、上游状态、批准/实际文件、Patch hash、测试 argv 与退出码。
 - Dry-run 会用 Obsidian YAML 解析器检查 Frontmatter、必需 Properties、规范元数据、H1、路径和占位符。
 - Apply 通过 base64 JSON payload 调用 `obsidian eval`，写入后逐字读回；失败时恢复旧内容，或将刚创建的笔记放入可恢复回收站并恢复 `.gitkeep`。

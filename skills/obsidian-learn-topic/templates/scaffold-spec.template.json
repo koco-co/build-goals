@@ -9,45 +9,24 @@
   "learning_goal": "{{LEARNING_GOAL}}",
   "version_scope": "{{VERSION_SCOPE}}",
   "root": "{{ROADMAP_ROOT}}",
+  "curriculum_plan_file": "{{TEMP_DIR}}/curriculum-plan.json",
   "base": {
     "path": "{{ROADMAP_ROOT}}/{{TOPIC_PATH_SEGMENT}}-Roadmap.base",
     "content_file": "{{TEMP_DIR}}/{{TOPIC_PATH_SEGMENT}}-Roadmap.base"
   },
   "directories": [
-    {
-      "path": "{{ROADMAP_ROOT}}/01-{{TOPIC_PATH_SEGMENT}}概述",
-      "role": "overview",
-      "keep": false
-    },
-    {
-      "path": "{{ROADMAP_ROOT}}/02-{{FIRST_FORMAL_STAGE}}",
-      "role": "formal",
-      "keep": true
-    },
-    {
-      "path": "{{ROADMAP_ROOT}}/03-深入与拓展",
-      "role": "extension",
-      "keep": true
-    },
-    {
-      "path": "{{ROADMAP_ROOT}}/04-复习与面试",
-      "role": "review",
-      "keep": true
-    },
-    {
-      "path": "{{ROADMAP_ROOT}}/99-assets",
-      "role": "assets",
-      "keep": true
-    }
+    {"path": "{{ROADMAP_ROOT}}/01-{{TOPIC_PATH_SEGMENT}}概述", "role": "overview", "keep": false},
+    {"path": "{{ROADMAP_ROOT}}/02-{{FIRST_FORMAL_STAGE}}", "role": "formal", "keep": true},
+    {"path": "{{ROADMAP_ROOT}}/03-深入与拓展", "role": "extension", "keep": true},
+    {"path": "{{ROADMAP_ROOT}}/04-复习与面试", "role": "review", "keep": true},
+    {"path": "{{ROADMAP_ROOT}}/05-学习记录", "role": "records", "keep": false},
+    {"path": "{{ROADMAP_ROOT}}/99-assets", "role": "assets", "keep": true}
   ],
   "notes": [
-    {
-      "path": "{{ROADMAP_ROOT}}/01-{{TOPIC_PATH_SEGMENT}}概述/§01-前置准备.md",
-      "content_file": "{{TEMP_DIR}}/§01-前置准备.md"
-    },
-    {
-      "path": "{{ROADMAP_ROOT}}/01-{{TOPIC_PATH_SEGMENT}}概述/§02-{{TOPIC_PATH_SEGMENT}}概述.md",
-      "content_file": "{{TEMP_DIR}}/§02-{{TOPIC_PATH_SEGMENT}}概述.md"
-    }
+    {"path": "{{ROADMAP_ROOT}}/01-{{TOPIC_PATH_SEGMENT}}概述/§01-学习路线图.md", "content_file": "{{TEMP_DIR}}/§01-学习路线图.md"},
+    {"path": "{{ROADMAP_ROOT}}/01-{{TOPIC_PATH_SEGMENT}}概述/§02-前置准备.md", "content_file": "{{TEMP_DIR}}/§02-前置准备.md"},
+    {"path": "{{ROADMAP_ROOT}}/01-{{TOPIC_PATH_SEGMENT}}概述/§03-{{TOPIC_PATH_SEGMENT}}概述.md", "content_file": "{{TEMP_DIR}}/§03-{{TOPIC_PATH_SEGMENT}}概述.md"},
+    {"path": "{{ROADMAP_ROOT}}/05-学习记录/§01-前置准备-学习记录.md", "content_file": "{{TEMP_DIR}}/§01-前置准备-学习记录.md"},
+    {"path": "{{ROADMAP_ROOT}}/05-学习记录/§02-{{TOPIC_PATH_SEGMENT}}概述-学习记录.md", "content_file": "{{TEMP_DIR}}/§02-{{TOPIC_PATH_SEGMENT}}概述-学习记录.md"}
   ]
 }

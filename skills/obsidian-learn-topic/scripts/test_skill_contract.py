@@ -46,7 +46,7 @@ class LearnTopicSkillContractTests(unittest.TestCase):
             set(values), {"name", "description", "compatibility", "metadata"}
         )
         self.assertEqual(values["name"], "obsidian-learn-topic")
-        self.assertIn('version: "1.0.0"', read_text(SKILL_FILE))
+        self.assertIn('version: "2.0.0"', read_text(SKILL_FILE))
         description = values["description"]
         for marker in ("开始或继续系统学习", "复习", "维护学习路线", "模型直接调用"):
             self.assertIn(marker, description)
@@ -71,17 +71,10 @@ class LearnTopicSkillContractTests(unittest.TestCase):
         example_path = SKILL_ROOT / "examples/one-shot-question.example.md"
         example = read_text(example_path)
 
-        for marker in (
-            "#### Question contract",
-            "one-shot",
-            "进度状态行",
-            "场景",
-            "问题",
-            "提示",
-            "三句以内反馈",
-            "验证目标",
-            "通过标准",
-        ):
+        record_contract = read_text(SKILL_ROOT / "rules/learning-record-contract.md")
+        for marker in ("进度状态行", "场景", "问题", "提示", "三句以内", "一个核心点"):
+            self.assertIn(marker, record_contract)
+        for marker in ("每次只推进一个单元、一道问题", "问题发送后立即停止本轮"):
             self.assertIn(marker, skill)
 
         self.assertIn("examples/one-shot-question.example.md", skill)
@@ -101,26 +94,18 @@ class LearnTopicSkillContractTests(unittest.TestCase):
         skill = read_text(SKILL_FILE)
         unit_workflow = read_text(SKILL_ROOT / "workflows/§04-learn-unit.md")
         review_workflow = read_text(SKILL_ROOT / "workflows/§05-review.md")
-        lesson_template = read_text(SKILL_ROOT / "templates/lesson.template.md")
-        review_template = read_text(SKILL_ROOT / "templates/review.template.md")
+        record_contract = read_text(SKILL_ROOT / "rules/learning-record-contract.md")
+        record_template = read_text(SKILL_ROOT / "templates/learning-record.template.md")
 
-        for document in (unit_workflow, review_workflow, lesson_template, review_template):
+        for document in (review_workflow, record_contract, record_template):
             for marker in ("进度状态行", "场景", "问题", "提示"):
                 self.assertIn(marker, document)
 
-        for document in (lesson_template, review_template):
-            self.assertIn("本单元知识点已验收", document)
-            self.assertIn("{{QUESTION_STATUS}}", document)
-            self.assertNotIn("回答格式", document)
-
-        self.assertIn("Question contract", unit_workflow)
-        self.assertIn("Question contract", review_workflow)
-        self.assertIn("{{QUESTION_OBJECTIVE}}", lesson_template)
-        self.assertIn("{{QUESTION_RESPONSE_FORMAT}}", lesson_template)
-        self.assertIn("内部评定", lesson_template)
-        self.assertIn("{{QUESTION_PASS_CRITERIA}}", review_template)
-        self.assertIn("架构、职责、边界和用户流程", unit_workflow)
-        self.assertIn("内部状态名、API", skill)
+        self.assertIn("{{QUESTION_OBJECTIVE}}", record_template)
+        self.assertIn("{{QUESTION_HINT}}", record_template)
+        self.assertIn("## 作答与反馈", record_template)
+        self.assertNotIn("## 作答与反馈", read_text(SKILL_ROOT / "templates/review.template.md"))
+        self.assertIn("迁移验证", unit_workflow)
 
     def test_learning_record_transaction_is_explicit(self) -> None:
         skill = read_text(SKILL_FILE)
@@ -128,19 +113,19 @@ class LearnTopicSkillContractTests(unittest.TestCase):
         resume_workflow = read_text(SKILL_ROOT / "workflows/§03-resume.md")
         unit_workflow = read_text(SKILL_ROOT / "workflows/§04-learn-unit.md")
         review_workflow = read_text(SKILL_ROOT / "workflows/§05-review.md")
-        lesson_template = read_text(SKILL_ROOT / "templates/lesson.template.md")
-        for document in (skill, record_contract, resume_workflow, unit_workflow, review_workflow, lesson_template):
+        record_template = read_text(SKILL_ROOT / "templates/learning-record.template.md")
+        for document in (record_contract, record_template):
             for marker in ("knowledge_points_total", "knowledge_points_covered", "knowledge_points_pending"):
                 self.assertIn(marker, document)
-        for document in (skill, record_contract, resume_workflow, unit_workflow, review_workflow, lesson_template):
+        for document in (skill, record_contract, unit_workflow, review_workflow):
             self.assertIn("立即停止本轮", document)
-        for document in (skill, record_contract, resume_workflow, unit_workflow, review_workflow):
+        for document in (record_contract, unit_workflow, review_workflow):
             self.assertIn("compare-and-swap", document)
-        self.assertIn("先把知识点、覆盖矩阵和一道待回答题写入并读回课程笔记", skill)
-        self.assertIn("不得进行只存在于聊天里的教学", skill)
-        self.assertIn("没有完成第 3 步时不得开始第 4 步", record_contract)
-        self.assertIn("不得选择新的单元", resume_workflow)
-        self.assertIn("本单元知识点清单", lesson_template)
+        self.assertIn("所有问题、用户回答、实践、掌握与复习证据只写入记录", skill)
+        self.assertIn("正文与记录双向链接", skill)
+        self.assertIn("没有完成第 3 步不得教学", record_contract)
+        self.assertIn("不得选择新单元", resume_workflow)
+        self.assertIn("## 知识点与题目状态", record_template)
 
     def test_routing_names_every_supported_branch_and_negative_boundary(self) -> None:
         text = read_text(SKILL_FILE)
@@ -219,6 +204,8 @@ class LearnTopicSkillContractTests(unittest.TestCase):
             self.assertIn(case_id, checklist)
         for case_id in ("LT-22", "LT-23", "LT-24", "LT-25", "LT-26", "LT-27", "LT-28", "LT-29", "LT-30"):
             self.assertIn(case_id, checklist)
+        for case_id in ("LT-39", "LT-40", "LT-41", "LT-42", "LT-43", "LT-44", "LT-45"):
+            self.assertIn(case_id, checklist)
         for marker in ("正向路由", "负向路由", "门禁与失败路径", "全新任务"):
             self.assertIn(marker, checklist)
 
@@ -251,7 +238,7 @@ class LearnTopicSkillContractTests(unittest.TestCase):
             "01-项目概述", "02-运行与测试基线", "03-架构与模块地图",
             "04-核心调用链", "05-测试与质量体系", "06-Issue与PR考古",
             "07-最小修复实践", "08-深入与拓展", "09-复习与贡献准备",
-            "99-assets",
+            "10-学习记录", "99-assets",
         ):
             self.assertIn(stage, policy)
         for marker in ("完整 Commit", "核心切片", "真实最小 Patch", "不 commit", "上游"):
@@ -297,9 +284,9 @@ class LearnTopicSkillContractTests(unittest.TestCase):
         skill = read_text(SKILL_FILE)
         unit_workflow = read_text(SKILL_ROOT / "workflows/§04-learn-unit.md")
         code_workflow = read_text(SKILL_ROOT / "workflows/§08-code-exercise.md")
-        for text in (skill, unit_workflow, code_workflow):
-            self.assertIn("roadmap_kind", text)
-            self.assertIn("repository", text)
+        self.assertIn("非仓库代码型单元", skill)
+        self.assertIn("普通代码型单元", unit_workflow)
+        self.assertIn("非仓库代码型单元", code_workflow)
 
     def test_code_exercise_template_keeps_external_root_unresolved_and_public(self) -> None:
         template = json.loads(read_text(SKILL_ROOT / "templates/code-exercise-manifest.template.json"))

@@ -34,7 +34,7 @@ class ObsidianLearnTopicIntegrationTests(unittest.TestCase):
         )
 
         self.assertRegex(skill, r"(?m)^name:\s*obsidian-learn-topic\s*$")
-        self.assertIn('version: "1.0.0"', skill)
+        self.assertIn('version: "2.0.0"', skill)
         self.assertNotIn("disable-model-invocation:", skill)
         self.assertIn("allow_implicit_invocation: true", adapter)
         self.assertIn("$obsidian-learn-topic", adapter)
@@ -103,6 +103,7 @@ class ObsidianLearnTopicIntegrationTests(unittest.TestCase):
     def test_portable_skill_contract_and_drivers_pass(self) -> None:
         for script in (
             "test_skill_contract.py",
+            "test_content_architecture.py",
             "test_roadmap_cli.py",
             "test_repository_cli.py",
         ):
