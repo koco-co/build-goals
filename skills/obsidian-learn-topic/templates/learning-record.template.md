@@ -52,13 +52,11 @@ sources: []
 
 {{CHECKPOINT_CONTEXT}}
 
-### 任务
+### 问题
 
 {{CHECKPOINT_PROMPT}}
 
-### 提示
-
-{{PROGRESSIVE_HINT_OR_NONE}}
+{{OPTIONAL_HINT_SECTION}}
 
 ## 作答与反馈
 

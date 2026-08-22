@@ -17,7 +17,7 @@ class SkillContractTests(unittest.TestCase):
     def test_identity_and_model_invocation(self) -> None:
         skill = read("SKILL.md")
         self.assertRegex(skill, r"(?m)^name: obsidian-learn-topic$")
-        self.assertIn('version: "3.0.0"', skill)
+        self.assertIn('version: "3.0.1"', skill)
         self.assertNotIn("disable-model-invocation", skill)
         self.assertIn("allow_implicit_invocation: true", read("agents/openai.yaml"))
 
@@ -34,6 +34,26 @@ class SkillContractTests(unittest.TestCase):
             "repository-patch", "custom",
         ):
             self.assertIn(profile, profiles)
+
+    def test_review_checkpoint_uses_heading_contract(self) -> None:
+        contract = read("rules/learning-record-contract.md")
+        template = read("templates/learning-record.template.md")
+        example = read("examples/recoverable-checkpoint.example.md")
+
+        for heading in ("## 场景", "## 问题", "## 提示"):
+            self.assertIn(heading, contract)
+        self.assertIn("### 场景", template)
+        self.assertIn("### 问题", template)
+        self.assertIn("{{OPTIONAL_HINT_SECTION}}", template)
+        self.assertNotIn("### 任务", template)
+        self.assertNotIn("{{PROGRESSIVE_HINT_OR_NONE}}", template)
+        self.assertIn("## 场景", example)
+        self.assertIn("## 问题", example)
+        self.assertNotIn("## 任务", example)
+        self.assertNotRegex(
+            "\n".join((contract, template, example)),
+            r"(?m)^(?:场景|问题)[：:]",
+        )
 
     def test_deprecated_contracts_are_absent(self) -> None:
         active_paths = [

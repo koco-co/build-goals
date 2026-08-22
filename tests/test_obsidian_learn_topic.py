@@ -33,7 +33,7 @@ class ObsidianLearnTopicIntegrationTests(unittest.TestCase):
         )
 
         self.assertRegex(skill, r"(?m)^name:\s*obsidian-learn-topic\s*$")
-        self.assertIn('version: "3.0.0"', skill)
+        self.assertIn('version: "3.0.1"', skill)
         self.assertNotIn("disable-model-invocation:", skill)
         self.assertIn("allow_implicit_invocation: true", adapter)
         self.assertIn("$obsidian-learn-topic", adapter)
@@ -65,7 +65,7 @@ class ObsidianLearnTopicIntegrationTests(unittest.TestCase):
             )
         )
         versions.add(marketplace["plugins"][0]["version"])
-        self.assertEqual(versions, {"2.3.0"})
+        self.assertEqual(versions, {"2.3.1"})
 
         generated = (
             REPO_ROOT / "packages" / "dsh-build-goals" / "lib" / "skills.generated.js"

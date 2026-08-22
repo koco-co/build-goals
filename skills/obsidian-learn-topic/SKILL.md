@@ -4,7 +4,7 @@ description: 将“从零系统学习技术、框架、语言、知识点或 Git
 compatibility: 需要 Obsidian、Obsidian CLI、Python 3.10+ 与互联网访问。
 metadata:
   author: koco-co
-  version: "3.0.0"
+  version: "3.0.1"
 ---
 
 # Outcome
