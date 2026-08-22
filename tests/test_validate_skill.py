@@ -404,7 +404,7 @@ class ValidateSkillTests(unittest.TestCase):
             "build-readme": "需要 Python 3.9+ 运行内置校验脚本。",
             "build-skill": "需要互联网访问和 Python 3.9+ 运行内置静态校验脚本。",
             "handoff": None,
-            "obsidian-learn-topic": "需要 Obsidian、Obsidian CLI 与 Python 3.10+；代码练习执行需要 macOS sandbox-exec。",
+            "obsidian-learn-topic": "需要 Obsidian、Obsidian CLI、Python 3.10+ 与互联网访问。",
             "shape-idea": None,
             "vibe-coding": "需要 Python 3.9+、Git，以及目标项目实际使用的构建与验证工具；调研公开资料时需要互联网访问。",
         }
@@ -431,7 +431,7 @@ class ValidateSkillTests(unittest.TestCase):
             "build-readme": 'version: "2.1.0"',
             "build-skill": 'version: "2.1.0"',
             "handoff": 'version: "2.1.0"',
-            "obsidian-learn-topic": 'version: "2.0.0"',
+            "obsidian-learn-topic": 'version: "3.0.0"',
             "shape-idea": 'version: "2.1.0"',
             "vibe-coding": 'version: "2.0.1"',
         }

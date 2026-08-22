@@ -8,7 +8,7 @@
 
 - 只有一个可观察的 `learning_outcome`；
 - 只有一种主要 `document_type`；
-- 只有一个主要验收方式；
+- 只有一个主要 `evidence_profile` 和验收方式；
 - 使用一个贯穿式案例或一个连贯问题；
 - 所有硬前置都指向更早的单元；
 - 每个知识点 ID 只有一个权威所属单元。
@@ -17,17 +17,19 @@
 
 ## 持久课程计划
 
-路线预览前，从 `templates/curriculum-plan.template.json` 生成 Vault 外计划并验证：
+路线预览前，从 `templates/curriculum-plan.template.json` 生成 Vault 外事务计划并验证；首次设计或知识分配难以判断时，完整读取 `examples/curriculum-plan.example.json` 校准单项成果、依赖和唯一归属：
 
 - `unit_id`、计划路径和知识点归属唯一；
 - `document_type` 只能是教程、原理解释、操作指南或参考资料；
 - 依赖存在、无环且顺序正确；
 - 学习成果和验收方式非空；
+- `evidence_profile` 属于 `rules/evidence-profiles.md` 的公开集合；
 - 每个计划路径位于已预览的编号目录，不能位于学习记录或资产目录。
+- 需要子目录时，把每条相对路径和职责写入机器合同的 `subdirectories`；同一父目录从 `01-` 连续编号并先声明父级。未声明、未编号或跳号子目录不得出现在 `note_path` 或 scaffold。
 
-确认后，把同一计划确定性渲染到 `01-<主题>概述/§01-学习路线图.md`。路线图必须包含依赖图、完整单元目录、知识点唯一归属、版本基线和状态链接，并在 `learn-topic-curriculum` 标记之间嵌入与 Vault 外 JSON 逐字段相同的机器可读课程合同。可见单元表逐行保存 ID、路径、正文类型、成果、前置和验收，归属表逐行保存知识点与唯一单元；驱动限定对应章节并校验行数、顺序和字段精确等于机器合同，正确新行与陈旧旧行并存也会阻断。尚未学习的单元只保留在路线图，不创建空白正文。
+确认后，把计划确定性渲染到 `01-<主题>概述/§01-学习路线图.md`。路线图必须包含依赖图、完整单元目录、知识点唯一归属、版本基线和状态链接，并在 `learn-topic-curriculum` 标记之间嵌入 `schema_version: 3` 的机器合同。该嵌入合同是持久化课程权威；Vault 外 JSON 在事务完成后不再作为读取依赖。可见单元表逐行保存 ID、路径、正文类型、成果、前置、profile 和验收。尚未学习的单元只保留在路线图，不创建空白正文。
 
-机器可读合同是路线内单元身份的权威来源。后续创建或改写正文时，路径、`unit_id`、`document_type`、`learning_outcome`、`knowledge_ownership`、`hard_prerequisites` 和 `assessment_method` 必须与合同精确一致；学习记录必须使用已计划的 `unit_id`、进入唯一的 `NN-学习记录` 目录，并链接该单元的计划正文。任一字段漂移都先停止写入并做路线变更预览。
+后续创建或改写正文时，路径、标题、主题、目标、版本范围、阶段标题/序号、课程序号、`unit_id`、`document_type`、`learning_outcome`、`knowledge_ownership`、`hard_prerequisites`、`evidence_profile`、`assessment_method` 和双向链接必须与嵌入合同及本次配对路径一致；学习记录必须使用已计划的 `unit_id`、进入唯一的 `NN-学习记录` 目录，并链接计划正文。写入前枚举路线根，模拟事务后的全局状态，确保同一单元恰好一篇正文和一篇学习记录。任一字段或基数漂移都先停止写入并做路线变更预览。
 
 ## 三层边界
 

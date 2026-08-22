@@ -21,6 +21,7 @@ hard_prerequisites: []
 soft_prerequisites: []
 blocked_by: []
 assessment_method: "执行前置检查并解释结果"
+evidence_profile: task-operation
 evidence_note: "[[{{PREREQUISITE_EVIDENCE_PATH}}]]"
 stage_title: "01-{{TOPIC_PATH_SEGMENT}}概述"
 stage_order: 1
@@ -48,11 +49,15 @@ content_audit_note:
 
 ## 环境与配置
 
+## 操作前检查
+
 ## 操作步骤
 
 ## 成功验证
 
 ## 故障处理
+
+## 不适用场景
 
 ## 关联笔记
 

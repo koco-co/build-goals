@@ -22,6 +22,7 @@ hard_prerequisites: []
 soft_prerequisites: []
 blocked_by: []
 assessment_method: "执行前置与受控环境检查并解释结果"
+evidence_profile: task-operation
 evidence_note: "[[{{PREREQUISITE_EVIDENCE_PATH}}]]"
 stage_title: "01-项目概述"
 stage_order: 1
@@ -45,6 +46,8 @@ content_audit_note:
 
 ## 源码隔离与执行边界
 
+## 操作前检查
+
 ## 操作步骤
 
 ## 成功验证
@@ -54,6 +57,8 @@ content_audit_note:
 仓库身份、Commit、许可证、核心切片、上游状态和毕业状态只以 [[§01-学习路线图]] 为准；本篇不复制可变值。
 
 ## 故障处理
+
+## 不适用场景
 
 ## 关联笔记
 

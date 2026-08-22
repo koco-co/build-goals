@@ -21,6 +21,7 @@ hard_prerequisites: []
 soft_prerequisites: []
 blocked_by: []
 assessment_method: "{{ONE_ACCEPTANCE_METHOD}}"
+evidence_profile: concept-explanation
 evidence_note: "[[{{EVIDENCE_NOTE_PATH}}]]"
 stage_title: "{{STAGE_DIRECTORY}}"
 stage_order: {{STAGE_ORDER}}
@@ -39,6 +40,8 @@ content_audit_note:
 > {{CORE_CONCLUSION}}
 
 ## 核心问题
+
+{{REAL_QUESTION_AND_SCENARIO}}
 
 ## 心智模型
 

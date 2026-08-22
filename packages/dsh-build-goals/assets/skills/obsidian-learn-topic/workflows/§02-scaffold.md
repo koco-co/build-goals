@@ -6,7 +6,7 @@
 
 1. 读取 `rules/obsidian-cli-contract.md`、`rules/curriculum-design.md`、`rules/properties-and-base.md` 和所需模板。
 2. 解析当前 `SKILL.md` 真实目录，并用 `mktemp -d` 创建本轮独立 Vault 外目录。
-3. 生成并验证 `curriculum-plan.json`；它必须与已确认预览逐项一致。
+3. 普通路线从 `templates/curriculum-plan.template.json` 生成 v3 计划；仓库路线从 `templates/repository-curriculum-plan.template.json` 生成。计划只是本轮事务输入，必须与已确认预览逐项一致。
 4. 生成：
    - `<主题路径段>-Roadmap.base`
    - `§01-学习路线图.md`
@@ -15,7 +15,7 @@
    - 前置与概述各自的学习记录
    - `scaffold-spec.json`
 5. 仓库路线使用 `repository-curriculum-map`、仓库前置和固定外层目录；普通路线使用通用模板。
-6. 路线图的单元、依赖、唯一归属、正文类型和验收必须与课程计划一致；把规范化后的完整 JSON 写入 `learn-topic-curriculum` 机器合同。删除空章节与未替换占位符。
+6. 路线图的单元、依赖、唯一归属、正文类型、evidence profile 和验收必须与计划一致；把规范化后的完整 JSON 写入 `learn-topic-curriculum` 机器合同。事务完成后，该嵌入合同成为唯一持久化课程权威。
 
 ## 2. Dry-run 与 Apply
 
@@ -31,13 +31,13 @@ Dry-run 必须证明：
 - 初始化学习记录只在 `NN-学习记录`；
 - 其他阶段保留 `.gitkeep`，`99-assets` 只用于资产；
 - 正文与记录使用相同 `unit_id` 并双向链接；
-- Vault 外课程计划、路线图机器合同、可见目录和 Base 视图语义一致。
+- 事务计划、路线图机器合同、可见目录和 Base 五项语义能力一致。
 
 Apply 前记录未解析链接和 `dev:errors` 基线。不得绕过驱动直接写 Vault。
 
 ## 3. 验证与停止
 
-1. 运行 `roadmap_cli.py validate`，查询 `学习路线`、`课程路线`、`知识正文`、`学习记录`、`学习中`、`阻塞`、`待复习`、`已掌握`、`待核验` 和 `待补齐`。
+1. 运行 `roadmap_cli.py validate`，证明 Base 具备 `route`、`current`、`review-due`、`blocked` 和 `evidence` 五项语义能力；视图名称、顺序与额外视图不作为失败条件。
 2. 用 Obsidian CLI 读回全部初始文件、Properties、Wikilink 与 Base；打开 Base 并检查 `dev:errors`。
 3. 导航入口更新仍使用 Obsidian CLI，写前读、写后读，避免重复。
 4. 满足类型质量门的正文才设 `已发布`；学习记录保持真实初始状态。

@@ -1,0 +1,12 @@
+{
+  "origin": "host-tool|user-ci",
+  "adapter_id": "{{TRUSTED_ADAPTER_ID}}",
+  "external_run_id": "{{HOST_OR_CI_RUN_ID}}",
+  "manifest_sha256": "{{EXACT_MANIFEST_SHA256}}",
+  "command_id": "{{AUTHORIZED_COMMAND_ID}}",
+  "argv": ["{{EXACT}}", "{{AUTHORIZED}}", "{{ARGV}}"],
+  "exit_code": 0,
+  "status": "passed|failed|blocked",
+  "observed_at": "{{ISO_DATETIME}}",
+  "signature": "{{HMAC_SHA256_OVER_ALL_PRECEDING_FIELDS_IN_CANONICAL_JSON}}"
+}

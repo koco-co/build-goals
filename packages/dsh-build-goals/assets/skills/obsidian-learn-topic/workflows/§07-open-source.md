@@ -24,5 +24,6 @@
 1. 进入最小修复前展示问题、批准文件、测试 argv、预期 Patch、学习价值和风险，等待单独确认。
 2. 使用 `repository_cli.py verify-patch` 先 dry-run，再 Apply。
 3. Patch 摘要和测试结果写入对应学习记录；正文只保留稳定机制与修复说明。
-4. 只有 HEAD、批准文件、非空 Patch、`git diff --check` 和相关测试全部通过，才设 `graduation_status: passed`。
-5. 恢复前运行只读 `upstream-check`；不自动 fetch、pull、merge、rebase、commit、push 或创建 Issue/PR。
+4. 只有 HEAD、批准文件、非空 Patch、`git diff --check` 和相关测试全部通过，才满足 `repository-patch` 学习毕业门。
+5. `09-复习与贡献准备` 只说明贡献准备度；它不能替代 Patch 学习证据，外部贡献仍需独立授权。
+6. 恢复前运行只读 `upstream-check`；不自动 fetch、pull、merge、rebase、commit、push 或创建 Issue/PR。

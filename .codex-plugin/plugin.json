@@ -1,6 +1,6 @@
 {
   "name": "build-goals",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "description": "A focused toolkit for clarifying goals, delivering verifiable software artifacts, and managing evidence-based technical learning in Obsidian.",
   "author": {
     "name": "koco-co",

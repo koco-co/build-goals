@@ -1,11 +1,36 @@
 {
+  "schema_version": 3,
+  "roadmap_kind": "topic",
   "vault_name": "{{VAULT_NAME}}",
   "vault_path": "{{VAULT_PATH}}",
   "root": "{{ROADMAP_ROOT}}",
+  "expected_directories": [
+    {"name": "01-{{TOPIC_PATH_SEGMENT}}概述", "role": "overview"},
+    {"name": "02-旧阶段", "role": "formal"},
+    {"name": "03-复习与综合应用", "role": "review"},
+    {"name": "04-学习记录", "role": "records"},
+    {"name": "99-assets", "role": "assets"}
+  ],
+  "final_directories": [
+    {"name": "01-{{TOPIC_PATH_SEGMENT}}概述", "role": "overview"},
+    {"name": "02-新增阶段", "role": "formal"},
+    {"name": "03-旧阶段", "role": "formal"},
+    {"name": "04-复习与综合应用", "role": "review"},
+    {"name": "05-学习记录", "role": "records"},
+    {"name": "99-assets", "role": "assets"}
+  ],
   "moves": [
     {
       "from": "{{ROADMAP_ROOT}}/02-旧阶段",
       "to": "{{ROADMAP_ROOT}}/03-旧阶段"
+    },
+    {
+      "from": "{{ROADMAP_ROOT}}/03-复习与综合应用",
+      "to": "{{ROADMAP_ROOT}}/04-复习与综合应用"
+    },
+    {
+      "from": "{{ROADMAP_ROOT}}/04-学习记录",
+      "to": "{{ROADMAP_ROOT}}/05-学习记录"
     }
   ],
   "add_directories": [
@@ -14,11 +39,32 @@
       "keep": true
     }
   ],
-  "expected_links": [],
-  "property_updates": [],
+  "expected_links": [
+    {
+      "source": "{{ROADMAP_ROOT}}/03-旧阶段/§01-示例.md",
+      "target": "{{ROADMAP_ROOT}}/05-学习记录/§01-示例-学习记录.md"
+    }
+  ],
+  "property_updates": [
+    {
+      "path": "{{ROADMAP_ROOT}}/03-旧阶段/§01-示例.md",
+      "expected": {"stage_title": "02-旧阶段", "stage_order": 2},
+      "set": {"stage_title": "03-旧阶段", "stage_order": 3}
+    }
+  ],
+  "route_update": {
+    "path": "{{ROADMAP_ROOT}}/01-{{TOPIC_PATH_SEGMENT}}概述/§01-学习路线图.md",
+    "expected_before_file": "route-before.md",
+    "expected_after_moves_file": "route-after-moves.md",
+    "content_file": "route-replacement.md"
+  },
   "base": {
     "path": "{{ROADMAP_ROOT}}/{{TOPIC_PATH_SEGMENT}}-Roadmap.base",
     "view": "学习路线",
-    "expected_paths": []
+    "expected_paths": [
+      "{{ROADMAP_ROOT}}/01-{{TOPIC_PATH_SEGMENT}}概述/§01-学习路线图.md",
+      "{{ROADMAP_ROOT}}/03-旧阶段/§01-示例.md",
+      "{{ROADMAP_ROOT}}/05-学习记录/§01-示例-学习记录.md"
+    ]
   }
 }

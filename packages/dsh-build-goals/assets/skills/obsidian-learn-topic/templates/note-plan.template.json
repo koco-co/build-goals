@@ -1,20 +1,22 @@
 {
+  "schema_version": 3,
   "vault_name": "{{VAULT_NAME}}",
   "vault_path": "{{VAULT_PATH}}",
-  "topic": {
-    "display": "{{TOPIC_DISPLAY}}",
-    "path_segment": "{{TOPIC_PATH_SEGMENT}}",
-    "tag": "{{TOPIC_TAG}}"
-  },
-  "learning_goal": "{{LEARNING_GOAL}}",
-  "version_scope": "{{VERSION_SCOPE}}",
-  "content_contract": "three-layer",
   "root": "{{ROADMAP_ROOT}}",
+  "route_note": "{{ROADMAP_ROOT}}/01-{{TOPIC_PATH_SEGMENT}}概述/§01-学习路线图.md",
+  "expected_route_sha256": "{{ROUTE_NOTE_SHA256}}",
   "records_directory": "{{ROADMAP_ROOT}}/{{RECORDS_DIRECTORY}}",
-  "curriculum_plan_file": "{{TEMP_DIR}}/curriculum-plan.json",
-  "path": "{{NOTE_PATH}}",
-  "content_file": "{{TEMP_DIR}}/{{NOTE_FILENAME}}",
-  "mode": "create",
-  "expected_current_file": null,
-  "remove_gitkeep": true
+  "writes": [
+    {
+      "path": "{{KNOWLEDGE_NOTE_PATH}}",
+      "content_file": "{{KNOWLEDGE_NOTE_FILENAME}}",
+      "expected_current_file": null
+    },
+    {
+      "path": "{{LEARNING_RECORD_PATH}}",
+      "content_file": "{{LEARNING_RECORD_FILENAME}}",
+      "expected_current_file": null
+    }
+  ],
+  "trusted_evidence": []
 }

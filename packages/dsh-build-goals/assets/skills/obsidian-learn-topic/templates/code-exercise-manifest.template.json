@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "vault_root": "{{ABSOLUTE_EXISTING_VAULT_ROOT}}",
   "workspace_root": "{{USER_PROVIDED_CONFIRMED_EXISTING_EXTERNAL_ROOT}}",
   "exercise_directory": "01-{{EXERCISE_SLUG}}",
@@ -13,38 +13,20 @@
     "version_scope": "{{VERSION_SCOPE}}",
     "goal": "{{ONE_VERIFIABLE_GOAL}}",
     "layout": "standalone",
-    "core_requirements": [
-      "{{PUBLIC_CORE_REQUIREMENT}}"
-    ],
-    "explanation_prompts": [
-      "{{EXPLAIN_KEY_IMPLEMENTATION_AND_BOUNDARY}}"
-    ],
-    "rubric": [
-      {
-        "criterion": "{{PUBLIC_CRITERION}}",
-        "points": 100
-      }
-    ],
+    "core_requirements": ["{{PUBLIC_CORE_REQUIREMENT}}"],
+    "explanation_prompts": ["{{EXPLAIN_KEY_IMPLEMENTATION_AND_BOUNDARY}}"],
+    "rubric": {
+      "mode": "pass-fail",
+      "criteria": ["{{PUBLIC_PASS_CRITERION}}"]
+    },
     "hints": [
-      {"level": 1, "content": "{{FAILURE_AND_KNOWLEDGE_POINT}}"},
-      {"level": 2, "content": "{{FILE_FUNCTION_OR_BOUNDARY_CLUE}}"},
-      {"level": 3, "content": "{{LOCAL_PSEUDOCODE_OR_MINIMAL_FRAGMENT}}"}
-    ],
-    "optional_challenges": []
+      {"when": "首次失败后", "content": "{{FAILURE_AND_KNOWLEDGE_POINT}}"},
+      {"when": "仍无法定位时", "content": "{{FILE_FUNCTION_OR_BOUNDARY_CLUE}}"}
+    ]
   },
   "files": [
-    {
-      "path": "01-{{EXERCISE_SLUG}}.py",
-      "role": "starter",
-      "content_file": "starter.py",
-      "user_editable": true
-    },
-    {
-      "path": "test_exercise.py",
-      "role": "core_test",
-      "content_file": "test_exercise.py",
-      "user_editable": false
-    }
+    {"path": "01-{{EXERCISE_SLUG}}.py", "role": "starter", "content_file": "starter.py", "user_editable": true},
+    {"path": "test_exercise.py", "role": "core_test", "content_file": "test_exercise.py", "user_editable": false}
   ],
   "commands": [
     {
@@ -58,7 +40,5 @@
       "visible": true,
       "effects": []
     }
-  ],
-  "runtime_write_paths": ["__pycache__"],
-  "cleanup_paths": ["__pycache__"]
+  ]
 }

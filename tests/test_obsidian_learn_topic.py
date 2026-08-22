@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import json
 import os
-import platform
 import re
 import subprocess
 import sys
@@ -34,7 +33,7 @@ class ObsidianLearnTopicIntegrationTests(unittest.TestCase):
         )
 
         self.assertRegex(skill, r"(?m)^name:\s*obsidian-learn-topic\s*$")
-        self.assertIn('version: "2.0.0"', skill)
+        self.assertIn('version: "3.0.0"', skill)
         self.assertNotIn("disable-model-invocation:", skill)
         self.assertIn("allow_implicit_invocation: true", adapter)
         self.assertIn("$obsidian-learn-topic", adapter)
@@ -66,7 +65,7 @@ class ObsidianLearnTopicIntegrationTests(unittest.TestCase):
             )
         )
         versions.add(marketplace["plugins"][0]["version"])
-        self.assertEqual(versions, {"2.2.0"})
+        self.assertEqual(versions, {"2.3.0"})
 
         generated = (
             REPO_ROOT / "packages" / "dsh-build-goals" / "lib" / "skills.generated.js"
@@ -97,27 +96,30 @@ class ObsidianLearnTopicIntegrationTests(unittest.TestCase):
         self.assertEqual(artifacts, [])
         self.assertEqual(private_paths, [])
 
-    @unittest.skipUnless(
-        sys.version_info >= (3, 10), "obsidian-learn-topic requires Python 3.10+"
-    )
     def test_portable_skill_contract_and_drivers_pass(self) -> None:
-        for script in (
-            "test_skill_contract.py",
-            "test_content_architecture.py",
-            "test_roadmap_cli.py",
-            "test_repository_cli.py",
-        ):
-            with self.subTest(script=script):
-                result = self.run_skill_test(script)
-                self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-
-    @unittest.skipUnless(
-        sys.version_info >= (3, 10) and platform.system() == "Darwin",
-        "code exercise execution requires Python 3.10+ and macOS sandbox-exec",
-    )
-    def test_macos_code_exercise_driver_passes(self) -> None:
-        result = self.run_skill_test("test_exercise_cli.py")
+        env = os.environ.copy()
+        env["PYTHONDONTWRITEBYTECODE"] = "1"
+        result = subprocess.run(
+            [sys.executable, "-m", "unittest", "discover", "-s", str(SKILL_ROOT / "scripts" / "tests"), "-v"],
+            cwd=REPO_ROOT,
+            env=env,
+            check=False,
+            text=True,
+            capture_output=True,
+        )
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+        eval_result = self.run_skill_test("eval_cli.py")
+        self.assertNotEqual(eval_result.returncode, 0, "eval_cli requires an explicit command")
+        eval_result = subprocess.run(
+            [sys.executable, str(SKILL_ROOT / "scripts" / "eval_cli.py"), "validate"],
+            cwd=REPO_ROOT,
+            env=env,
+            check=False,
+            text=True,
+            capture_output=True,
+        )
+        self.assertEqual(eval_result.returncode, 0, eval_result.stdout + eval_result.stderr)
 
 
 if __name__ == "__main__":

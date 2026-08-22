@@ -1,5 +1,5 @@
 ---
-title: "{{TOPIC_DISPLAY}}复习与面试"
+title: "{{TOPIC_DISPLAY}}复习与综合应用"
 aliases: []
 tags:
   - "学习路线/{{TOPIC_TAG}}"
@@ -21,6 +21,7 @@ hard_prerequisites: []
 soft_prerequisites: []
 blocked_by: []
 assessment_method: "{{ONE_ACCEPTANCE_METHOD}}"
+evidence_profile: reference-application
 evidence_note: "[[{{EVIDENCE_NOTE_PATH}}]]"
 stage_title: "{{STAGE_DIRECTORY}}"
 stage_order: {{STAGE_ORDER}}
@@ -33,22 +34,22 @@ content_audit_at: {{DATE}}
 content_audit_note:
 ---
 
-# {{TOPIC_DISPLAY}}复习与面试
+# {{TOPIC_DISPLAY}}复习与综合应用
 
 > [!abstract] 复习目标
 > {{REVIEW_GOAL}}
 
-## 适用范围
+## 能力索引
 
-## 重点功能与特性索引
+## 易混淆概念与失败模式
 
-## 易混淆概念
+## 综合应用任务
 
-## 高频失败模式
+## 迁移方向
 
-## 面试题、追问与解答技巧
+## 职业目标附录（仅在用户明确需要时保留）
 
-## 综合实践索引
+<!-- 仅在显式面试、求职或认证目标下加入题目与解答技巧。 -->
 
 ## 关联笔记
 

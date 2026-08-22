@@ -21,6 +21,7 @@ hard_prerequisites: []
 soft_prerequisites: []
 blocked_by: []
 assessment_method: "分析一个新场景并判断是否适用"
+evidence_profile: concept-explanation
 evidence_note: "[[{{OVERVIEW_EVIDENCE_PATH}}]]"
 stage_title: "01-{{TOPIC_PATH_SEGMENT}}概述"
 stage_order: 1

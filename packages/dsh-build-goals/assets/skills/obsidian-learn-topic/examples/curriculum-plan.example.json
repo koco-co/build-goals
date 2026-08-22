@@ -1,52 +1,45 @@
 {
-  "topic": "Playwright Python",
-  "learning_goal": "能独立编写、调试并维护一条可靠的浏览器自动化测试",
-  "version_baseline": "经路线启动时核验的受维护 Playwright Python 版本",
-  "source_checked_at": "2026-08-21",
+  "schema_version": 3,
+  "roadmap_kind": "topic",
+  "roadmap_root": "Learning/Rust-Ownership",
+  "directories": [
+    {"name": "01-Rust所有权概述", "role": "overview"},
+    {"name": "02-借用与实践", "role": "formal"},
+    {"name": "03-深入与拓展", "role": "extension"},
+    {"name": "04-复习与综合应用", "role": "review"},
+    {"name": "05-学习记录", "role": "records"},
+    {"name": "99-assets", "role": "assets"}
+  ],
+  "subdirectories": [],
+  "records_directory": "05-学习记录",
+  "topic": "Rust Ownership",
+  "learning_goal": "能解释所有权转移，并独立修复一个由 move 引起的编译错误",
+  "version_baseline": "路线启动时核验的 Rust stable",
+  "source_checked_at": "2099-01-01",
   "units": [
     {
-      "unit_id": "PW-FOUND-01",
-      "stage": "01-Playwright概述",
-      "note_path": "01-Playwright概述/§02-前置准备.md",
-      "title": "前置准备",
-      "document_type": "操作指南",
-      "learning_outcome": "能说明并验证开始练习所需的 Python、环境与浏览器条件",
-      "prerequisites": [],
-      "knowledge_ownership": ["PW.ENV.RUNTIME", "PW.ENV.BROWSER"],
-      "assessment": "运行环境检查并解释每项结果"
-    },
-    {
-      "unit_id": "PW-LOC-01",
-      "stage": "03-定位器与断言",
-      "note_path": "03-定位器与断言/§01-语义Locator.md",
-      "title": "语义 Locator",
-      "document_type": "教程",
-      "learning_outcome": "能为一个真实页面选择稳定 Locator 并解释选择依据",
-      "prerequisites": ["PW-FOUND-01"],
-      "knowledge_ownership": ["PW.LOCATOR.SEMANTIC", "PW.LOCATOR.STRICTNESS"],
-      "assessment": "修改贯穿案例中的 Locator 并通过公开测试"
-    },
-    {
-      "unit_id": "PW-AST-01",
-      "stage": "03-定位器与断言",
-      "note_path": "03-定位器与断言/§02-Web-first断言.md",
-      "title": "Web-first 断言",
+      "unit_id": "OWN-01",
+      "stage": "01-Rust所有权概述",
+      "note_path": "01-Rust所有权概述/§02-所有权为何存在.md",
+      "title": "所有权为何存在",
       "document_type": "原理解释",
-      "learning_outcome": "能解释自动等待的因果链并诊断一个错误断言",
-      "prerequisites": ["PW-LOC-01"],
-      "knowledge_ownership": ["PW.ASSERT.WEB_FIRST", "PW.ASSERT.RETRY"],
-      "assessment": "分析新失败场景并选择正确断言"
+      "learning_outcome": "能预测一次 move 后哪些变量仍可使用，并解释原因",
+      "prerequisites": [],
+      "knowledge_ownership": ["ownership.move", "ownership.drop"],
+      "evidence_profile": "concept-explanation",
+      "assessment": "分析一个未见过的 move 场景并纠正错误心智模型"
     },
     {
-      "unit_id": "PW-CODEGEN-01",
-      "stage": "04-工具与调试",
-      "note_path": "04-工具与调试/§01-Codegen审阅.md",
-      "title": "审阅 Codegen 结果",
-      "document_type": "操作指南",
-      "learning_outcome": "能审阅生成的脚本并替换不稳定 Locator",
-      "prerequisites": ["PW-LOC-01", "PW-AST-01"],
-      "knowledge_ownership": ["PW.CODEGEN.REVIEW"],
-      "assessment": "修正一份生成脚本并说明修改理由"
+      "unit_id": "OWN-02",
+      "stage": "02-借用与实践",
+      "note_path": "02-借用与实践/§01-用借用避免无意转移.md",
+      "title": "用借用避免无意转移",
+      "document_type": "教程",
+      "learning_outcome": "能独立修复一个无意 move，同时保持调用者继续使用原值",
+      "prerequisites": ["OWN-01"],
+      "knowledge_ownership": ["borrowing.shared-reference"],
+      "evidence_profile": "code-practice",
+      "assessment": "用户真实尝试通过公开编译测试并解释借用边界"
     }
   ]
 }

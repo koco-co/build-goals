@@ -21,6 +21,7 @@ hard_prerequisites: []
 soft_prerequisites: []
 blocked_by: []
 assessment_method: "{{ONE_ACCEPTANCE_METHOD}}"
+evidence_profile: tutorial-reproduction
 evidence_note: "[[{{EVIDENCE_NOTE_PATH}}]]"
 stage_title: "{{STAGE_DIRECTORY}}"
 stage_order: {{STAGE_ORDER}}
@@ -38,6 +39,9 @@ content_audit_note:
 > [!abstract] 核心结论
 > {{CORE_CONCLUSION}}
 
+> [!question] 本文解决的真实问题
+> {{REAL_QUESTION}}
+
 ## 学习成果
 
 {{ONE_MEASURABLE_OUTCOME}}
@@ -53,6 +57,8 @@ content_audit_note:
 ### 第二步
 
 ### 完整结果
+
+### 如何验证结果
 
 ## 阶段检查
 

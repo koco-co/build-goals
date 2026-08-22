@@ -19,6 +19,8 @@ import subprocess
 import sys
 from typing import Any, Iterable
 
+from learn_topic.curriculum import SPDX_LICENSE_VALUES
+
 
 REPOSITORY_RE = re.compile(r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
 COMMIT_RE = re.compile(r"^(?:[0-9a-fA-F]{40}|[0-9a-fA-F]{64})$")
@@ -101,6 +103,19 @@ def normalize_target_ref(value: Any) -> str:
     if invalid:
         raise ContractError("target_ref is not a safe canonical Git ref")
     return target_ref
+
+
+def normalize_default_branch(value: Any) -> str:
+    branch = ensure_text(value, label="default_branch")
+    invalid = (
+        not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._/-]*", branch)
+        or branch.endswith(("/", ".", ".lock"))
+        or ".." in branch or "//" in branch or "@{" in branch
+        or any(part.startswith(".") or part.endswith(".lock") for part in branch.split("/"))
+    )
+    if invalid:
+        raise ContractError("default_branch is not a safe Git branch name")
+    return branch
 
 
 def normalize_approved_files(value: Any) -> list[str]:
@@ -217,14 +232,17 @@ def load_plan(path_value: str) -> dict[str, Any]:
     upstream_status = ensure_text(raw["upstream_status"], label="upstream_status")
     if upstream_status not in UPSTREAM_STATES:
         raise ContractError("upstream_status is not a supported repository state")
+    license_spdx = ensure_text(raw["license_spdx"], label="license_spdx")
+    if license_spdx not in SPDX_LICENSE_VALUES:
+        raise ContractError("license_spdx must be a supported SPDX license identifier")
     return {
         "provider": "github",
         "repository": repository,
         "repository_url": repository_url,
-        "default_branch": ensure_text(raw["default_branch"], label="default_branch"),
+        "default_branch": normalize_default_branch(raw["default_branch"]),
         "target_ref": normalize_target_ref(raw["target_ref"]),
         "baseline_commit": baseline_commit,
-        "license_spdx": ensure_text(raw["license_spdx"], label="license_spdx"),
+        "license_spdx": license_spdx,
         "upstream_status": upstream_status,
         "verified_at": verified_at,
         "vault_path": str(vault_path),
@@ -292,6 +310,7 @@ def clean_test_environment(plan: dict[str, Any]) -> dict[str, str]:
             "GIT_CONFIG_NOSYSTEM": "1",
             "GIT_CONFIG_GLOBAL": os.devnull,
             "NPM_CONFIG_USERCONFIG": os.devnull,
+            "PYTHONDONTWRITEBYTECODE": "1",
         }
     )
     return environment
@@ -478,7 +497,7 @@ def verify_patch(plan: dict[str, Any], *, apply: bool) -> dict[str, Any]:
             "baseline_commit": before["head"],
             "changed_files": before["changed"],
             "patch_sha256": before["patch_sha256"],
-            "graduation_status": "pending",
+            "graduation_status": "pending-evidence",
         }
     tested = run(
         plan["test_argv"],

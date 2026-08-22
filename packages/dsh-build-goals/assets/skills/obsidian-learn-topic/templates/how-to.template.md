@@ -21,6 +21,7 @@ hard_prerequisites: []
 soft_prerequisites: []
 blocked_by: []
 assessment_method: "{{ONE_ACCEPTANCE_METHOD}}"
+evidence_profile: task-operation
 evidence_note: "[[{{EVIDENCE_NOTE_PATH}}]]"
 stage_title: "{{STAGE_DIRECTORY}}"
 stage_order: {{STAGE_ORDER}}
@@ -37,6 +38,9 @@ content_audit_note:
 
 > [!abstract] 要完成的任务
 > {{ONE_MEASURABLE_OUTCOME}}
+
+> [!example] 真实使用场景
+> {{REAL_TASK_SCENARIO}}
 
 ## 适用条件
 

@@ -1,0 +1,53 @@
+{
+  "schema_version": 3,
+  "roadmap_kind": "repository",
+  "roadmap_root": "{{ROADMAP_ROOT}}",
+  "directories": [
+    {"name": "01-项目概述", "role": "overview"},
+    {"name": "02-运行与测试基线", "role": "formal"},
+    {"name": "03-架构与模块地图", "role": "formal"},
+    {"name": "04-核心调用链", "role": "formal"},
+    {"name": "05-测试与质量体系", "role": "formal"},
+    {"name": "06-Issue与PR考古", "role": "formal"},
+    {"name": "07-最小修复实践", "role": "formal"},
+    {"name": "08-深入与拓展", "role": "extension"},
+    {"name": "09-复习与贡献准备", "role": "review"},
+    {"name": "10-学习记录", "role": "records"},
+    {"name": "99-assets", "role": "assets"}
+  ],
+  "subdirectories": [],
+  "records_directory": "10-学习记录",
+  "topic": "{{TOPIC_DISPLAY}}",
+  "learning_goal": "{{LEARNING_GOAL}}",
+  "version_baseline": "{{FULL_COMMIT}}",
+  "source_checked_at": "{{VERIFIED_AT}}",
+  "repository": {
+    "provider": "github",
+    "name": "{{REPOSITORY_NAME}}",
+    "url": "{{REPOSITORY_URL}}",
+    "default_branch": "{{DEFAULT_BRANCH}}",
+    "target_ref": "{{TARGET_REF}}",
+    "commit": "{{FULL_COMMIT}}",
+    "license_spdx": "{{LICENSE_SPDX}}",
+    "verified_at": "{{VERIFIED_AT}}",
+    "scope": "{{REPOSITORY_SCOPE}}",
+    "core_slice": "{{CORE_SLICE}}",
+    "upstream_checked_at": "{{UPSTREAM_CHECKED_AT}}",
+    "upstream_status": "{{UPSTREAM_STATUS}}",
+    "graduation_status": "pending-evidence"
+  },
+  "units": [
+    {
+      "unit_id": "{{UNIT_ID}}",
+      "stage": "{{STAGE_DIRECTORY}}",
+      "note_path": "{{STAGE_DIRECTORY}}/§01-{{LESSON_TITLE}}.md",
+      "title": "{{LESSON_TITLE}}",
+      "document_type": "{{DOCUMENT_TYPE}}",
+      "learning_outcome": "{{ONE_MEASURABLE_OUTCOME}}",
+      "prerequisites": [],
+      "knowledge_ownership": ["{{KNOWLEDGE_POINT_ID}}"],
+      "evidence_profile": "{{EVIDENCE_PROFILE}}",
+      "assessment": "{{ONE_ACCEPTANCE_METHOD}}"
+    }
+  ]
+}

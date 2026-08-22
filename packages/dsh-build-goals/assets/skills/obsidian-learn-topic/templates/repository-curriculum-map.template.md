@@ -8,6 +8,7 @@ updated: {{VERIFIED_AT}}
 status: 待核验
 category: "{{CATEGORY}}"
 record_type: curriculum-map
+schema_version: 3
 roadmap_topic: "{{TOPIC_DISPLAY}}"
 roadmap_kind: repository
 roadmap_root: "{{ROADMAP_ROOT}}"
@@ -33,7 +34,7 @@ repository_verified_at: {{VERIFIED_AT}}
 repository_scope: "{{REPOSITORY_SCOPE}}"
 core_slice: "{{CORE_SLICE}}"
 upstream_checked_at: {{UPSTREAM_CHECKED_AT}}
-graduation_status: pending
+graduation_status: pending-evidence
 ---
 
 # {{TOPIC_DISPLAY}}学习路线图
@@ -43,29 +44,40 @@ graduation_status: pending
 
 ## Commit 与资料基线
 
+- Provider：`github`
 - 仓库：`{{REPOSITORY_NAME}}`
+- Canonical URL：`{{REPOSITORY_URL}}`
+- 默认分支：`{{DEFAULT_BRANCH}}`
+- 目标 ref：`{{TARGET_REF}}`
 - Commit：`{{FULL_COMMIT}}`
+- 许可证：`{{LICENSE_SPDX}}`
+- 学习范围：{{REPOSITORY_SCOPE}}
 - 核心切片：{{CORE_SLICE}}
+- 上游检查：`{{UPSTREAM_CHECKED_AT}}`
 - 上游状态：`{{UPSTREAM_STATUS}}`
+- 仓库核验：`{{VERIFIED_AT}}`
+- 毕业状态：`pending-evidence`
 
 ## 知识依赖图
 
 ```mermaid
 flowchart LR
+  %% unit: {{UNIT_ID}}
   {{UNIT_ID}}["{{LESSON_TITLE}}"]
+  {{DEPENDENCY_COMMENT_LINES}}
 ```
 
 ## 单元目录
 
-| 单元 ID | 阶段与计划文件 | 正文类型 | 单项可验收成果 | 前置单元 | 验收方式 | 状态 |
+| 单元 ID | 阶段与计划文件 | 正文类型 | 单项可验收成果 | 前置单元 | Evidence profile | 验收方式 |
 | --- | --- | --- | --- | --- | --- | --- |
-| `{{UNIT_ID}}` | `{{NOTE_PATH}}` | {{DOCUMENT_TYPE}} | {{ONE_MEASURABLE_OUTCOME}} | 无 | {{ONE_ACCEPTANCE_METHOD}} | 未创建 |
+| `{{UNIT_ID}}` | `{{NOTE_PATH}}` | {{DOCUMENT_TYPE}} | {{ONE_MEASURABLE_OUTCOME}} | 无 | `{{EVIDENCE_PROFILE}}` | {{ONE_ACCEPTANCE_METHOD}} |
 
 ## 知识点唯一归属
 
-| 知识点 ID | 唯一所属单元 | 边界 |
-| --- | --- | --- |
-| `{{KNOWLEDGE_POINT_ID}}` | `{{UNIT_ID}}` | {{OWNERSHIP_BOUNDARY}} |
+| 知识点 ID | 唯一所属单元 |
+| --- | --- |
+| `{{KNOWLEDGE_POINT_ID}}` | `{{UNIT_ID}}` |
 
 ## 机器可读课程合同
 

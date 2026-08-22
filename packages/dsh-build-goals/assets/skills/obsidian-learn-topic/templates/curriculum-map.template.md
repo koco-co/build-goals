@@ -8,7 +8,9 @@ updated: {{DATE}}
 status: 待核验
 category: "{{CATEGORY}}"
 record_type: curriculum-map
+schema_version: 3
 roadmap_topic: "{{TOPIC_DISPLAY}}"
+roadmap_kind: topic
 roadmap_root: "{{ROADMAP_ROOT}}"
 roadmap_status: 进行中
 learning_goal: "{{LEARNING_GOAL}}"
@@ -39,20 +41,22 @@ sources: []
 
 ```mermaid
 flowchart LR
+  %% unit: {{UNIT_ID}}
   {{UNIT_ID}}["{{LESSON_TITLE}}"]
+  {{DEPENDENCY_COMMENT_LINES}}
 ```
 
 ## 单元目录
 
-| 单元 ID | 阶段与计划文件 | 正文类型 | 单项可验收成果 | 前置单元 | 验收方式 | 状态 |
+| 单元 ID | 阶段与计划文件 | 正文类型 | 单项可验收成果 | 前置单元 | Evidence profile | 验收方式 |
 | --- | --- | --- | --- | --- | --- | --- |
-| `{{UNIT_ID}}` | `{{NOTE_PATH}}` | {{DOCUMENT_TYPE}} | {{ONE_MEASURABLE_OUTCOME}} | 无 | {{ONE_ACCEPTANCE_METHOD}} | 未创建 |
+| `{{UNIT_ID}}` | `{{NOTE_PATH}}` | {{DOCUMENT_TYPE}} | {{ONE_MEASURABLE_OUTCOME}} | 无 | `{{EVIDENCE_PROFILE}}` | {{ONE_ACCEPTANCE_METHOD}} |
 
 ## 知识点唯一归属
 
-| 知识点 ID | 唯一所属单元 | 边界 |
-| --- | --- | --- |
-| `{{KNOWLEDGE_POINT_ID}}` | `{{UNIT_ID}}` | {{OWNERSHIP_BOUNDARY}} |
+| 知识点 ID | 唯一所属单元 |
+| --- | --- |
+| `{{KNOWLEDGE_POINT_ID}}` | `{{UNIT_ID}}` |
 
 ## 机器可读课程合同
 
