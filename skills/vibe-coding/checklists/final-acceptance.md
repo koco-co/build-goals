@@ -8,4 +8,5 @@
 - [ ] 已验证、未验证和阻塞准确区分；文件存在没有被当作行为通过。
 - [ ] 已完成并集成的任务 worktree 与本地任务分支按规则清理；保留项有进行中任务、独有改动、阻塞或既有所有权依据。
 - [ ] 未经授权没有 push、发布、部署或外部数据写入。
+- [ ] `health-check` 最终交付检查点已完成；发现的问题均经确认修复并复检，或准确保留为阻塞。
 - [ ] `validate_delivery.py <root> --mode <mode> --phase delivery --require-clean --strict` 通过。

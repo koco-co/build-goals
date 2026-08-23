@@ -9,7 +9,7 @@
 
 第二次确认覆盖已展示的所有功能域。后续不逐域重复询问，除非产品范围、公开契约、持久化数据、认证授权、部署拓扑、核心工具链或整体依赖路线发生实质变化。
 
-配套 Skill 尚未决定的具体内容仍按其自身规则预览确认，例如项目指令完整正文或 README 修改预览。这不是第三个全局门禁；同一内容已经被完整等价确认时不机械重复。
+`health-check` 内部领域尚未决定的具体内容仍按其自身规则预览确认，例如项目指令完整正文或 README 修改预览。这不是第三个全局门禁；同一内容已经被完整等价确认时不机械重复。
 
 ## 2. 路线与权威输入
 
@@ -78,6 +78,6 @@
 
 ## 6. 配套 Skills
 
-按 `rules/companion-skills.md` 处理 `shape-idea`、`build-prd`、`build-agents-md`、`build-skill`、`build-plugin`、`build-readme` 和 `handoff`。
+按 `rules/companion-skills.md` 处理 `shape-idea`、`health-check` 和 `handoff`。项目规范领域统一由 `health-check` 封装，不在总控计划和交付记录中展开内部 Skill。
 
-受控调用只传最小上下文。子 Skill 不重复询问由总控管理的本地 commit，也不得自行 push、发布、部署或更新本地 Plugin。出现新的产品、架构、公开契约或范围决策时返回对应全局门禁。
+受控调用只传最小上下文。子 Skill 不重复询问由总控管理的本地 commit，也不得自行 push、发布、部署或更新本地 Plugin。`health-check` 没有发现问题时不增加用户交互；发现问题时暂停当前阶段，报告后经用户确认直接修复并复检。出现新的产品、架构、公开契约或范围决策时返回对应全局门禁。

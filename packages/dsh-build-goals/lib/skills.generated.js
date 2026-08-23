@@ -8,6 +8,7 @@ export const SKILLS = [
   {"name": "build-readme", "description": "新建或更新项目 README.md；用户要求 README，或 README 缺失、与稳定项目事实不一致时使用，不用于普通文档润色、代码开发或发布。", "modelInvocable": true, "userInvocable": true},
   {"name": "build-skill", "description": "从零构建、升级或重构通用 Skill 与项目级 Agent Skill；任务明确涉及 Agent Skill 时使用，不用于 Plugin 打包分发、普通提示词润色或一般编码任务。", "modelInvocable": true, "userInvocable": true},
   {"name": "handoff", "description": "将当前对话整理为精简交接文档和可复制的接续提示词；用户要求交接，或工作必须切换会话、客户端或环境时使用，不用于普通总结。", "modelInvocable": true, "userInvocable": true},
+  {"name": "health-check", "description": "对项目的 Agent Skill、Plugin、README、AGENTS.md/CLAUDE.md 与正式 PRD 需求包进行统一健康检查；用户要求项目健康检查，或上层项目流程需要基线、就绪或交付复核时使用，不用于代码质量、安全、依赖、测试覆盖率、CI 或性能审计。", "modelInvocable": true, "userInvocable": true},
   {"name": "obsidian-learn-topic", "description": "将“从零系统学习技术、框架、语言、知识点或 GitHub 开源仓库”转化为经过当前资料核验、Vault 前置审计、路线确认、可读知识正文、可恢复学习证据、真实实践与适应性复习的长期 Obsidian 学习流程。用户开始或继续系统学习、制定或维护路线、复习能力、读懂 owner/repo 或完成真实最小 Patch 时使用；支持模型直接调用与显式调用，不用于一次性概念问答、普通故障排查或未经授权的外部贡献。", "modelInvocable": true, "userInvocable": true},
   {"name": "shape-idea", "description": "通过逐轮提问与事实核查完善初步想法；目标、范围或关键取舍尚不明确且需要用户决策时使用，目标明确、普通问答、评审或直接实施时不使用。", "modelInvocable": true, "userInvocable": true},
   {"name": "vibe-coding", "description": "依据已确认的 docs/产品需求/ 需求包新建项目、按用户指定范围参考旧项目、续建现有项目，或实施现有项目的架构与技术栈迁移；经过架构方案和整体实施路线两次全局确认，以 TDD、多 Agent 和可选 Git worktrees 按功能域交付并完成全链路验收。", "modelInvocable": false, "userInvocable": true},

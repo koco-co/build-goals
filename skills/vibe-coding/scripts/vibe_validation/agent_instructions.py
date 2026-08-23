@@ -223,7 +223,7 @@ def validate_agent_readiness(
             "error",
             "AGENT_VALIDATION_COMMAND",
             plan_path,
-            "验证命令必须调用 build-agents-md 的 validate_agents_md.py，并启用 --strict。",
+            "验证命令必须调用项目指令严格校验器 validate_agents_md.py，并启用 --strict。",
             root,
         )
     if not _is_passing_result(values.get("验证结果", "")):

@@ -1492,8 +1492,8 @@ class VibeCodingValidatorTests(unittest.TestCase):
             self.assertEqual(drifted.returncode, 1)
             self.assertIn("AGENT_INSTRUCTIONS_DRIFT", drifted.stdout)
 
-    def test_vibe_coding_installs_for_both_platforms(self) -> None:
-        for platform, platform_root in (("claude", ".claude"), ("codex", ".agents")):
+    def test_vibe_coding_standalone_install_is_rejected(self) -> None:
+        for platform in ("claude", "codex", "dsh"):
             with self.subTest(platform=platform), tempfile.TemporaryDirectory() as temp:
                 env = os.environ.copy()
                 env["HOME"] = temp
@@ -1513,75 +1513,10 @@ class VibeCodingValidatorTests(unittest.TestCase):
                     text=True,
                     capture_output=True,
                 )
-                self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-                target = Path(temp) / platform_root / "skills" / "vibe-coding"
-                self.assertTrue(
-                    target.joinpath("scripts", "validate_delivery.py").is_file()
-                )
-                self.assertTrue(target.joinpath("scripts", "validate_prd.py").is_file())
-                self.assertTrue(
-                    target.joinpath("scripts", "import_requirements.py").is_file()
-                )
-                self.assertTrue(
-                    target.joinpath("scripts", "validate_agents_md.py").is_file()
-                )
-                self.assertFalse(
-                    target.joinpath("scripts", "validate_prd.py").is_symlink()
-                )
-                self.assertFalse(
-                    target.joinpath("scripts", "validate_agents_md.py").is_symlink()
-                )
-                self.assertFalse(
-                    target.joinpath("prompts", "reviewer.agent.md").is_symlink()
-                )
-                self.assertEqual(
-                    target.joinpath("agents").exists(), platform == "codex"
-                )
-
-                project = Path(temp) / "fixture-project"
-                self.write_architecture(project, "greenfield")
-                self.write_readiness_plan(
-                    project,
-                    "F-001 F-001-AC-01",
-                    status="有效沿用",
-                    commit="N/A（无需更新）",
-                    baseline="N/A（非 Git 项目）",
-                )
-                self.write_agent_instructions(project)
-                installed_readiness = subprocess.run(
-                    [
-                        sys.executable,
-                        str(target / "scripts" / "validate_delivery.py"),
-                        str(project),
-                        "--mode",
-                        "greenfield",
-                        "--phase",
-                        "readiness",
-                        "--strict",
-                    ],
-                    check=False,
-                    text=True,
-                    capture_output=True,
-                )
-                self.assertEqual(
-                    installed_readiness.returncode,
-                    0,
-                    installed_readiness.stdout + installed_readiness.stderr,
-                )
-                installed_agents_help = subprocess.run(
-                    [
-                        sys.executable,
-                        str(target / "scripts" / "validate_agents_md.py"),
-                        "--help",
-                    ],
-                    check=False,
-                    text=True,
-                    capture_output=True,
-                )
-                self.assertEqual(
-                    installed_agents_help.returncode,
-                    0,
-                    installed_agents_help.stdout + installed_agents_help.stderr,
+                self.assertEqual(result.returncode, 1)
+                self.assertIn(
+                    "vibe-coding 只能随 build-goals Plugin 使用",
+                    result.stderr,
                 )
 
 

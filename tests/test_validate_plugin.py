@@ -106,6 +106,7 @@ class ValidatePluginTests(unittest.TestCase):
         self.assertIn("skills/build-prd", result.stdout)
         self.assertIn("skills/build-readme", result.stdout)
         self.assertIn("skills/build-agents-md", result.stdout)
+        self.assertIn("skills/health-check", result.stdout)
         self.assertIn("skills/shape-idea", result.stdout)
         self.assertIn("skills/handoff", result.stdout)
 

@@ -4,7 +4,7 @@ description: 创建、升级或迁移 Claude Code、Codex 等 Agent Plugin；任
 compatibility: 需要互联网访问和 Python 3.9+ 运行内置静态校验脚本。
 metadata:
   author: koco-co
-  version: "2.1.0"
+  version: "2.2.0"
 ---
 
 # Outcome
@@ -18,6 +18,7 @@ metadata:
 - 用户要求把现有 Skills、Hooks、Agents 或配置仓库改造成 Plugin 时，执行“仓库迁移”分支。
 - 用户要求同时支持 Claude Code 与 Codex 时，执行“双平台 Plugin”分支，核心组件只维护一份，Manifest 与平台适配分别管理。
 - 由 `vibe-coding` 等上层总控受控调用时，保留尚未完成的内容确认，但按上层任务、提交与恢复契约返回结果。
+- 由 `health-check` 受控调用时，审查阶段保持只读，仅返回问题、证据、修复方案、影响文件和验证方式；上层取得修复确认后，按本 Skill 现有流程修复和验证，保留尚未确认的行为与内容门禁。
 - Plugin 需要新建或升级 Skill 时，转交 `build-skill`；平台不支持 Skill 间受控委派时，生成完整交接提示，由用户继续调用对应 Skill。
 - 用户只要求编写单个 Skill 且没有插件打包、安装或分发需求时，转交 `build-skill`。
 

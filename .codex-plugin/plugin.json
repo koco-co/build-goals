@@ -38,6 +38,7 @@
     "websiteURL": "https://github.com/koco-co/build-goals",
     "defaultPrompt": [
       "Use shape-idea to turn a rough idea into a clear scope with fully resolved decisions.",
+      "Use health-check to inspect a project's Agent Skills, plugin packaging, README, project instructions, and formal requirement package; report findings first, then repair and recheck after confirmation.",
       "Use build-skill or build-plugin to create a verifiable Agent capability.",
       "Use build-prd to produce a research-backed, domain-sliced product requirement package with representative inputs, outputs, behavior samples, and acceptance contracts.",
       "Use vibe-coding to build from a confirmed requirement snapshot, optionally reference only user-authorized parts of an old project, continue an existing project, or migrate its architecture through two global approvals, TDD, multi-agent delivery, and cross-domain validation.",

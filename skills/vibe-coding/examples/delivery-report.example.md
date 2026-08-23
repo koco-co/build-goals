@@ -54,10 +54,7 @@
 
 ## 配套 Skill 生命周期
 
-- `build-prd`：有效沿用（需求包已确认，未重新触发）。
-- `build-agents-md`：已更新并验证，治理提交 `c1d2e3f`，最终无漂移。
-- `build-readme`：不适用（README 与最终事实一致）。
-- `build-skill` / `build-plugin`：不适用。
+- `health-check`：基线检查通过；就绪检查的问题已确认修复并形成治理提交 `c1d2e3f`；最终交付检查复检通过。
 
 ## 仓库治理
 

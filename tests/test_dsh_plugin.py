@@ -290,6 +290,7 @@ class DshPluginPackageTests(unittest.TestCase):
             "build-readme",
             "build-skill",
             "handoff",
+            "health-check",
             "shape-idea",
         ):
             with self.subTest(skill=skill_name):
@@ -297,7 +298,7 @@ class DshPluginPackageTests(unittest.TestCase):
         self.assertIn('"modelInvocable": false', lines["vibe-coding"])
 
         readme = (PACKAGE_DIR / "README.md").read_text(encoding="utf-8")
-        self.assertIn("8 个配套 Skill 既可由模型按描述调用", readme)
+        self.assertIn("9 个配套 Skill 既可由模型按描述调用", readme)
         self.assertIn("`vibe-coding` 仅通过 `/vibe-coding` 启动", readme)
 
     def test_committed_assets_match_the_authoritative_source(self) -> None:

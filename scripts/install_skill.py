@@ -32,6 +32,7 @@ PORTABLE_FRONTMATTER_FIELDS = {
     "metadata",
     "allowed-tools",
 }
+PLUGIN_ONLY_SKILLS = {"health-check", "vibe-coding"}
 
 
 class InstallError(RuntimeError):
@@ -151,6 +152,10 @@ def install_skill(
 ) -> Path:
     if not NAME_PATTERN.fullmatch(skill_name):
         raise InstallError("Skill 名称只能包含小写字母、数字和单个连字符。")
+    if skill_name in PLUGIN_ONLY_SKILLS:
+        raise InstallError(
+            f"{skill_name} 只能随 build-goals Plugin 使用，不能独立安装。"
+        )
 
     repo_root = repo_root.expanduser().resolve()
     source = repo_root / "skills" / skill_name

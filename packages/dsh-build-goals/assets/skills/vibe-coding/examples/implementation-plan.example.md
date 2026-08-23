@@ -18,8 +18,7 @@
 
 | Skill | 触发证据 | 调用阶段 | 阻断 | 恢复条件 | 交付记录 |
 | --- | --- | --- | --- | --- | --- |
-| `build-agents-md` | 新项目尚无根 `AGENTS.md` | 脚手架验证后、功能开发前 | 是 | 完整内容确认、写入并通过严格校验 | 治理提交 `a1b2c3d` |
-| `build-prd` | 需求包已确认 | 不适用 | 否 | — | 有效沿用 |
+| `health-check` | 进入基线、就绪和最终交付检查点 | 三个检查点 | 有问题时是 | 用户确认后修复、验证并复检 | 基线通过；就绪修复项目指令并形成治理提交 `a1b2c3d`；最终待执行 |
 
 ## 需求追踪
 
@@ -70,12 +69,12 @@ TASK-001 与 TASK-002 串行；本示例只有一个功能域，不创建无收�
 
 ## 项目指令就绪
 
-「已更新并验证」分支：根 `AGENTS.md` 缺失，已调用 `build-agents-md` 生成并确认完整正文与文件操作。
+「已更新并验证」分支：`health-check` 就绪检查发现根 `AGENTS.md` 缺失，报告后已确认完整正文与文件操作并完成修复。
 
 - 状态：已更新并验证
 - 触发证据：新项目没有根 `AGENTS.md` 与同目录 `CLAUDE.md` 单一来源入口。
 - 内容确认：已确认 `AGENTS.md` 完整正文、`CLAUDE.md` 相对符号链接及全部文件操作。
-- 验证命令：`python3 <build-agents-md>/scripts/validate_agents_md.py . --strict`
+- 验证命令：`python3 <vibe-coding>/scripts/validate_agents_md.py . --strict`
 - 验证结果：通过。
 - 治理提交：`a1b2c3d`
 - 功能开发基线：`e5f6a7b`（readiness 执行时的当前 HEAD，已回填明确 SHA）
@@ -88,7 +87,7 @@ TASK-001 与 TASK-002 串行；本示例只有一个功能域，不创建无收�
 - 状态：有效沿用
 - 触发证据：根 `AGENTS.md` 与 `CLAUDE.md` 单一来源入口已存在且与真实命令一致。
 - 内容确认：N/A（无需改写）
-- 验证命令：`python3 <build-agents-md>/scripts/validate_agents_md.py . --strict`
+- 验证命令：`python3 <vibe-coding>/scripts/validate_agents_md.py . --strict`
 - 验证结果：通过。
 - 治理提交：N/A（无需更新）
 - 功能开发基线：`e5f6a7b`

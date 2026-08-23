@@ -1,7 +1,7 @@
 {
   "name": "@koco-co/dsh-build-goals",
   "version": "2.4.0",
-  "description": "DeepSeek Harness plugin bundle distributing nine build-goals skills, including evidence-based technical learning in Obsidian.",
+  "description": "DeepSeek Harness plugin bundle distributing ten build-goals skills, including unified project health checks and evidence-based technical learning in Obsidian.",
   "type": "module",
   "main": "lib/index.js",
   "exports": {

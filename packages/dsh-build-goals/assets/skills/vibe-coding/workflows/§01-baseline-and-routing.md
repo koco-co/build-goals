@@ -48,7 +48,15 @@ readiness 前已经存在的非当前 worktree 必须按“路径 | 完整分支
 
 用户自然语言已经明确时不得再让用户选择编号。只有确实存在多种合理解释且会改变读取范围或实施方式时，提出一个带推荐答案的路线问题。
 
-## Phase 4：校验并比较需求快照
+## Phase 4：执行基线检查点
+
+路线确定后受控调用 `health-check`，传递当前项目、路线、HEAD、工作区、已有 worktrees、需求来源和只读范围。
+
+新项目只检查路线当前需要的输入和已经存在的规范产物，不把尚未到创建时点的 README 或项目指令报成问题。没有发现问题时不与用户交互，直接进入需求快照校验；发现问题时暂停当前阶段，由 `health-check` 一次性报告，用户确认后直接修复、验证并复检。只有复检满足恢复条件后才能继续。
+
+平台不能受控调用时按 `rules/companion-skills.md` 输出只指向 `health-check` 的人工交接提示，不展开内部领域。
+
+## Phase 5：校验并比较需求快照
 
 路线 1–3 必须先运行：
 
@@ -70,7 +78,7 @@ python3 <vibe-coding>/scripts/import_requirements.py <requirement-source> <targe
 
 不会自动同步来源更新。每次更新都重新比较、说明影响并按统一状态表处理写入权限。
 
-## Phase 5：形成基线摘要
+## Phase 6：形成基线摘要
 
 摘要至少包含：
 
@@ -80,6 +88,7 @@ python3 <vibe-coding>/scripts/import_requirements.py <requirement-source> <targe
 - 当前 HEAD、工作区、已有 worktrees 和保护方式；
 - 工具链、入口、测试、CI 和项目指令初步状态；
 - 可用 Agent、浏览器、worktree 和验证能力；
+- `health-check` 基线检查点的范围、问题、修复、验证与复检结论；
 - 下一阶段只读调研范围与真实阻塞。
 
 完成前不得修改目标项目。第一次架构确认前，需求快照首次复制也不属于例外写入。

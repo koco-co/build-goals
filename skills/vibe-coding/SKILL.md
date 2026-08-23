@@ -5,7 +5,7 @@ compatibility: 需要 Python 3.9+、Git，以及目标项目实际使用的构�
 disable-model-invocation: true
 metadata:
   author: koco-co
-  version: "2.0.1"
+  version: "2.1.0"
 ---
 
 # Outcome
@@ -26,7 +26,8 @@ metadata:
 用户已经明确“新建”“续建”“参考哪些内容”“升级架构”或“迁移技术栈”时直接路由。只有描述确实可对应多条路线且会改变结果时，才询问一个路线问题并给出推荐。
 
 - 路线 1–3 必须使用通过严格校验的完整需求包，或范围、外部依赖和验收条件都已明确且已确认的正式阶段包；`.build-goals/build-prd/` 过程检查点不能实施。
-- 需求包缺失、未确认、哈希漂移或行为样例不完整时，转交 `build-prd`；不能用旧代码或零散描述替代。
+- 需求包缺失、未确认、哈希漂移或行为样例不完整时，由基线 `health-check` 报告并在确认后组织修复；不能用旧代码或零散描述替代。
+- 本 Skill 的三个检查点依赖同一 Plugin 中的 `health-check`，只随完整 `build-goals` Plugin 分发，不支持独立安装。
 - 普通代码修改、单点 Bug、单个文档或没有完整项目交付目标的任务不进入本 Skill。
 
 ## Steps
@@ -37,7 +38,8 @@ metadata:
    - 完整读取 `workflows/§01-baseline-and-routing.md`。
    - 保护当前 HEAD、未提交修改、已有 worktrees（工作树）和用户新增文件，不执行破坏性清理或历史改写。
    - 目标不是 Git 仓库时暂停并询问是否初始化 Git；未得到同意不得初始化，也不得继续进入依赖 Git/worktree/commit 的实施阶段。
-   - 路线 1–3 先严格校验来源需求包；来源不在目标项目时，使用 `scripts/import_requirements.py` 只读比较差异。第一次架构确认前不得使用 `--write`。
+   - 路线确定后执行 `health-check` 基线检查点；没有发现问题时继续，发现问题时暂停当前阶段，报告、确认、修复并复检后再恢复。
+   - 路线 1–3 再严格校验来源需求包；来源不在目标项目时，使用 `scripts/import_requirements.py` 只读比较差异。第一次架构确认前不得使用 `--write`。
    - 已有快照不会自动更新。发现来源版本变化时先报告受影响功能域、功能和文件；替换仍需明确确认。
 
 2. 调研并确认架构方案
@@ -58,7 +60,7 @@ metadata:
    - 完整读取 `workflows/§05-scaffold-and-worktrees.md`。
    - 建立架构方案要求的最小可运行骨架，不默认增加格式化、Lint、类型检查、CI、环境变量、日志或测试层级。
    - 脚手架通过适用检查后形成可回滚的本地提交。
-   - 检查项目指令；缺失、链接异常或与真实工程事实冲突时，按 `rules/companion-skills.md` 处理 `build-agents-md`。平台不能受控调用时输出完整人工交接提示并暂停依赖任务，不在本 Skill 内复制其实现。
+   - 脚手架与真实命令稳定后执行 `health-check` 就绪检查点；没有发现问题时继续，发现问题时暂停当前阶段，报告、确认、修复并复检后再恢复。
    - 在全局实施任务清单记录安装、启动或 smoke（冒烟）、基础测试、治理提交和既有 worktree 基线；readiness（项目就绪门禁）严格校验通过前不得创建功能 worktree 或调起功能 Agent。
 
 5. 按功能域组织 Agent 并交付
@@ -80,6 +82,7 @@ metadata:
    - 完整读取 `workflows/§08-delivery.md`。
    - 全局报告写入 `docs/交付验收/交付验收报告.md`，每个功能域证据写入 `docs/交付验收/功能域/<功能域>.md`。
    - 更新 `docs/实施任务/` 中的任务状态、验证证据、集成状态和 commit SHA，执行最终严格校验。
+   - 最终项目事实和交付文档稳定后执行 `health-check` 最终交付检查点；问题完成修复和复检前不得交付。
    - 受保护主分支合并、push、发布、部署或本地 Plugin 更新仍需分别取得明确授权。
 
 ## Outputs

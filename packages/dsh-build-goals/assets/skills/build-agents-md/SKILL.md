@@ -4,7 +4,7 @@ description: 初始化或整体重构项目的 AGENTS.md，并以 CLAUDE.md 相�
 compatibility: 需要 Python 3.9+ 运行内置校验脚本。
 metadata:
   author: koco-co
-  version: "2.1.0"
+  version: "2.2.0"
 ---
 
 # Outcome
@@ -18,6 +18,7 @@ metadata:
 - Monorepo 仅在子目录存在不同技术栈、命令、职责或关键约定时创建嵌套 `AGENTS.md`。
 - 用户只要求审查、建议或预览时，停在只读阶段。
 - 由 `vibe-coding` 等上层总控受控调用时，保留完整内容确认，但按上层提供的任务、提交和恢复契约返回结果。
+- 由 `health-check` 受控调用时，审查阶段保持只读，仅返回问题、证据、修复方案、影响文件和验证方式；上层取得修复确认后，按本 Skill 现有流程修复和验证，写入前仍展示完整正文和全部文件操作。
 - 普通 README、项目文档、通用 Agent 行为规范、测试框架或 CI 建设不属于本 Skill。
 
 ## Steps

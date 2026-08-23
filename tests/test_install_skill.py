@@ -313,7 +313,9 @@ class InstallSkillTests(unittest.TestCase):
 
     def test_all_shipped_skills_install_for_both_platforms(self) -> None:
         skill_names = sorted(
-            path.name for path in REPO_ROOT.joinpath("skills").iterdir()
+            path.name
+            for path in REPO_ROOT.joinpath("skills").iterdir()
+            if path.name not in {"health-check", "vibe-coding"}
         )
 
         for skill_name in skill_names:
@@ -336,25 +338,33 @@ class InstallSkillTests(unittest.TestCase):
                     skill_md = destination.joinpath("SKILL.md").read_text(
                         encoding="utf-8"
                     )
-                    model_invocable = skill_name != "vibe-coding"
                     if platform == "claude":
                         self.assertFalse(destination.joinpath("agents").exists())
-                        if model_invocable:
-                            self.assertNotIn("disable-model-invocation:", skill_md)
-                        else:
-                            self.assertIn(
-                                "disable-model-invocation: true", skill_md
-                            )
+                        self.assertNotIn("disable-model-invocation:", skill_md)
                     else:
                         self.assertNotIn("disable-model-invocation:", skill_md)
                         adapter = destination.joinpath(
                             "agents", "openai.yaml"
                         ).read_text(encoding="utf-8")
                         self.assertIn(
-                            "allow_implicit_invocation: "
-                            + ("true" if model_invocable else "false"),
+                            "allow_implicit_invocation: true",
                             adapter,
                         )
+
+    def test_plugin_only_skills_reject_standalone_installation(self) -> None:
+        for skill_name in ("health-check", "vibe-coding"):
+            for platform in ("claude", "codex", "dsh"):
+                with (
+                    self.subTest(skill=skill_name, platform=platform),
+                    tempfile.TemporaryDirectory() as temp,
+                ):
+                    result = self.run_installer(Path(temp), platform, skill_name)
+                    self.assertEqual(result.returncode, 1)
+                    self.assertIn(
+                        f"{skill_name} 只能随 build-goals Plugin 使用",
+                        result.stderr,
+                    )
+
     def test_dry_run_does_not_create_target_directories(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
             home = Path(temp) / "new-home"

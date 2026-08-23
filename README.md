@@ -18,7 +18,7 @@
 
 <h2 align="center">𝑶𝒗𝒆𝒓𝒗𝒊𝒆𝒘 · 简介</h2>
 
-<p><code>build-goals</code> 是一个持续演进与沉淀的 <b>Agent</b> 目标构建仓库。它既是可以直接加载的 <b>Claude Code</b>、<b>Codex</b> 与 <b>DeepSeek Harness</b> 三平台 <b>Plugin</b>，也保留单个 <b>Skill</b> 的独立安装方式。</p>
+<p><code>build-goals</code> 是一个持续演进与沉淀的 <b>Agent</b> 目标构建仓库。它既是可以直接加载的 <b>Claude Code</b>、<b>Codex</b> 与 <b>DeepSeek Harness</b> 三平台 <b>Plugin</b>，也为没有跨 <b>Skill</b> 依赖的能力保留独立安装方式。</p>
 
 - 当前适配 <b>Claude Code</b>、<b>Codex</b> 与 <b>DeepSeek Harness</b>。
 - 其他 <b>Coding Agent</b> 尚未声明兼容；新增平台前会先核对真实能力与契约。
@@ -30,6 +30,7 @@
 | <b>Skill</b>                                 | 作用                                                                     |
 | -------------------------------------------- | ------------------------------------------------------------------------ |
 | [`shape-idea`](skills/shape-idea/)           | 将初步想法塑造成完整、无歧义的定义                                       |
+| [`health-check`](skills/health-check/)       | 统一检查项目规范产物，报告问题并在确认后修复、验证和复检                  |
 | [`build-skill`](skills/build-skill/)         | 按能力设计 <b>Frontmatter</b>，构建并审查高质量 <b>Agent Skill</b>       |
 | [`build-plugin`](skills/build-plugin/)       | 构建、升级或迁移双平台 <b>Plugin</b>                                     |
 | [`build-prd`](skills/build-prd/)             | 生成包含真实输入输出与行为样例的可复制产品需求包                         |
@@ -39,11 +40,13 @@
 | [`handoff`](skills/handoff/)                 | 整理跨会话交接文档并生成可直接复制的接续提示词                           |
 | [`obsidian-learn-topic`](skills/obsidian-learn-topic/) | 在 <b>Obsidian</b> 中规划、教学、实践、复习并维护长期技术学习路线 |
 
+<p><code>health-check</code> 统一检查项目中的 <b>Agent Skill</b>、<b>Plugin</b>、<b>README</b>、<code>AGENTS.md</code> / <code>CLAUDE.md</code> 和正式产品需求包。它先只读检查并一次性报告有证据的问题；用户确认后，直接组织对应领域修复、验证并重新检查，不生成持久化健康报告。</p>
+
 <p><code>build-prd</code> 支持从已有项目提取完整对外行为，也能把尚不完整的想法完善为产品需求包。它先确认功能域地图，再逐域确认用户输入、追问、输出固定结构与语义、对外契约、异常边界和行为样例；大项目可在 <code>.build-goals/build-prd/</code> 保存已确认的逐域检查点，最终生成可独立复制和校验的 <code>docs/产品需求/</code>。</p>
 
 <p><code>build-skill</code> 会根据调用方式、参数、权限、上下文与硬性环境要求形成 <b>Frontmatter</b> 字段决策矩阵；实现后分别完成内容审查、文案审查、内容回归和适用的独立 <b>Reviewer</b> 审查。</p>
 
-<p><code>vibe-coding</code> 是端到端软件交付总控：它按用户原话选择“新项目只按需求实现”“新项目仅参考旧项目指定部分”“现有项目按需求续建”或“现有项目架构/技术栈迁移”。外部需求包会复制为目标项目本地快照，不与来源实时联动；架构方案和整体实施路线经过两次全局确认后，按功能域组织 <b>TDD</b>、多 <b>Agent</b> 与可选 <b>Git worktrees</b>，最终执行跨域端到端验收。</p>
+<p><code>vibe-coding</code> 是端到端软件交付总控：它按用户原话选择“新项目只按需求实现”“新项目仅参考旧项目指定部分”“现有项目按需求续建”或“现有项目架构/技术栈迁移”。外部需求包会复制为目标项目本地快照，不与来源实时联动；架构方案和整体实施路线经过两次全局确认后，按功能域组织 <b>TDD</b>、多 <b>Agent</b> 与可选 <b>Git worktrees</b>，并在基线、就绪和最终交付三个检查点自动调用 <code>health-check</code>。没有问题时继续执行；发现问题时暂停当前阶段，报告、确认、修复并复检后恢复。</p>
 
 <p><code>build-readme</code> 会先了解代码、命令、测试、<b>CI</b>、文档和资源并提供具体修改预览；用户确认后才创建或更新 <b>README</b>，并分别报告静态检查、<b>GitHub</b> 渲染和未验证内容。</p>
 
@@ -64,18 +67,19 @@ flowchart LR
     B --> F[README]
     B --> M[AGENTS.md]
     E --> G[Vibe Coding]
-    G --> H[Architecture Approval]
+    G --> Q[Health Check: Baseline]
+    Q --> H[Architecture Approval]
     H --> I[Task Approval]
     I --> N[Scaffold]
-    N --> O{Agent Instructions Ready?}
-    O -->|Update required| P[Build AGENTS.md]
-    P --> O
-    O -->|Ready| J[TDD Agent Team]
+    N --> R[Health Check: Readiness]
+    R --> J[TDD Agent Team]
+    J --> V[Cross-domain Validation]
+    V --> S[Health Check: Final]
+    S --> L[Handoff]
     C --> K[Validate]
     D --> K
     F --> K
     M --> K
-    J --> K
     K --> L[Handoff]
 ```
 
@@ -116,6 +120,7 @@ build-goals/
 │   └── install_skill.py
 ├── skills/
 │   ├── shape-idea/
+│   ├── health-check/
 │   ├── build-skill/
 │   ├── build-plugin/
 │   ├── build-prd/
@@ -172,13 +177,15 @@ codex plugin add build-goals@build-goals
 dsh plugin --profile web add 'github:koco-co/build-goals#path:packages/dsh-build-goals'
 ```
 
-<p>需要 <b>pnpm</b> 9+；本地开发可用绝对路径替代 <b>git</b> 地址。安装后重启对应 <code>profile</code> 的 <code>dsh</code> 进程，新会话的 <code>/</code> 菜单即可调用 9 个 <b>Skill</b>。升级 = 重跑 <code>add</code>（<b>git</b> 渠道装的是仓库快照）；<b>npm</b> 注册表为预留发布渠道。</p>
+<p>需要 <b>pnpm</b> 9+；本地开发可用绝对路径替代 <b>git</b> 地址。安装后重启对应 <code>profile</code> 的 <code>dsh</code> 进程，新会话的 <code>/</code> 菜单即可调用 10 个 <b>Skill</b>。升级 = 重跑 <code>add</code>（<b>git</b> 渠道装的是仓库快照）；<b>npm</b> 注册表为预留发布渠道。</p>
+
+<p>安装完整 <b>Plugin</b> 后，可在 <b>Claude Code</b> 中调用 <code>/build-goals:health-check</code>，在 <b>Codex</b> 中调用 <code>$build-goals:health-check</code>，在 <b>DeepSeek Harness</b> 中调用 <code>/health-check</code>；符合描述的项目健康检查请求也允许模型直接路由。<code>vibe-coding</code> 会在三个项目检查点自动使用该入口。</p>
 
 <a id="standalone-skills"></a>
 
 <h2 align="center">𝑺𝒕𝒂𝒏𝒅𝒂𝒍𝒐𝒏𝒆 𝑺𝒌𝒊𝒍𝒍𝒔 · 独立安装</h2>
 
-<p><b>Plugin</b> 是推荐分发方式。确实只需要一个 <b>Skill</b> 时，仍可使用兼容安装器。</p>
+<p><b>Plugin</b> 是推荐分发方式。确实只需要一个没有跨 <b>Skill</b> 依赖的能力时，仍可使用兼容安装器；<code>health-check</code> 与 <code>vibe-coding</code> 只随完整 <b>Plugin</b> 分发，安装器会拒绝独立安装。</p>
 
 <p><b>Codex</b>：</p>
 
@@ -204,7 +211,7 @@ python3 scripts/install_skill.py build-skill \
   --scope user
 ```
 
-<p>将 <code>build-skill</code> 替换为 <code>build-plugin</code>、<code>build-prd</code>、<code>vibe-coding</code>、<code>build-readme</code>、<code>build-agents-md</code>、<code>shape-idea</code>、<code>handoff</code> 或 <code>obsidian-learn-topic</code> 即可安装另一个 <b>Skill</b>。目标目录已存在时默认拒绝覆盖；明确确认后添加 <code>--force</code>。</p>
+<p>将 <code>build-skill</code> 替换为 <code>build-plugin</code>、<code>build-prd</code>、<code>build-readme</code>、<code>build-agents-md</code>、<code>shape-idea</code>、<code>handoff</code> 或 <code>obsidian-learn-topic</code> 即可安装另一个独立 <b>Skill</b>。目标目录已存在时默认拒绝覆盖；明确确认后添加 <code>--force</code>。</p>
 
 <a id="validation"></a>
 
@@ -230,7 +237,7 @@ python3 packages/dsh-build-goals/scripts/sync_skills.py --root .
 
 ```bash
 python3 skills/build-skill/scripts/validate_skill.py \
-  skills/vibe-coding \
+  skills/health-check \
   --profile dual \
   --plugin-root . \
   --strict
@@ -315,7 +322,7 @@ python3 -m unittest discover -s tests -p 'test_*.py' -v
 | ------------------------ | --------------------------------------- | ---------------- | ------------------------------------------------- |
 | <b>Claude Code</b>       | `.claude-plugin/plugin.json`            | 已接入 <b>CI</b> | 需在本地 <b>Claude Code</b> 完成                  |
 | <b>Codex</b>             | `.codex-plugin/plugin.json`             | 已接入 <b>CI</b> | 需在支持 <b>Plugin</b> 的 <b>Codex</b> 客户端完成 |
-| <b>DeepSeek Harness</b>  | `packages/dsh-build-goals/package.json` | 已接入 <b>CI</b> | 已在本机 <b>DSH</b> web/headless 完成             |
+| <b>DeepSeek Harness</b>  | `packages/dsh-build-goals/package.json` | 已接入 <b>CI</b> | 既有安装链路已验证；<code>health-check</code> 本次真实调用待验证 |
 | 其他 <b>Coding Agent</b> | 暂无                                    | 暂无             | 暂无                                              |
 
 <a id="license"></a>

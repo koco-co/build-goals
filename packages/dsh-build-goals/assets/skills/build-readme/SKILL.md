@@ -4,7 +4,7 @@ description: 新建或更新项目 README.md；用户要求 README，或 README 
 compatibility: 需要 Python 3.9+ 运行内置校验脚本。
 metadata:
   author: koco-co
-  version: "2.1.0"
+  version: "2.2.0"
 ---
 
 # Outcome
@@ -17,6 +17,7 @@ metadata:
 - 目标项目已有 `README.md` 时，执行“保留事实并更新 README”分支。
 - 仓库已有 `README-EN.md` 等伴随 README 时，在预览中列出并于确认后同步；不存在时不创建，也不把它变成待确认问题。
 - 用户只要求审查或预览时，停在只读预览，不修改文件。
+- 由 `health-check` 受控调用时，审查阶段保持只读，仅返回问题、证据、修复方案、影响文件和验证方式；上层取得修复确认后，按本 Skill 现有流程修复和验证，写入前仍展示具体修改预览。
 - 普通文档润色、代码开发、发布、仓库主页配置和与项目 README 无关的写作不属于本 Skill。
 
 ## Steps
