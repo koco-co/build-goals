@@ -65,7 +65,7 @@ class ObsidianLearnTopicIntegrationTests(unittest.TestCase):
             )
         )
         versions.add(marketplace["plugins"][0]["version"])
-        self.assertEqual(versions, {"2.3.1"})
+        self.assertEqual(versions, {"2.4.0"})
 
         generated = (
             REPO_ROOT / "packages" / "dsh-build-goals" / "lib" / "skills.generated.js"

@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "build-goals",
   "displayName": "Build Goals",
-  "version": "2.3.1",
+  "version": "2.4.0",
   "description": "Clarify goals, deliver verifiable software artifacts, and manage evidence-based technical learning in Obsidian.",
   "author": {
     "name": "koco-co",

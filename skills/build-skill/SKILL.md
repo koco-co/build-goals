@@ -4,7 +4,7 @@ description: 从零构建、升级或重构通用 Skill 与项目级 Agent Skill
 compatibility: 需要互联网访问和 Python 3.9+ 运行内置静态校验脚本。
 metadata:
   author: koco-co
-  version: "2.1.0"
+  version: "2.2.0"
 ---
 
 # Outcome
@@ -52,7 +52,8 @@ metadata:
 4. 执行
    - 完整读取 `workflows/§04-implementation.md`。
    - 使用 `templates/skill.template.md` 作为结构基线，默认骨架按 `rules/architecture.md` 的省略准则调整；按照 `rules/frontmatter.md` 形成并落盘平台配置。
-   - 优先复用仓库已有 CLI、校验器、测试和公共能力；只有确有缺口时才新增 Skill 内脚本。
+   - 优先复用仓库已有 CLI、校验器、测试和公共能力；多个 Skills 确实共用且共享目录会随目标交付时，将稳定脚本放在项目根目录 `.agents/scripts/`，否则只在确有缺口时新增 Skill 内脚本。
+   - 新增脚本优先使用无需第三方依赖即可运行的 MJS 或 Shell；任务不适合时可以选择 Python 等语言，并明确运行时、依赖和验证命令。
    - 实现方式优先级遵循 `rules/quality-standard.md` §1。
    - 完成初稿后先确认内容正确、完整，再按照文案审查规则润色；不确定原意时退回内容设计，不自行改变行为。
    - 保持单一规范源；平台差异集中在 Manifest、适配文件或安装过程，不复制两套核心工作流。

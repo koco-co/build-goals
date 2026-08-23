@@ -334,6 +334,45 @@ class ValidateSkillTests(unittest.TestCase):
         self.assertIn("`when_to_use`", quality)
         self.assertIn("触发条件、排除条件", quality)
 
+    def test_build_skill_defines_conditional_shared_script_policy(self) -> None:
+        skill_root = REPO_ROOT / "skills" / "build-skill"
+        paths = (
+            skill_root / "SKILL.md",
+            skill_root / "rules" / "architecture.md",
+            skill_root / "rules" / "quality-standard.md",
+            skill_root / "rules" / "platform-compatibility.md",
+            skill_root / "workflows" / "§01-research.md",
+            skill_root / "workflows" / "§03-design.md",
+            skill_root / "workflows" / "§04-implementation.md",
+            skill_root / "checklists" / "design-review.md",
+            skill_root / "checklists" / "content-review.md",
+            skill_root / "templates" / "design-proposal.template.md",
+            skill_root / "examples" / "project-skill.example.md",
+        )
+        contract = "\n".join(path.read_text(encoding="utf-8") for path in paths)
+
+        for required in (
+            ".agents/scripts/",
+            "至少两个",
+            "随项目或整体安装包",
+            "独立安装",
+            "Skill 自有",
+            "MJS",
+            "Shell",
+            "Python",
+            "第三方依赖",
+            "验收命令",
+        ):
+            with self.subTest(required=required):
+                self.assertIn(required, contract)
+
+        self.assertIn(
+            "node .agents/scripts/release-evidence.mjs",
+            (skill_root / "examples" / "project-skill.example.md").read_text(
+                encoding="utf-8"
+            ),
+        )
+
     def test_build_skill_defines_frontmatter_decision_matrix(self) -> None:
         skill_root = REPO_ROOT / "skills" / "build-skill"
         frontmatter = skill_root.joinpath("rules", "frontmatter.md").read_text(
@@ -429,7 +468,7 @@ class ValidateSkillTests(unittest.TestCase):
             "build-plugin": 'version: "2.1.0"',
             "build-prd": 'version: "2.1.0"',
             "build-readme": 'version: "2.1.0"',
-            "build-skill": 'version: "2.1.0"',
+            "build-skill": 'version: "2.2.0"',
             "handoff": 'version: "2.1.0"',
             "obsidian-learn-topic": 'version: "3.0.1"',
             "shape-idea": 'version: "2.1.0"',
