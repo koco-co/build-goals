@@ -44,6 +44,24 @@ class EvalCliTests(unittest.TestCase):
             with self.assertRaises(eval_cli.EvalError):
                 eval_cli.validate_observation(path)
 
+    def test_dsh_observation_is_not_a_supported_client(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            path = Path(temporary) / "observation.json"
+            path.write_text(
+                json.dumps(
+                    {
+                        "client": "dsh",
+                        "fresh_session": True,
+                        "case_id": "route-language",
+                        "result": "passed",
+                        "evidence": ["legacy DSH transcript"],
+                    }
+                ),
+                encoding="utf-8",
+            )
+            with self.assertRaises(eval_cli.EvalError):
+                eval_cli.validate_observation(path)
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

@@ -33,7 +33,7 @@ class ObsidianLearnTopicIntegrationTests(unittest.TestCase):
         )
 
         self.assertRegex(skill, r"(?m)^name:\s*obsidian-learn-topic\s*$")
-        self.assertIn('version: "3.0.1"', skill)
+        self.assertIn('version: "4.0.0"', skill)
         self.assertNotIn("disable-model-invocation:", skill)
         self.assertIn("allow_implicit_invocation: true", adapter)
         self.assertIn("$obsidian-learn-topic", adapter)
@@ -50,13 +50,12 @@ class ObsidianLearnTopicIntegrationTests(unittest.TestCase):
         self.assertIn("$build-goals:obsidian-learn-topic", readme)
         self.assertIn("/build-goals:obsidian-learn-topic", readme)
 
-    def test_plugin_release_and_dsh_bundle_include_the_new_skill(self) -> None:
+    def test_plugin_release_versions_are_synchronized(self) -> None:
         versions = {
             json.loads(path.read_text(encoding="utf-8"))["version"]
             for path in (
                 REPO_ROOT / ".claude-plugin" / "plugin.json",
                 REPO_ROOT / ".codex-plugin" / "plugin.json",
-                REPO_ROOT / "packages" / "dsh-build-goals" / "package.json",
             )
         }
         marketplace = json.loads(
@@ -65,22 +64,8 @@ class ObsidianLearnTopicIntegrationTests(unittest.TestCase):
             )
         )
         versions.add(marketplace["plugins"][0]["version"])
-        self.assertEqual(versions, {"2.4.0"})
-
-        generated = (
-            REPO_ROOT / "packages" / "dsh-build-goals" / "lib" / "skills.generated.js"
-        ).read_text(encoding="utf-8")
-        self.assertIn('"name": "obsidian-learn-topic"', generated)
-        self.assertTrue(
-            REPO_ROOT.joinpath(
-                "packages",
-                "dsh-build-goals",
-                "assets",
-                "skills",
-                "obsidian-learn-topic",
-                "SKILL.md",
-            ).is_file()
-        )
+        self.assertEqual(versions, {"3.0.0"})
+        self.assertFalse(REPO_ROOT.joinpath("packages", "dsh-build-goals").exists())
 
     def test_public_skill_has_no_generated_or_machine_private_artifacts(self) -> None:
         artifacts = [

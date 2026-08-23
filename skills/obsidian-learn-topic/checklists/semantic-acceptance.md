@@ -42,7 +42,7 @@
 
 ## 全新任务观察
 
-- Codex、Claude 与 DSH 分别在全新会话观察自动/显式路由。
+- Codex 与 Claude 分别在全新会话观察自动/显式路由。
 - 环境覆盖空 Vault、相似内容、旧路线和无安全 runner。
 - 静态测试通过不能代替真实客户端与真实 Obsidian 观察；未运行时报告 `NOT VERIFIED`。
 - 观察结果使用 `evals/observation.schema.json`，不得把真实用户路线打包为 fixture。

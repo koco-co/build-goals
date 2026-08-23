@@ -6,7 +6,6 @@
 
 [![Claude Code](https://img.shields.io/badge/Claude_Code-Plugin-D97757?logo=anthropic&logoColor=white&cacheSeconds=3600)](https://code.claude.com/docs/en/plugins)
 [![Codex](https://img.shields.io/badge/Codex-Supported-000000?style=flat-square&logo=openai&logoColor=white&cacheSeconds=3600)](https://developers.openai.com/plugins/)
-[![DeepSeek Harness](https://img.shields.io/badge/DeepSeek_Harness-Plugin-4D6BFE?cacheSeconds=3600)](https://github.com/deepseek-ai/deepseek-harness)
 [![Agent Skills](https://img.shields.io/badge/Agent_Skills-Compatible-2563EB?cacheSeconds=3600)](https://github.com/agentskills/agentskills)
 [![Validate Plugin](https://github.com/koco-co/build-goals/actions/workflows/validate-skills.yml/badge.svg)](https://github.com/koco-co/build-goals/actions/workflows/validate-skills.yml)
 [![Python](https://img.shields.io/badge/Python-3.9%2B-3776AB?logo=python&logoColor=white&cacheSeconds=3600)](https://www.python.org/)
@@ -18,9 +17,10 @@
 
 <h2 align="center">𝑶𝒗𝒆𝒓𝒗𝒊𝒆𝒘 · 简介</h2>
 
-<p><code>build-goals</code> 是一个持续演进与沉淀的 <b>Agent</b> 目标构建仓库。它既是可以直接加载的 <b>Claude Code</b>、<b>Codex</b> 与 <b>DeepSeek Harness</b> 三平台 <b>Plugin</b>，也为没有跨 <b>Skill</b> 依赖的能力保留独立安装方式。</p>
+<p><code>build-goals</code> 是一个持续演进与沉淀的 <b>Agent</b> 目标构建仓库。它既是可以直接加载的 <b>Claude Code</b> 与 <b>Codex</b> 双平台 <b>Plugin</b>，也为没有跨 <b>Skill</b> 依赖的能力保留独立安装方式。</p>
 
-- 当前适配 <b>Claude Code</b>、<b>Codex</b> 与 <b>DeepSeek Harness</b>。
+- 当前直接适配 <b>Claude Code</b> 与 <b>Codex</b>。
+- 本仓库不再提供 <b>DeepSeek Harness</b> 专用包；<b>DSH</b> 使用其自身的 <b>Codex</b> 兼容能力，本仓库不单独验证该路径。
 - 其他 <b>Coding Agent</b> 尚未声明兼容；新增平台前会先核对真实能力与契约。
 
 <a id="capabilities"></a>
@@ -129,17 +129,6 @@ build-goals/
 │   ├── build-agents-md/
 │   ├── handoff/
 │   └── obsidian-learn-topic/
-├── packages/
-│   └── dsh-build-goals/
-│       ├── package.json
-│       ├── cordis.patch.yml
-│       ├── lib/
-│       │   ├── index.js
-│       │   └── skills.generated.js
-│       ├── assets/
-│       │   └── skills/
-│       └── scripts/
-│           └── sync_skills.py
 └── tests/
 ```
 
@@ -169,17 +158,7 @@ codex plugin marketplace list
 codex plugin add build-goals@build-goals
 ```
 
-<a id="deepseek-harness"></a>
-
-<h3 align="center">𝑫𝒆𝒆𝒑𝑺𝒆𝒆𝒌 𝑯𝒂𝒓𝒏𝒆𝒔𝒔 · 添加 𝑫𝑺𝑯 𝑷𝒍𝒖𝒈𝒊𝒏</h3>
-
-```bash
-dsh plugin --profile web add 'github:koco-co/build-goals#path:packages/dsh-build-goals'
-```
-
-<p>需要 <b>pnpm</b> 9+；本地开发可用绝对路径替代 <b>git</b> 地址。安装后重启对应 <code>profile</code> 的 <code>dsh</code> 进程，新会话的 <code>/</code> 菜单即可调用 10 个 <b>Skill</b>。升级 = 重跑 <code>add</code>（<b>git</b> 渠道装的是仓库快照）；<b>npm</b> 注册表为预留发布渠道。</p>
-
-<p>安装完整 <b>Plugin</b> 后，可在 <b>Claude Code</b> 中调用 <code>/build-goals:health-check</code>，在 <b>Codex</b> 中调用 <code>$build-goals:health-check</code>，在 <b>DeepSeek Harness</b> 中调用 <code>/health-check</code>；符合描述的项目健康检查请求也允许模型直接路由。<code>vibe-coding</code> 会在三个项目检查点自动使用该入口。</p>
+<p>安装完整 <b>Plugin</b> 后，可在 <b>Claude Code</b> 中调用 <code>/build-goals:health-check</code>，在 <b>Codex</b> 中调用 <code>$build-goals:health-check</code>；符合描述的项目健康检查请求也允许模型直接路由。<code>vibe-coding</code> 会在三个项目检查点自动使用该入口。</p>
 
 <a id="standalone-skills"></a>
 
@@ -203,14 +182,6 @@ python3 scripts/install_skill.py build-skill \
   --scope user
 ```
 
-<p><b>DeepSeek Harness</b>：</p>
-
-```bash
-python3 scripts/install_skill.py build-skill \
-  --platform dsh \
-  --scope user
-```
-
 <p>将 <code>build-skill</code> 替换为 <code>build-plugin</code>、<code>build-prd</code>、<code>build-readme</code>、<code>build-agents-md</code>、<code>shape-idea</code>、<code>handoff</code> 或 <code>obsidian-learn-topic</code> 即可安装另一个独立 <b>Skill</b>。目标目录已存在时默认拒绝覆盖；明确确认后添加 <code>--force</code>。</p>
 
 <a id="validation"></a>
@@ -225,12 +196,6 @@ python3 skills/build-plugin/scripts/validate_plugin.py \
   . \
   --platform dual \
   --strict
-```
-
-<p>检查 <b>DSH</b> 插件包资产与 <code>skills/</code> 一致（默认只读；确认修改后添加 <code>--write</code> 刷新）：</p>
-
-```bash
-python3 packages/dsh-build-goals/scripts/sync_skills.py --root .
 ```
 
 <p>验证单个 <b>Skill</b>：</p>
@@ -322,7 +287,6 @@ python3 -m unittest discover -s tests -p 'test_*.py' -v
 | ------------------------ | --------------------------------------- | ---------------- | ------------------------------------------------- |
 | <b>Claude Code</b>       | `.claude-plugin/plugin.json`            | 已接入 <b>CI</b> | 需在本地 <b>Claude Code</b> 完成                  |
 | <b>Codex</b>             | `.codex-plugin/plugin.json`             | 已接入 <b>CI</b> | 需在支持 <b>Plugin</b> 的 <b>Codex</b> 客户端完成 |
-| <b>DeepSeek Harness</b>  | `packages/dsh-build-goals/package.json` | 已接入 <b>CI</b> | 既有安装链路已验证；<code>health-check</code> 本次真实调用待验证 |
 | 其他 <b>Coding Agent</b> | 暂无                                    | 暂无             | 暂无                                              |
 
 <a id="license"></a>

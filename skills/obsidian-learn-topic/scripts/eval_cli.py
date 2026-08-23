@@ -64,7 +64,7 @@ def validate_observation(path: Path) -> dict[str, Any]:
     required = {"client", "fresh_session", "case_id", "result", "evidence"}
     if not required.issubset(value):
         raise EvalError("observation is missing required fields")
-    if value["client"] not in {"codex", "claude", "dsh"} or value["fresh_session"] is not True:
+    if value["client"] not in {"codex", "claude"} or value["fresh_session"] is not True:
         raise EvalError("observation must come from a supported fresh client")
     if value["result"] not in {"passed", "failed", "not-verified", "blocked"}:
         raise EvalError("observation result is invalid")

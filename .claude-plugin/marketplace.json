@@ -11,7 +11,7 @@
       "name": "build-goals",
       "source": "./",
       "description": "Clarify goals, deliver verifiable software artifacts, and manage evidence-based technical learning in Obsidian.",
-      "version": "2.4.0",
+      "version": "3.0.0",
       "author": {
         "name": "koco-co",
         "url": "https://github.com/koco-co"

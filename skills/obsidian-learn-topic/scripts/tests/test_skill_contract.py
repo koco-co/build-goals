@@ -17,7 +17,7 @@ class SkillContractTests(unittest.TestCase):
     def test_identity_and_model_invocation(self) -> None:
         skill = read("SKILL.md")
         self.assertRegex(skill, r"(?m)^name: obsidian-learn-topic$")
-        self.assertIn('version: "3.0.1"', skill)
+        self.assertIn('version: "4.0.0"', skill)
         self.assertNotIn("disable-model-invocation", skill)
         self.assertIn("allow_implicit_invocation: true", read("agents/openai.yaml"))
 

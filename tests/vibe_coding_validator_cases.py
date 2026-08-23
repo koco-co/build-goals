@@ -1493,7 +1493,7 @@ class VibeCodingValidatorTests(unittest.TestCase):
             self.assertIn("AGENT_INSTRUCTIONS_DRIFT", drifted.stdout)
 
     def test_vibe_coding_standalone_install_is_rejected(self) -> None:
-        for platform in ("claude", "codex", "dsh"):
+        for platform in ("claude", "codex"):
             with self.subTest(platform=platform), tempfile.TemporaryDirectory() as temp:
                 env = os.environ.copy()
                 env["HOME"] = temp

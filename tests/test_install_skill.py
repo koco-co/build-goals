@@ -353,7 +353,7 @@ class InstallSkillTests(unittest.TestCase):
 
     def test_plugin_only_skills_reject_standalone_installation(self) -> None:
         for skill_name in ("health-check", "vibe-coding"):
-            for platform in ("claude", "codex", "dsh"):
+            for platform in ("claude", "codex"):
                 with (
                     self.subTest(skill=skill_name, platform=platform),
                     tempfile.TemporaryDirectory() as temp,
@@ -364,6 +364,12 @@ class InstallSkillTests(unittest.TestCase):
                         f"{skill_name} 只能随 build-goals Plugin 使用",
                         result.stderr,
                     )
+
+    def test_dsh_is_not_a_standalone_installation_platform(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            result = self.run_installer(Path(temp), "dsh")
+            self.assertEqual(result.returncode, 2)
+            self.assertIn("invalid choice: 'dsh'", result.stderr)
 
     def test_dry_run_does_not_create_target_directories(self) -> None:
         with tempfile.TemporaryDirectory() as temp:

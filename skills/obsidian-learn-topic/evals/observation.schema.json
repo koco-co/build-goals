@@ -4,7 +4,7 @@
   "type": "object",
   "required": ["client", "fresh_session", "case_id", "result", "evidence"],
   "properties": {
-    "client": {"enum": ["codex", "claude", "dsh"]},
+    "client": {"enum": ["codex", "claude"]},
     "fresh_session": {"const": true},
     "case_id": {"type": "string", "minLength": 1},
     "environment": {"enum": ["blank-vault", "similar-content", "stale-route", "no-safe-runner"]},
