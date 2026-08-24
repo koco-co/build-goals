@@ -4,7 +4,7 @@ description: 将已有项目的对外行为或产品想法整理为可跨项目�
 compatibility: 需要互联网访问、Python 3.9+，以及对来源项目和目标文档目录的本地读写权限。
 metadata:
   author: koco-co
-  version: "2.2.0"
+  version: "2.3.0"
 ---
 
 # Outcome
@@ -37,6 +37,7 @@ metadata:
 3. 逐功能域确认并保存过程检查点
    - 完整读取 `workflows/§02-domain-confirmation.md`。
    - 每次只处理一个功能域，每次只询问一个会改变用户输入、产品行为、输出、文案或验收结果的问题；给出基于事实与调研的推荐答案。
+   - 当前功能域涉及前端、GUI、TUI 或 CLI 时，按 `rules/ui-interaction-preview.md` 展示受影响完整流程中的全部可见状态与产品行为状态机。
    - 一个功能域的总结得到用户确认后，才写入 `.build-goals/build-prd/` 的过程检查点，并用 `scripts/validate_checkpoint.py --strict` 校验，然后自动进入下一个功能域；不按问题数量或上下文长度强制切段。
    - 过程检查点只用于续接 `build-prd`，不是正式需求包，不能实施；`vibe-coding` 不得读取它。
    - 完成条件：全部功能域都有已确认检查点，且 `会话.yaml` 的 `status` 已更新为 `ready_for_authoring`。
@@ -86,3 +87,4 @@ docs/产品需求/
 
 - 只有用户主动询问输入格式，或无法识别产品主题与来源时，才读取 `templates/prd-intake.template.md`。
 - 需要完整输出范例时读取 `examples/产品需求/`；不要再使用旧的单文件 PRD 范式。
+- 当前功能域存在可见界面或操作流程时，完整读取 `rules/ui-interaction-preview.md`。

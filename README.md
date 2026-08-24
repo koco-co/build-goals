@@ -2,7 +2,7 @@
 
 # 𝓑𝓾𝓲𝓵𝓭 𝓖𝓸𝓪𝓵𝓼
 
-<p align="center">从目标澄清到可验证的软件交付与 𝑶𝒃𝒔𝒊𝒅𝒊𝒂𝒏 技术学习 · 𝑭𝒓𝒐𝒎 𝑰𝒅𝒆𝒂𝒔 𝒕𝒐 𝑽𝒆𝒓𝒊𝒇𝒊𝒂𝒃𝒍𝒆 𝑫𝒆𝒍𝒊𝒗𝒆𝒓𝒚 𝒂𝒏𝒅 𝑳𝒆𝒂𝒓𝒏𝒊𝒏𝒈</p>
+<p align="center">从目标澄清到可验证的软件交付 · 𝑭𝒓𝒐𝒎 𝑰𝒅𝒆𝒂𝒔 𝒕𝒐 𝑽𝒆𝒓𝒊𝒇𝒊𝒂𝒃𝒍𝒆 𝑫𝒆𝒍𝒊𝒗𝒆𝒓𝒚</p>
 
 [![Claude Code](https://img.shields.io/badge/Claude_Code-Plugin-D97757?logo=anthropic&logoColor=white&cacheSeconds=3600)](https://code.claude.com/docs/en/plugins)
 [![Codex](https://img.shields.io/badge/Codex-Supported-000000?style=flat-square&logo=openai&logoColor=white&cacheSeconds=3600)](https://developers.openai.com/plugins/)
@@ -29,30 +29,27 @@
 
 | <b>Skill</b>                                 | 作用                                                                     |
 | -------------------------------------------- | ------------------------------------------------------------------------ |
-| [`shape-idea`](skills/shape-idea/)           | 将初步想法塑造成完整、无歧义的定义                                       |
+| [`shape-idea`](skills/shape-idea/)           | 澄清目标与取舍，涉及界面时逐状态展示交互和业务状态流                      |
 | [`health-check`](skills/health-check/)       | 统一检查项目规范产物，报告问题并在确认后修复、验证和复检                  |
 | [`build-skill`](skills/build-skill/)         | 按能力设计 <b>Frontmatter</b>，构建并审查高质量 <b>Agent Skill</b>       |
 | [`build-plugin`](skills/build-plugin/)       | 构建、升级或迁移双平台 <b>Plugin</b>                                     |
-| [`build-prd`](skills/build-prd/)             | 生成包含真实输入输出与行为样例的可复制产品需求包                         |
-| [`vibe-coding`](skills/vibe-coding/)         | 按需求包与项目路线编排架构、<b>TDD</b>、多 <b>Agent</b> 开发与全链路验收 |
+| [`build-prd`](skills/build-prd/)             | 生成包含真实输入输出、UI 状态与行为样例的可复制产品需求包                 |
+| [`vibe-coding`](skills/vibe-coding/)         | 按需求包编排架构、技术状态流、<b>TDD</b> 与多 <b>Agent</b> 全链路交付    |
 | [`build-readme`](skills/build-readme/)       | 探索项目并创建或更新 <b>GitHub</b> 风格 <b>README</b>                    |
 | [`build-agents-md`](skills/build-agents-md/) | 初始化或整体重构跨平台 <b>AGENTS.md</b> 与 <b>CLAUDE.md</b>              |
 | [`handoff`](skills/handoff/)                 | 整理跨会话交接文档并生成可直接复制的接续提示词                           |
-| [`obsidian-learn-topic`](skills/obsidian-learn-topic/) | 在 <b>Obsidian</b> 中规划、教学、实践、复习并维护长期技术学习路线 |
 
 <p><code>health-check</code> 统一检查项目中的 <b>Agent Skill</b>、<b>Plugin</b>、<b>README</b>、<code>AGENTS.md</code> / <code>CLAUDE.md</code> 和正式产品需求包。它先只读检查并一次性报告有证据的问题；用户确认后，直接组织对应领域修复、验证并重新检查，不生成持久化健康报告。</p>
 
-<p><code>build-prd</code> 支持从已有项目提取完整对外行为，也能把尚不完整的想法完善为产品需求包。它先确认功能域地图，再逐域确认用户输入、追问、输出固定结构与语义、对外契约、异常边界和行为样例；大项目可在 <code>.build-goals/build-prd/</code> 保存已确认的逐域检查点，最终生成可独立复制和校验的 <code>docs/产品需求/</code>。</p>
+<p><code>build-prd</code> 支持从已有项目提取完整对外行为，也能把尚不完整的想法完善为产品需求包。它先确认功能域地图，再逐域确认用户输入、追问、输出固定结构与语义、对外契约、异常边界和行为样例；涉及界面时，会在对话中枚举受影响完整流程的全部可见状态与产品状态流，并把最终确认版本写入功能域需求。大项目可在 <code>.build-goals/build-prd/</code> 保存已确认的逐域检查点，最终生成可独立复制和校验的 <code>docs/产品需求/</code>。</p>
 
 <p><code>build-skill</code> 会根据调用方式、参数、权限、上下文与硬性环境要求形成 <b>Frontmatter</b> 字段决策矩阵；实现后分别完成内容审查、文案审查、内容回归和适用的独立 <b>Reviewer</b> 审查。</p>
 
-<p><code>vibe-coding</code> 是端到端软件交付总控：它按用户原话选择“新项目只按需求实现”“新项目仅参考旧项目指定部分”“现有项目按需求续建”或“现有项目架构/技术栈迁移”。外部需求包会复制为目标项目本地快照，不与来源实时联动；架构方案和整体实施路线经过两次全局确认后，按功能域组织 <b>TDD</b>、多 <b>Agent</b> 与可选 <b>Git worktrees</b>，并在基线、就绪和最终交付三个检查点自动调用 <code>health-check</code>。没有问题时继续执行；发现问题时暂停当前阶段，报告、确认、修复并复检后恢复。</p>
+<p><code>vibe-coding</code> 是端到端软件交付总控：它按用户原话选择“新项目只按需求实现”“新项目仅参考旧项目指定部分”“现有项目按需求续建”或“现有项目架构/技术栈迁移”。外部需求包会复制为目标项目本地快照，不与来源实时联动；涉及界面时，第一次架构确认会复用产品状态并补充前后端边界、数据更新、异步处理与失败回滚等技术状态流。架构方案和整体实施路线经过两次全局确认后，按功能域组织 <b>TDD</b>、多 <b>Agent</b> 与可选 <b>Git worktrees</b>，并在基线、就绪和最终交付三个检查点自动调用 <code>health-check</code>。没有问题时继续执行；发现问题时暂停当前阶段，报告、确认、修复并复检后恢复。</p>
 
 <p><code>build-readme</code> 会先了解代码、命令、测试、<b>CI</b>、文档和资源并提供具体修改预览；用户确认后才创建或更新 <b>README</b>，并分别报告静态检查、<b>GitHub</b> 渲染和未验证内容。</p>
 
 <p><code>build-agents-md</code> 会根据仓库证据筛选项目特有指令，并按应用、库、<b>CLI</b> 或 <b>Monorepo</b> 的实际结构组织根目录和子目录 <code>AGENTS.md</code>；用户确认完整内容预览后，才创建同目录 <code>CLAUDE.md</code> 相对符号链接，供两个平台共用正文。</p>
-
-<p><code>obsidian-learn-topic</code> 把技术、框架、语言、知识点或 <b>GitHub</b> 开源仓库转化为可持久恢复的学习路线：先核验当前资料与 <b>Vault</b> 前置条件，再经目录预览确认创建 <b>Obsidian Base</b> 路线；后续每次只推进一个知识单元，并以真实练习、测验、<b>Patch</b>、测试与间隔复习证据判断掌握。作为 <b>Plugin</b> 使用时，<b>Codex</b> 可显式调用 <code>$build-goals:obsidian-learn-topic</code>，<b>Claude Code</b> 可调用 <code>/build-goals:obsidian-learn-topic</code>；符合描述的系统学习请求也允许模型直接路由。</p>
 
 <a id="workflow"></a>
 
@@ -127,8 +124,7 @@ build-goals/
 │   ├── vibe-coding/
 │   ├── build-readme/
 │   ├── build-agents-md/
-│   ├── handoff/
-│   └── obsidian-learn-topic/
+│   └── handoff/
 └── tests/
 ```
 
@@ -182,7 +178,7 @@ python3 scripts/install_skill.py build-skill \
   --scope user
 ```
 
-<p>将 <code>build-skill</code> 替换为 <code>build-plugin</code>、<code>build-prd</code>、<code>build-readme</code>、<code>build-agents-md</code>、<code>shape-idea</code>、<code>handoff</code> 或 <code>obsidian-learn-topic</code> 即可安装另一个独立 <b>Skill</b>。目标目录已存在时默认拒绝覆盖；明确确认后添加 <code>--force</code>。</p>
+<p>将 <code>build-skill</code> 替换为 <code>build-plugin</code>、<code>build-prd</code>、<code>build-readme</code>、<code>build-agents-md</code>、<code>shape-idea</code> 或 <code>handoff</code> 即可安装另一个独立 <b>Skill</b>。目标目录已存在时默认拒绝覆盖；明确确认后添加 <code>--force</code>。</p>
 
 <a id="validation"></a>
 

@@ -5,7 +5,7 @@ compatibility: 需要 Python 3.9+、Git，以及目标项目实际使用的构�
 disable-model-invocation: true
 metadata:
   author: koco-co
-  version: "2.1.0"
+  version: "2.2.0"
 ---
 
 # Outcome
@@ -44,6 +44,7 @@ metadata:
 
 2. 调研并确认架构方案
    - 路线 1–3 完整读取 `workflows/§02-requirements-architecture.md`；路线 4 读取 `workflows/§03-migration-audit.md`。
+   - 架构方案涉及前端、GUI、TUI 或 CLI 时，完整读取 `rules/ui-interaction-preview.md`：复用已确认的产品状态，按受影响完整流程展示全部可见状态，并补充技术状态流后再请求第一次全局确认。
    - 路线 2 的只读检查只能访问用户授权范围，并只返回行为、输入、输出、公开契约和证据摘要。
    - 调研与当前架构决策直接相关的官方规范和工具，比较真实可行方案并给出推荐；只有一个可行方案时说明依据。
    - 先在对话中提交全局架构方案。用户第一次确认前，目标项目保持只读：不导入需求快照、不写架构文档、不修改代码、不执行 Git 写操作。

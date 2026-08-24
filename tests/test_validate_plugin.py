@@ -158,6 +158,10 @@ class ValidatePluginTests(unittest.TestCase):
             "skills/build-plugin/templates/skill.template.md": "skills/build-skill/templates/skill.template.md",
             "skills/vibe-coding/scripts/validate_agents_md.py": "skills/build-agents-md/scripts/validate_agents_md.py",
             "skills/vibe-coding/scripts/validate_prd.py": "skills/build-prd/scripts/validate_prd.py",
+            "skills/build-prd/rules/ui-interaction-preview.md": "skills/shape-idea/rules/ui-interaction-preview.md",
+            "skills/vibe-coding/rules/ui-interaction-preview.md": "skills/shape-idea/rules/ui-interaction-preview.md",
+            "skills/build-prd/templates/ui-interaction-preview.template.md": "skills/shape-idea/templates/ui-interaction-preview.template.md",
+            "skills/vibe-coding/templates/ui-interaction-preview.template.md": "skills/shape-idea/templates/ui-interaction-preview.template.md",
         }
         manifest = json.loads(
             REPO_ROOT.joinpath(".plugin-shared-files.json").read_text(encoding="utf-8")
@@ -584,7 +588,7 @@ class ValidatePluginTests(unittest.TestCase):
         self.assertEqual(
             claude_manifest["version"], marketplace["plugins"][0]["version"]
         )
-        self.assertEqual(claude_manifest["version"], "3.0.0")
+        self.assertEqual(claude_manifest["version"], "4.0.0")
 
     def test_claude_marketplace_manifest_is_allowed(self) -> None:
         with tempfile.TemporaryDirectory() as temp:

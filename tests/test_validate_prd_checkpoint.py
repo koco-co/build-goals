@@ -64,6 +64,15 @@ def write_checkpoint(root: Path) -> Path:
                     "name": "创建任务",
                     "user_inputs": ["创建任务：预约牙医"],
                     "interactions": ["缺少名称时追问任务名称"],
+                    "ui_states": [
+                        {
+                            "name": "任务输入",
+                            "enter_when": "用户点击新建任务",
+                            "sketch": "[任务名称输入框] [创建]",
+                            "transitions": ["点击创建 → 创建成功或输入错误"],
+                        }
+                    ],
+                    "product_state_flow": "打开输入 → 校验 → 创建或保留输入并提示错误",
                     "outputs": {
                         "exact": ["状态字段"],
                         "semantic": ["说明创建结果"],
@@ -130,6 +139,20 @@ class ValidatePrdCheckpointTests(unittest.TestCase):
             self.assertEqual(result.returncode, 1)
             self.assertIn("DOMAIN_PARTITION", result.stdout)
             self.assertIn("CURRENT_DOMAIN", result.stdout)
+
+    def test_ui_states_and_product_flow_must_form_one_complete_contract(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            checkpoint = write_checkpoint(Path(temp))
+            path = checkpoint / "功能域" / "task-management.yaml"
+            data = json.loads(path.read_text(encoding="utf-8"))
+            del data["features"][0]["product_state_flow"]
+            data["features"][0]["ui_states"][0]["transitions"] = []
+            write_json(path, data)
+
+            result = self.run_validator(checkpoint)
+
+            self.assertEqual(result.returncode, 1)
+            self.assertIn("UI_INTERACTION_CONTRACT", result.stdout)
 
     def test_domain_partition_rejects_non_string_entries_without_crashing(self) -> None:
         with tempfile.TemporaryDirectory() as temp:

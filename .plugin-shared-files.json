@@ -54,6 +54,20 @@
     {
       "source": "skills/build-prd/scripts/validate_prd.py",
       "targets": ["skills/vibe-coding/scripts/validate_prd.py"]
+    },
+    {
+      "source": "skills/shape-idea/rules/ui-interaction-preview.md",
+      "targets": [
+        "skills/build-prd/rules/ui-interaction-preview.md",
+        "skills/vibe-coding/rules/ui-interaction-preview.md"
+      ]
+    },
+    {
+      "source": "skills/shape-idea/templates/ui-interaction-preview.template.md",
+      "targets": [
+        "skills/build-prd/templates/ui-interaction-preview.template.md",
+        "skills/vibe-coding/templates/ui-interaction-preview.template.md"
+      ]
     }
   ]
 }

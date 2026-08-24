@@ -110,6 +110,64 @@ def _validate_domain(
         for key in ("interactions", "external_contracts", "forbidden"):
             if key in feature and feature.get(key) != [] and not _strings(feature.get(key)):
                 issues.append(Issue("FEATURE_FIELD", label, f"{key} 如存在，必须是字符串数组。"))
+        has_ui_states = "ui_states" in feature
+        has_product_flow = "product_state_flow" in feature
+        if has_ui_states != has_product_flow:
+            issues.append(
+                Issue(
+                    "UI_INTERACTION_CONTRACT",
+                    label,
+                    "ui_states 与 product_state_flow 必须同时存在或同时省略。",
+                )
+            )
+        if has_ui_states:
+            ui_states = feature.get("ui_states")
+            if not isinstance(ui_states, list) or not ui_states:
+                issues.append(
+                    Issue(
+                        "UI_INTERACTION_CONTRACT",
+                        label,
+                        "ui_states 必须是非空状态数组。",
+                    )
+                )
+            else:
+                for state_index, state in enumerate(ui_states):
+                    state_label = f"{label}.ui_states[{state_index}]"
+                    if not isinstance(state, dict):
+                        issues.append(
+                            Issue(
+                                "UI_INTERACTION_CONTRACT",
+                                state_label,
+                                "界面状态必须是对象。",
+                            )
+                        )
+                        continue
+                    for key in ("name", "enter_when", "sketch"):
+                        if not isinstance(state.get(key), str) or not state[key].strip():
+                            issues.append(
+                                Issue(
+                                    "UI_INTERACTION_CONTRACT",
+                                    state_label,
+                                    f"{key} 必须是非空字符串。",
+                                )
+                            )
+                    if not _strings(state.get("transitions")):
+                        issues.append(
+                            Issue(
+                                "UI_INTERACTION_CONTRACT",
+                                state_label,
+                                "transitions 必须是非空字符串数组。",
+                            )
+                        )
+            product_flow = feature.get("product_state_flow")
+            if not isinstance(product_flow, str) or not product_flow.strip():
+                issues.append(
+                    Issue(
+                        "UI_INTERACTION_CONTRACT",
+                        label,
+                        "product_state_flow 必须完整记录产品状态流。",
+                    )
+                )
         outputs = feature.get("outputs")
         if not isinstance(outputs, dict) or not _strings(outputs.get("semantic")):
             issues.append(Issue("OUTPUT_CONTRACT", label, "outputs 必须包含 semantic 非空数组。"))
