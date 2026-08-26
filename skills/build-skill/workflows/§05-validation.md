@@ -17,7 +17,7 @@ python3 scripts/validate_skill.py /path/to/skill --profile claude --strict
 python3 scripts/validate_skill.py /path/to/skill --profile codex --strict
 ```
 
-至少检查：运行 `python3 scripts/validate_skill.py <skill-dir> --profile <profile> --strict`；脚本已覆盖结构、Frontmatter、引用、工作流编号、命名、空文件与软链接，本清单只处理脚本无法判断的内容与场景项。
+该脚本已覆盖结构、Frontmatter、引用、工作流编号、命名、空文件与软链接；本清单只处理脚本无法判断的内容与场景项。
 
 ## Phase 2：设计落实审查
 
@@ -74,7 +74,7 @@ Reviewer 只读审查并分别输出内容审查结果与文案审查结果。�
 
 只验证本次目标实际包含的场景：调用策略、输入分支、可复现缺陷、平台差异和交付状态。不得为了覆盖用户调用、模型调用、参数化、通用、项目级、升级、失败等类别而制造目标 Skill 不具备的行为。
 
-其余场景参照 `rules/quality-standard.md` §7 决策与确认。
+其余场景遵循 `rules/quality-standard.md` 的决策与确认原则。
 
 使用临时目录、夹具或隔离分支，避免验证污染真实项目。
 

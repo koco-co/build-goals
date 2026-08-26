@@ -1,7 +1,7 @@
 interface:
   display_name: "Build PRD"
-  short_description: "生成可跨项目实施的产品需求包"
-  default_prompt: "使用 $build-prd 梳理已有项目的完整对外行为，或把产品想法完善为按功能域拆分的需求包；记录真实用户输入、输出契约与行为样例，逐域确认后写入当前项目的 docs/产品需求/。"
+  short_description: "生成可复制的正式产品需求包"
+  default_prompt: "使用 $build-prd 生成可复制的正式需求包；逐域确认后写入 docs/产品需求/。"
 
 policy:
   allow_implicit_invocation: true

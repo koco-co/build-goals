@@ -1,7 +1,7 @@
 interface:
   display_name: "Build Skill"
-  short_description: "构建或升级可验证的 Agent Skills"
-  default_prompt: "使用 $build-skill 构建或升级一个高质量 Agent Skill。"
+  short_description: "创建或升级可验证的 Agent Skill"
+  default_prompt: "使用 $build-skill 创建或升级可验证的 Agent Skill。"
 
 policy:
   allow_implicit_invocation: true

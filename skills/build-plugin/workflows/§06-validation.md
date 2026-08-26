@@ -8,7 +8,7 @@
 python3 scripts/validate_plugin.py <plugin-root> --platform <dual|claude|codex> --strict
 ```
 
-检查：运行 `python3 scripts/validate_plugin.py <plugin-root> --platform <dual|claude|codex> --strict`；脚本已覆盖 Manifest、双平台身份与版本、Skill 质量与 Frontmatter、共享镜像（存在/非软链接/与规范源一致/越界）、必要链接、空文件与失效引用，并顺带校验 Claude Marketplace，本清单只处理脚本无法判断的内容与场景项。
+该脚本已覆盖 Manifest、双平台身份与版本、Skill 质量与 Frontmatter、共享镜像（存在、非软链接、与规范源一致且不越界）、必要链接、空文件、失效引用及 Claude Marketplace；本清单只处理脚本无法判断的内容与场景项。
 
 ## Phase 2：平台官方检查
 
@@ -31,6 +31,8 @@ Codex：
 
 ## Phase 3：场景验收
 
+先执行 `checklists/plugin-design-review.md` 和 `checklists/plugin-semantic-acceptance.md`；清单只补充脚本无法判断的设计与场景问题。
+
 至少覆盖：
 
 1. 新建 Plugin；
@@ -42,7 +44,7 @@ Codex：
 7. 安装、更新和失败回滚；
 8. 每个 Skill 的实际调用行为与平台配置一致。
 
-其余场景参照 `rules/skill-quality-standard.md` §7 决策与确认。
+其余场景遵循 `rules/skill-quality-standard.md` 的决策与确认原则。
 
 ## Phase 4：结果分类
 

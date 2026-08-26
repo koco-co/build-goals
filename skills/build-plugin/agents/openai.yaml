@@ -1,7 +1,7 @@
 interface:
   display_name: "Build Plugin"
-  short_description: "构建或升级 Claude Code 与 Codex Plugin"
-  default_prompt: "使用 $build-plugin 构建、升级或迁移一个可验证的 Plugin。"
+  short_description: "创建或升级 Claude Code/Codex Plugin"
+  default_prompt: "使用 $build-plugin 创建或升级可安装、可验证的 Claude Code/Codex Plugin。"
 
 policy:
   allow_implicit_invocation: true

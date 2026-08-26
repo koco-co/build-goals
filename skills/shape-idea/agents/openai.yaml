@@ -1,7 +1,7 @@
 interface:
   display_name: "Shape Idea"
-  short_description: "把初步想法塑造成完整、无歧义的定义"
-  default_prompt: "使用 $shape-idea 通过逐轮提问完善我的想法，直到目标、范围、约束和关键决策全部明确。"
+  short_description: "明确模糊想法的目标与关键决策"
+  default_prompt: "使用 $shape-idea 逐轮确认想法；探索阶段只读不改项目，完成共同理解后先询问是否确认并开始实施。"
 
 policy:
   allow_implicit_invocation: true

@@ -71,7 +71,7 @@ docs(plan): record implementation readiness
 
 ## Phase 5：执行 readiness 门禁
 
-更新 `docs/实施任务/实施任务清单.md` 的“基础工程就绪”和“项目指令就绪”章节，然后运行：
+先按 `checklists/implementation-readiness.md` 检查任务清单、工具链、基础工程、项目指令和既有 worktree 证据；更新 `docs/实施任务/实施任务清单.md` 的对应章节，然后运行：
 
 ```bash
 python3 <vibe-coding>/scripts/validate_delivery.py \

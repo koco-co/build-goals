@@ -4,7 +4,7 @@
 
 ## Phase 1：机械检查
 
-使用当前 Skill 目录中的校验器，执行 `python3 <skill-dir>/scripts/validate_readme.py <project-root>/README.md --project-root <project-root> --strict`；该校验器检查首屏/章节视觉规范、锚点、英文标签与斜体禁用、围栏语言、HTML 配对、本地链接与图片、SVG 安全与 Mermaid 声明；仅用户已授权联网时加 `--verify-remote`。远程检查失败必须显示具体 URL，不得静默忽略。
+使用当前 Skill 目录中的校验器，执行 `python3 <skill-dir>/scripts/validate_readme.py <project-root>/README.md --project-root <project-root> --strict`；仅用户已授权联网时加 `--verify-remote`，远程失败显示具体 URL。
 
 ## Phase 2：项目检查
 

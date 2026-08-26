@@ -1,7 +1,7 @@
 interface:
   display_name: "Build AGENTS.md"
-  short_description: "研究项目并创建或整体重构跨平台 Agent 指令"
-  default_prompt: "使用 $build-agents-md 研究当前项目，先给出完整内容预览，确认后创建或更新 AGENTS.md 与 CLAUDE.md。"
+  short_description: "创建或重构项目 Agent 指令"
+  default_prompt: "使用 $build-agents-md 研究项目，预览后创建或更新 AGENTS.md 与相对 CLAUDE.md 链接。"
 
 policy:
   allow_implicit_invocation: true

@@ -41,18 +41,10 @@ Skills + MCP + UI
 
 只设计当前方案实际需要的文件，不为未采用的平台入口、组件或目录生成占位骨架。
 
+创建平台 Manifest 时按需读取 `templates/claude-plugin.template.json` 或 `templates/codex-plugin.template.json`；模板只提供字段骨架，不扩大组件范围。
+
 ## Phase 4：输出方案
 
-使用 `templates/plugin-design-proposal.template.md`，至少包含：
-
-- 目标与非目标；
-- 输入、输出和主要分支；
-- `tree` 风格目录；
-- 每个文件、共享镜像与必要链接的职责；
-- Skill 子任务及委派方式；
-- 权限和数据流；
-- 安装、更新和发布方式；
-- 机械检查、语义验收和真实客户端测试；
-- 实施范围与回滚方式。
+使用 `templates/plugin-design-proposal.template.md` 汇总目标、分支、目录、组件职责、Skill 委派、权限、平台、安装发布、验证、实施范围和回滚；不在本工作流重复维护模板字段清单。
 
 输出后只请求一次实施确认。确认前保持只读。

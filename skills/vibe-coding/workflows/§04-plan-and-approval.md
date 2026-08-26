@@ -68,8 +68,10 @@ python3 <vibe-coding>/scripts/validate_delivery.py <project-root> \
 
 确认后进入 `plan_approved`，一次性写入：
 
-- `docs/实施任务/实施任务清单.md`：全局依赖、追踪、基础工程、Agent/worktree、验证与集成策略；
-- `docs/实施任务/功能域/<功能域>.md`：实际 `TASK-NNN`、任务类型、验证证据、测试数据、命令、提交和回滚边界。
+- 使用 `templates/implementation-plan.template.md` 写入 `docs/实施任务/实施任务清单.md`，记录全局依赖、追踪、基础工程、Agent/worktree、验证与集成策略；
+- 使用 `templates/domain-implementation.template.md` 写入 `docs/实施任务/功能域/<功能域>.md`，记录实际 `TASK-NNN`、任务类型、验证证据、测试数据、命令、提交和回滚边界。
+
+需要判断任务粒度时读取 `examples/implementation-plan.example.md`；示例不替代当前项目的确认范围。
 
 全部任务文档标记“文档状态：已确认”，然后运行 plan 阶段严格校验。第二次确认同时授权统一状态表中 `plan_approved` 明确列出的本地 Git 操作，不扩大到 push、受保护分支合并、发布或部署。
 

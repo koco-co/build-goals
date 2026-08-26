@@ -27,6 +27,8 @@
 
 ## Phase 3：写入顺序
 
+需要判断正式包的内容粒度时，按需读取 `examples/产品需求/PRD需求文档.md`、`examples/产品需求/功能域/任务管理.md`、`examples/产品需求/行为样例/产品行为样例集.yaml`、`examples/产品需求/行为样例/任务管理.yaml` 和 `examples/产品需求/需求包清单.yaml`；示例只用于结构参考，不复制其中事实。
+
 依次使用以下模板：
 
 1. `templates/prd.template.md` → `docs/产品需求/PRD需求文档.md`；

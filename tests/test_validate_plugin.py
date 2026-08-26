@@ -132,6 +132,17 @@ class ValidatePluginTests(unittest.TestCase):
         )
         self.assertNotIn("skills/build-skill/", compatibility)
 
+        quality = (skill / "rules" / "skill-quality-standard.md").read_text(
+            encoding="utf-8"
+        )
+        for prohibited in (
+            "rules/architecture.md",
+            "rules/frontmatter.md",
+            "workflows/§05-validation.md",
+        ):
+            with self.subTest(prohibited=prohibited):
+                self.assertNotIn(prohibited, quality)
+
         implementation = (skill / "workflows" / "§05-implementation.md").read_text(
             encoding="utf-8"
         )
@@ -588,7 +599,7 @@ class ValidatePluginTests(unittest.TestCase):
         self.assertEqual(
             claude_manifest["version"], marketplace["plugins"][0]["version"]
         )
-        self.assertEqual(claude_manifest["version"], "4.0.0")
+        self.assertEqual(claude_manifest["version"], "4.1.0")
 
     def test_claude_marketplace_manifest_is_allowed(self) -> None:
         with tempfile.TemporaryDirectory() as temp:

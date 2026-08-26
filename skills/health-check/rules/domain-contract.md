@@ -28,7 +28,7 @@
 
 ### Agent Skill
 
-- 有独立或项目级 Skill 时，由 `build-skill` 检查结构、Frontmatter、调用策略、内容、引用、验证与平台适配。
+- 有独立或项目级 Skill 时，由 `build-skill` 检查结构、Frontmatter、调用策略、内容、引用、验证、平台适配和最小充分原则；主入口中的无依据或重复描述属于问题。
 - Plugin 内已包含的 Skills 由 Plugin 领域统一检查，本领域不重复检查。
 - 没有 Skill 时，只在仓库证据表明同一 Agent 工作流已经重复出现并且具有稳定输入、步骤、输出和验收时，报告可抽取 Skill；没有重复证据则记为未发现问题。
 

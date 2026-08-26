@@ -2,18 +2,9 @@
 
 ## Phase 1：固化交付证据
 
-使用 `templates/delivery-report.template.md` 创建或更新 `docs/交付验收/交付验收报告.md`，并用 `templates/domain-delivery.template.md` 为每个功能域写 `docs/交付验收/功能域/<功能域>.md`。至少包含：
+使用 `templates/delivery-report.template.md` 创建或更新 `docs/交付验收/交付验收报告.md`，并用 `templates/domain-delivery.template.md` 为每个功能域写 `docs/交付验收/功能域/<功能域>.md`；按模板记录基线、追踪、任务、Agent/worktree、实际验证、配套 Skill、治理状态、未验证/阻塞项及外部动作状态。
 
-- 基线与最终 HEAD；
-- 需求快照、架构与任务文档族；
-- 需求追踪矩阵；
-- 任务与 commit 清单，以及实际使用的 Agent 和 worktree；
-- 实际运行的命令和结果；
-- 需求涉及的测试数据、UI、交互、安全或配置结果；
-- 实际调用的配套 Skill 及结果；
-- 项目指令 readiness 状态、治理提交和最终漂移复查；
-- 已验证、未验证和阻塞项；
-- 部署、发布和 push 状态。
+需要判断交付报告粒度时读取 `examples/delivery-report.example.md`；示例不替代当前项目的实际证据。
 
 所有结论必须有命令、文件、截图、日志或真实流程证据。
 
@@ -57,13 +48,7 @@
 
 ## Phase 5：最终回复
 
-按以下顺序报告：
-
-1. 完成范围、主要变化和产物；
-2. 功能、提交及实际验证；
-3. 已验证、未验证和阻塞；
-4. 未执行的外部动作；
-5. 可复现命令。
+按模板顺序报告完成范围、验证状态、外部动作和可复现命令。
 
 子 Skill 不单独询问交付动作。总控在实现和验证都结束后，只把当前任务仍适用且尚未授权的 commit、push、发布、部署或本地 Plugin 更新放入一次确认；用户可以只授权其中部分，回答前不得执行。
 

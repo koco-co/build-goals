@@ -29,6 +29,8 @@
 
 先根据内容职责选择目录，再展示 `tree`。目录选择规则见 `rules/architecture.md`。
 
+需要判断粒度时，按类型读取 `examples/global-skill.example.md` 或 `examples/project-skill.example.md`；示例只用于比较边界，不作为固定骨架。
+
 每个拟创建的文件都要回答：
 
 1. 它解决什么独立问题；
@@ -89,21 +91,7 @@
 
 ## Phase 8：提交设计方案
 
-使用 `templates/design-proposal.template.md`，至少包含：
-
-1. 调研结论；
-2. 已确认决策；
-3. 目标与非目标；
-4. 输入、输出和路由；
-5. Frontmatter 字段决策矩阵；
-6. 推荐目录树及职责；
-7. 按需读取关系；
-8. CLI、脚本、Hooks 和 Skill 的边界；
-9. 平台适配；
-10. 内容审查、文案审查和独立审查安排；
-11. 实施范围；
-12. 验收标准；
-13. 已证实风险与必要迁移说明。
+使用 `templates/design-proposal.template.md` 汇总前述行为、字段、目录、按需读取、能力边界、平台适配、审查、实施范围、验收和已证实风险；不再在本阶段重复维护另一份字段清单。
 
 最后只提出一次确认：是否按照该方案开始实施。
 

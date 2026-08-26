@@ -15,7 +15,7 @@
 
 ## 2. 统一规范
 
-Plugin 中的每个 Skill 必须满足 `build-skill` 的结构、命名、Frontmatter、渐进式读取、静态校验、内容审查和文案审查要求。
+Plugin 中的每个 Skill 必须满足 `build-skill` 的结构、命名、Frontmatter、渐进式读取、静态校验、内容审查和文案审查要求。需要在本 Plugin 内直接核对时，读取 `rules/skill-architecture.md`、`rules/skill-frontmatter.md`、`rules/skill-quality-standard.md` 和 `templates/skill.template.md`；这些文件只提供规范镜像，不替代 `build-skill` 的委派流程。
 
 执行：
 

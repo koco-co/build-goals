@@ -2,7 +2,7 @@
 
 ## Phase 1：机械校验
 
-定位当前加载的 `build-prd` Skill 目录，执行 `python3 <build-prd-skill-dir>/scripts/validate_prd.py <current-project> --strict`；该校验器检查目录完整性、清单与哈希、编号唯一互引、正常样例、契约与已记录调研来源，失败修复并重跑至退出码 0。
+定位当前加载的 `build-prd` Skill 目录，执行 `python3 <build-prd-skill-dir>/scripts/validate_prd.py <current-project> --strict`；失败时修复并重跑至退出码 0。校验器负责目录、清单、哈希、编号互引、样例和来源等机械约束。
 
 ## Phase 2：语义验收
 

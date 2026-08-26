@@ -1,7 +1,7 @@
 interface:
   display_name: "Health Check"
-  short_description: "统一检查并修复项目规范产物"
-  default_prompt: "使用 $health-check 检查当前项目；先报告问题，确认后修复并复检。"
+  short_description: "检查并修复项目规范产物"
+  default_prompt: "使用 $health-check 检查项目；先报告问题，确认后修复并复检。"
 
 policy:
   allow_implicit_invocation: true

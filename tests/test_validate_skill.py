@@ -471,7 +471,7 @@ class ValidateSkillTests(unittest.TestCase):
             "build-skill": 'version: "2.2.0"',
             "handoff": 'version: "2.1.0"',
             "health-check": 'version: "1.0.0"',
-            "shape-idea": 'version: "2.2.0"',
+            "shape-idea": 'version: "2.3.0"',
             "vibe-coding": 'version: "2.2.0"',
         }
 
@@ -481,6 +481,143 @@ class ValidateSkillTests(unittest.TestCase):
                     encoding="utf-8"
                 )
                 self.assertIn(version_line, text)
+
+    def test_shape_idea_publishes_an_explicit_implementation_gate(self) -> None:
+        shape = REPO_ROOT.joinpath("skills", "shape-idea", "SKILL.md").read_text(
+            encoding="utf-8"
+        )
+        adapter = REPO_ROOT.joinpath(
+            "skills", "shape-idea", "agents", "openai.yaml"
+        ).read_text(encoding="utf-8")
+
+        for required in (
+            "目标已明确或用户直接要求实施时退出",
+            "先查事实",
+            "每轮只问一个",
+            "共同理解最终确认前",
+            "不写项目",
+            "“确认”“继续”“好的”不授权实施",
+            "是否确认并开始实施",
+            "肯定回答才授权",
+            "新决策时回到第 2 步",
+            "rules/ui-interaction-preview.md",
+        ):
+            with self.subTest(required=required):
+                self.assertIn(required, shape)
+
+        self.assertIn("只读不改项目", adapter)
+        self.assertIn("是否确认并开始实施", adapter)
+
+    def test_skill_template_keeps_implicit_invocation_boundaries(self) -> None:
+        template = REPO_ROOT.joinpath(
+            "skills", "build-skill", "templates", "skill.template.md"
+        ).read_text(encoding="utf-8")
+
+        self.assertIn("触发场景、排除条件及与相邻 Skill 的边界", template)
+
+    def test_build_skill_requires_minimum_sufficient_design(self) -> None:
+        quality = REPO_ROOT.joinpath(
+            "skills", "build-skill", "rules", "quality-standard.md"
+        ).read_text(encoding="utf-8")
+
+        for required in (
+            "最小充分",
+            "用户需求、仓库事实或可复现缺陷",
+            "说不出具体依据就删除",
+        ):
+            with self.subTest(required=required):
+                self.assertIn(required, quality)
+
+    def test_reviewer_enforces_minimum_sufficient_content(self) -> None:
+        reviewer = REPO_ROOT.joinpath(
+            "skills", "build-skill", "prompts", "reviewer.agent.md"
+        ).read_text(encoding="utf-8")
+
+        for required in (
+            "最小充分",
+            "只保留目标、路由/退出、执行顺序和必要红线",
+            "用户需求、仓库事实、平台契约、可复现缺陷或明确安全要求",
+            "重复规范源",
+            "无法说明具体用途就删除",
+        ):
+            with self.subTest(required=required):
+                self.assertIn(required, reviewer)
+
+    def test_workflows_wire_referenced_resources_on_demand(self) -> None:
+        references = {
+            ("build-agents-md", "workflows/§01-research.md"): (
+                "examples/library-or-cli.example.md",
+                "examples/application.example.md",
+                "examples/monorepo.example.md",
+            ),
+            ("build-plugin", "workflows/§03-design.md"): (
+                "templates/claude-plugin.template.json",
+                "templates/codex-plugin.template.json",
+                "templates/plugin-design-proposal.template.md",
+            ),
+            ("build-plugin", "workflows/§04-skill-delegation.md"): (
+                "rules/skill-architecture.md",
+                "rules/skill-frontmatter.md",
+                "rules/skill-quality-standard.md",
+                "templates/skill.template.md",
+            ),
+            ("build-plugin", "workflows/§06-validation.md"): (
+                "checklists/plugin-design-review.md",
+                "checklists/plugin-semantic-acceptance.md",
+            ),
+            ("build-prd", "workflows/§03-authoring.md"): (
+                "examples/产品需求/PRD需求文档.md",
+                "examples/产品需求/功能域/任务管理.md",
+                "examples/产品需求/行为样例/产品行为样例集.yaml",
+                "examples/产品需求/行为样例/任务管理.yaml",
+                "examples/产品需求/需求包清单.yaml",
+            ),
+            ("build-readme", "workflows/§02-preview.md"): (
+                "templates/readme-preview.template.md",
+            ),
+            ("build-readme", "workflows/§03-authoring.md"): (
+                "rules/github-style.md",
+            ),
+            ("build-readme", "workflows/§04-validation.md"): (
+                "checklists/semantic-acceptance.md",
+            ),
+            ("build-skill", "workflows/§03-design.md"): (
+                "examples/global-skill.example.md",
+                "examples/project-skill.example.md",
+                "templates/design-proposal.template.md",
+            ),
+            ("vibe-coding", "workflows/§02-requirements-architecture.md"): (
+                "checklists/architecture-acceptance.md",
+            ),
+            ("vibe-coding", "workflows/§03-migration-audit.md"): (
+                "templates/architecture-migration.template.md",
+            ),
+            ("vibe-coding", "workflows/§04-plan-and-approval.md"): (
+                "templates/implementation-plan.template.md",
+                "templates/domain-implementation.template.md",
+                "examples/implementation-plan.example.md",
+            ),
+            ("vibe-coding", "workflows/§05-scaffold-and-worktrees.md"): (
+                "checklists/implementation-readiness.md",
+            ),
+            ("vibe-coding", "workflows/§06-feature-delivery.md"): (
+                "rules/tdd-and-quality-gates.md",
+                "prompts/feature-developer.agent.md",
+            ),
+            ("vibe-coding", "workflows/§08-delivery.md"): (
+                "templates/delivery-report.template.md",
+                "templates/domain-delivery.template.md",
+                "examples/delivery-report.example.md",
+            ),
+        }
+
+        for (skill_name, workflow), paths in references.items():
+            content = REPO_ROOT.joinpath("skills", skill_name, workflow).read_text(
+                encoding="utf-8"
+            )
+            for path in paths:
+                with self.subTest(skill=skill_name, workflow=workflow, path=path):
+                    self.assertIn(path, content)
 
     def test_repository_quality_sources_publish_the_evidence_first_rule(self) -> None:
         agents = REPO_ROOT.joinpath("AGENTS.md").read_text(encoding="utf-8")
