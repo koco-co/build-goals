@@ -465,7 +465,7 @@ class ValidateSkillTests(unittest.TestCase):
     def test_behavior_changed_skill_versions_are_updated(self) -> None:
         expected = {
             "build-agents-md": 'version: "3.0.0"',
-            "build-plugin": 'version: "2.2.0"',
+            "build-plugin": 'version: "2.3.0"',
             "build-prd": 'version: "2.3.0"',
             "build-readme": 'version: "2.2.0"',
             "build-skill": 'version: "2.2.0"',

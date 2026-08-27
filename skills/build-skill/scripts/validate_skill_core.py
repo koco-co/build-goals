@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Dependency-free structural validator for Agent Skills.
 
-The validator supports portable, Claude Code, Codex, and dual-platform source
-profiles. Relative symlinks are allowed only when their resolved targets remain
-inside the containing Plugin root.
+The validator supports portable, Claude Code, Codex, ZCode, and dual-platform
+source profiles. Relative symlinks are allowed only when their resolved targets
+remain inside the containing Plugin root.
 """
 
 from __future__ import annotations
@@ -216,7 +216,7 @@ def validate_frontmatter(
     issues: List[Issue],
 ) -> None:
     allowed = set(STANDARD_KEYS)
-    if profile in {"claude", "dual"}:
+    if profile in {"claude", "dual", "zcode"}:
         allowed.update(CLAUDE_EXTENSION_KEYS)
 
     for key in data:
@@ -306,7 +306,7 @@ def validate_frontmatter(
                     skill_dir,
                 )
 
-    if profile in {"claude", "dual"}:
+    if profile in {"claude", "dual", "zcode"}:
         manual = data.get("disable-model-invocation")
         if manual is not None and str(manual).lower() not in {"true", "false"}:
             add_issue(
@@ -832,7 +832,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("skill_dir", type=Path, help="包含 SKILL.md 的 Skill 目录")
     parser.add_argument(
         "--profile",
-        choices=("portable", "claude", "codex", "dual"),
+        choices=("portable", "claude", "codex", "zcode", "dual"),
         default="portable",
         help="按目标平台允许对应 Frontmatter 与适配配置",
     )

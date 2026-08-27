@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Dependency-free validator for Claude Code and Codex plugin packages."""
+"""Dependency-free validator for Claude Code, Codex, and ZCode plugin packages."""
 
 from __future__ import annotations
 
@@ -838,10 +838,54 @@ def collect_skill_dirs(skill_roots: Iterable[Path]) -> List[Path]:
     return sorted(discovered, key=lambda item: str(item))
 
 
+def check_manifest_consistency(
+    issues: List[Issue],
+    plugin_root: Path,
+    prefix: str,
+    reference: Tuple[Optional[str], Optional[str], Set[Path]],
+    others: Sequence[Tuple[str, Tuple[Optional[str], Optional[str], Set[Path]]]],
+) -> None:
+    ref_name, ref_version, ref_skills = reference
+    for label, (name, version, skills) in others:
+        if ref_name and name and ref_name != name:
+            add_issue(
+                issues,
+                "error",
+                f"{prefix}_NAME_MISMATCH",
+                plugin_root,
+                f"{label} 与 Claude Manifest 的 name 不一致：{name!r} != {ref_name!r}。",
+                plugin_root,
+            )
+        if ref_version and version and ref_version != version:
+            add_issue(
+                issues,
+                "error",
+                f"{prefix}_VERSION_MISMATCH",
+                plugin_root,
+                f"{label} 与 Claude Manifest 的 version 不一致：{version!r} != {ref_version!r}。",
+                plugin_root,
+            )
+        if ref_skills and skills and ref_skills != skills:
+            add_issue(
+                issues,
+                "error",
+                f"{prefix}_SKILLS_MISMATCH",
+                plugin_root,
+                f"{label} 与 Claude Manifest 必须指向同一组 Skills 规范源。",
+                plugin_root,
+            )
+
+
 def validate_plugin(plugin_dir: Path, platform: str = "dual") -> Report:
     plugin_root = plugin_dir.expanduser().resolve()
     issues: List[Issue] = []
     skills_checked: List[str] = []
+
+    if platform not in {"dual", "claude", "codex", "zcode", "all"}:
+        issues.append(
+            Issue("error", "PLATFORM", str(plugin_root), f"未知平台：{platform}")
+        )
+        return Report(str(plugin_root), platform, issues, skills_checked)
 
     if not plugin_root.is_dir():
         issues.append(
@@ -859,8 +903,9 @@ def validate_plugin(plugin_dir: Path, platform: str = "dual") -> Report:
 
     codex_result = (None, None, None, set())
     claude_result = (None, None, None, set())
+    zcode_result = (None, None, None, set())
 
-    if platform in {"codex", "dual"}:
+    if platform in {"codex", "dual", "all"}:
         codex_dir = plugin_root / ".codex-plugin"
         validate_manifest_directory(codex_dir, plugin_root, issues)
         codex_result = validate_manifest(
@@ -870,7 +915,7 @@ def validate_plugin(plugin_dir: Path, platform: str = "dual") -> Report:
             issues=issues,
         )
 
-    if platform in {"claude", "dual"}:
+    if platform in {"claude", "dual", "all"}:
         claude_dir = plugin_root / ".claude-plugin"
         validate_manifest_directory(
             claude_dir,
@@ -885,38 +930,42 @@ def validate_plugin(plugin_dir: Path, platform: str = "dual") -> Report:
             issues=issues,
         )
 
+    if platform in {"zcode", "all"}:
+        zcode_dir = plugin_root / ".zcode-plugin"
+        validate_manifest_directory(zcode_dir, plugin_root, issues)
+        zcode_result = validate_manifest(
+            platform="zcode",
+            manifest_path=zcode_dir / "plugin.json",
+            plugin_root=plugin_root,
+            issues=issues,
+        )
+
     if platform == "dual":
         _c_data, c_name, c_version, c_skills = codex_result
         _a_data, a_name, a_version, a_skills = claude_result
-        if c_name and a_name and c_name != a_name:
-            add_issue(
-                issues,
-                "error",
-                "DUAL_NAME_MISMATCH",
-                plugin_root,
-                f"两个 Manifest 的 name 不一致：{c_name!r} != {a_name!r}。",
-                plugin_root,
-            )
-        if c_version and a_version and c_version != a_version:
-            add_issue(
-                issues,
-                "error",
-                "DUAL_VERSION_MISMATCH",
-                plugin_root,
-                f"两个 Manifest 的 version 不一致：{c_version!r} != {a_version!r}。",
-                plugin_root,
-            )
-        if c_skills and a_skills and c_skills != a_skills:
-            add_issue(
-                issues,
-                "error",
-                "DUAL_SKILLS_MISMATCH",
-                plugin_root,
-                "两个 Manifest 必须指向同一组 Skills 规范源。",
-                plugin_root,
-            )
+        check_manifest_consistency(
+            issues,
+            plugin_root,
+            "DUAL",
+            (a_name, a_version, a_skills),
+            (("Codex Manifest", (c_name, c_version, c_skills)),),
+        )
 
-    all_skill_roots: Set[Path] = set(codex_result[3]) | set(claude_result[3])
+    if platform == "all":
+        check_manifest_consistency(
+            issues,
+            plugin_root,
+            "ALL",
+            claude_result[1:],
+            (
+                ("Codex Manifest", codex_result[1:]),
+                ("ZCode Manifest", zcode_result[1:]),
+            ),
+        )
+
+    all_skill_roots: Set[Path] = set(codex_result[3]) | set(claude_result[3]) | set(
+        zcode_result[3]
+    )
     skill_dirs = collect_skill_dirs(all_skill_roots)
     if not skill_dirs:
         add_issue(
@@ -928,13 +977,13 @@ def validate_plugin(plugin_dir: Path, platform: str = "dual") -> Report:
             plugin_root,
         )
 
-    skill_profile = "dual" if platform == "dual" else platform
+    skill_profile = "dual" if platform in {"dual", "all"} else platform
     for skill_dir in skill_dirs:
         report = validate_skill(skill_dir, skill_profile, plugin_root)
         skills_checked.append(display_path(skill_dir, plugin_root))
         merge_skill_report(report, skill_dir, plugin_root, issues)
 
-    if platform in {"codex", "dual"}:
+    if platform in {"codex", "dual", "all"}:
         validate_marketplace(plugin_root, issues)
 
     return Report(str(plugin_root), platform, issues, skills_checked)
@@ -962,13 +1011,14 @@ def print_human(report: Report) -> None:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="校验 Claude Code、Codex 或双平台 Plugin 的结构与 Skills。"
+        description="校验 Claude Code、Codex、ZCode 或全平台 Plugin 的结构与 Skills。"
     )
     parser.add_argument("plugin_dir", type=Path, help="Plugin 根目录")
     parser.add_argument(
         "--platform",
-        choices=("dual", "claude", "codex"),
+        choices=("dual", "claude", "codex", "zcode", "all"),
         default="dual",
+        help="all 同时检查三个平台 Manifest 及版本一致性",
     )
     parser.add_argument("--strict", action="store_true", help="将 warning 视为失败")
     parser.add_argument("--json", action="store_true", help="输出 JSON")

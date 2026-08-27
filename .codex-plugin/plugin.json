@@ -1,6 +1,6 @@
 {
   "name": "build-goals",
-  "version": "5.0.0",
+  "version": "5.1.0",
   "description": "A focused toolkit for clarifying goals and delivering verifiable software artifacts.",
   "author": {
     "name": "koco-co",
@@ -12,6 +12,7 @@
     "agent-skills",
     "codex",
     "claude-code",
+    "zcode",
     "plugin-development",
     "product-requirements",
     "readme-generation",

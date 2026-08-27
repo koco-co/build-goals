@@ -246,8 +246,12 @@ class InstallSkillTests(unittest.TestCase):
             validator["STANDARD_KEYS"],
         )
 
-    def test_build_prd_installs_for_both_platforms(self) -> None:
-        for platform, root_name in (("claude", ".claude"), ("codex", ".agents")):
+    def test_build_prd_installs_for_all_platforms(self) -> None:
+        for platform, root_name in (
+            ("claude", ".claude"),
+            ("codex", ".agents"),
+            ("zcode", ".zcode"),
+        ):
             with self.subTest(platform=platform), tempfile.TemporaryDirectory() as temp:
                 home = Path(temp)
                 result = self.run_installer(home, platform, "build-prd")
@@ -265,13 +269,19 @@ class InstallSkillTests(unittest.TestCase):
                 )
                 if platform == "claude":
                     self.assertFalse(destination.joinpath("agents").exists())
-                else:
+                elif platform == "codex":
                     self.assertTrue(
                         destination.joinpath("agents", "openai.yaml").is_file()
                     )
+                else:
+                    self.assertFalse(destination.joinpath("agents").exists())
 
-    def test_build_readme_installs_for_both_platforms(self) -> None:
-        for platform, root_name in (("claude", ".claude"), ("codex", ".agents")):
+    def test_build_readme_installs_for_all_platforms(self) -> None:
+        for platform, root_name in (
+            ("claude", ".claude"),
+            ("codex", ".agents"),
+            ("zcode", ".zcode"),
+        ):
             with self.subTest(platform=platform), tempfile.TemporaryDirectory() as temp:
                 home = Path(temp)
                 result = self.run_installer(home, platform, "build-readme")
@@ -284,13 +294,19 @@ class InstallSkillTests(unittest.TestCase):
                 )
                 if platform == "claude":
                     self.assertFalse(destination.joinpath("agents").exists())
-                else:
+                elif platform == "codex":
                     self.assertTrue(
                         destination.joinpath("agents", "openai.yaml").is_file()
                     )
+                else:
+                    self.assertFalse(destination.joinpath("agents").exists())
 
-    def test_build_agents_md_installs_for_both_platforms(self) -> None:
-        for platform, root_name in (("claude", ".claude"), ("codex", ".agents")):
+    def test_build_agents_md_installs_for_all_platforms(self) -> None:
+        for platform, root_name in (
+            ("claude", ".claude"),
+            ("codex", ".agents"),
+            ("zcode", ".zcode"),
+        ):
             with self.subTest(platform=platform), tempfile.TemporaryDirectory() as temp:
                 home = Path(temp)
                 result = self.run_installer(home, platform, "build-agents-md")
@@ -306,12 +322,14 @@ class InstallSkillTests(unittest.TestCase):
                 )
                 if platform == "claude":
                     self.assertFalse(destination.joinpath("agents").exists())
-                else:
+                elif platform == "codex":
                     self.assertTrue(
                         destination.joinpath("agents", "openai.yaml").is_file()
                     )
+                else:
+                    self.assertFalse(destination.joinpath("agents").exists())
 
-    def test_all_shipped_skills_install_for_both_platforms(self) -> None:
+    def test_all_shipped_skills_install_for_all_platforms(self) -> None:
         skill_names = sorted(
             path.name
             for path in REPO_ROOT.joinpath("skills").iterdir()
@@ -322,6 +340,7 @@ class InstallSkillTests(unittest.TestCase):
             for platform, root_name in (
                 ("claude", ".claude"),
                 ("codex", ".agents"),
+                ("zcode", ".zcode"),
             ):
                 with (
                     self.subTest(skill=skill_name, platform=platform),
@@ -341,7 +360,7 @@ class InstallSkillTests(unittest.TestCase):
                     if platform == "claude":
                         self.assertFalse(destination.joinpath("agents").exists())
                         self.assertNotIn("disable-model-invocation:", skill_md)
-                    else:
+                    elif platform == "codex":
                         self.assertNotIn("disable-model-invocation:", skill_md)
                         adapter = destination.joinpath(
                             "agents", "openai.yaml"
@@ -350,10 +369,24 @@ class InstallSkillTests(unittest.TestCase):
                             "allow_implicit_invocation: true",
                             adapter,
                         )
+                    else:
+                        self.assertFalse(destination.joinpath("agents").exists())
+                        self.assertIn(f"name: {skill_name}", skill_md)
+
+    def test_zcode_install_preserves_claude_frontmatter(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            home = Path(temp)
+            result = self.run_installer(home, "zcode", "handoff")
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+            destination = home / ".zcode" / "skills" / "handoff"
+            skill_md = destination.joinpath("SKILL.md").read_text(encoding="utf-8")
+            self.assertIn("argument-hint:", skill_md)
+            self.assertFalse(destination.joinpath("agents").exists())
 
     def test_plugin_only_skills_reject_standalone_installation(self) -> None:
         for skill_name in ("health-check", "vibe-coding"):
-            for platform in ("claude", "codex"):
+            for platform in ("claude", "codex", "zcode"):
                 with (
                     self.subTest(skill=skill_name, platform=platform),
                     tempfile.TemporaryDirectory() as temp,

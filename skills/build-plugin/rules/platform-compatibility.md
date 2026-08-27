@@ -4,7 +4,7 @@
 
 ## 当前范围
 
-当前通用构建流程支持 Claude Code 与 Codex。其他 Agent 平台只有在发现方式、Manifest、调用策略、安装和验证契约均已查明后才能加入；不能只创建空 Manifest 并宣称兼容。
+当前通用构建流程支持 Claude Code、Codex 与 ZCode。其他 Agent 平台只有在发现方式、Manifest、调用策略、安装和验证契约均已查明后才能加入；不能只创建空 Manifest 并宣称兼容。
 
 ## 平台入口
 
@@ -12,15 +12,19 @@
 | --- | --- | --- | --- |
 | Claude Code | `.claude-plugin/plugin.json` | `.claude-plugin/marketplace.json` | Claude Code 专用 Frontmatter |
 | Codex | `.codex-plugin/plugin.json` | `.agents/plugins/marketplace.json` | `agents/openai.yaml` |
+| ZCode | `.zcode-plugin/plugin.json`（优先探测） | 复用 `.claude-plugin/marketplace.json` | 无独立适配文件 |
 
 组件仍位于 Plugin 根目录。Manifest 中的组件路径使用以 `./` 开头、相对 Plugin 根目录解析的路径，不把 Skills、Hooks 或资源塞进 Manifest 目录。
 
-## 双平台规范源
+## 多平台规范源
 
-- Claude Code 与 Codex 的 `name`、`version` 默认保持一致，Manifest 分开维护。
+- 各平台 Manifest 的 `name`、`version` 默认保持一致，Manifest 分开维护。
 - 共用 Skill 的核心工作流、规则、模板、示例和脚本只维护一份。
 - Claude Code 专用字段与 Codex 的 `agents/openai.yaml` 可以同时存在于共用源；独立安装时再生成平台专用副本。
 - Codex 独立副本只保留通用 Agent Skills Frontmatter，并完整移除 Claude Code 专用字段及其嵌套内容。
+- ZCode 优先读取 `.zcode-plugin/plugin.json`，再回退到 `.claude-plugin/` 和 `.codex-plugin/`；ZCode 市场按探测顺序读取 `.claude-plugin/marketplace.json` 或根目录 `marketplace.json`。
+- ZCode 只识别 `name`、`description`、`when_to_use`、`license` 和 `metadata` 等 Skill Frontmatter 键，未识别的键在加载时被忽略，不阻塞加载。
+- ZCode 独立副本保留完整 Frontmatter 并移除 `agents/`。
 - 平台缺少等价能力时明确记录降级或退出条件，不伪造兼容行为。
 
 ## 共享文件与链接

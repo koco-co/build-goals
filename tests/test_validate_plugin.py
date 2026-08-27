@@ -89,7 +89,7 @@ class ValidatePluginTests(unittest.TestCase):
             "description": "Fixture plugin",
             "skills": "./skills/",
         }
-        for directory in (".codex-plugin", ".claude-plugin"):
+        for directory in (".codex-plugin", ".claude-plugin", ".zcode-plugin"):
             manifest = plugin / directory / "plugin.json"
             manifest.parent.mkdir(parents=True)
             manifest.write_text(
@@ -112,7 +112,11 @@ class ValidatePluginTests(unittest.TestCase):
 
     def test_build_plugin_templates_and_rules_are_standalone_safe(self) -> None:
         skill = REPO_ROOT / "skills" / "build-plugin"
-        for name in ("claude-plugin.template.json", "codex-plugin.template.json"):
+        for name in (
+            "claude-plugin.template.json",
+            "codex-plugin.template.json",
+            "zcode-plugin.template.json",
+        ):
             with self.subTest(template=name):
                 manifest = json.loads(
                     (skill / "templates" / name).read_text(encoding="utf-8")
@@ -581,26 +585,28 @@ class ValidatePluginTests(unittest.TestCase):
                 self.assertIn("恢复条件", contract)
 
     def test_repository_release_versions_are_synchronized(self) -> None:
-        claude_manifest = json.loads(
-            REPO_ROOT.joinpath(".claude-plugin", "plugin.json").read_text(
-                encoding="utf-8"
+        manifests = [
+            json.loads(
+                REPO_ROOT.joinpath(directory, "plugin.json").read_text(
+                    encoding="utf-8"
+                )
             )
-        )
-        codex_manifest = json.loads(
-            REPO_ROOT.joinpath(".codex-plugin", "plugin.json").read_text(
-                encoding="utf-8"
+            for directory in (
+                ".claude-plugin",
+                ".codex-plugin",
+                ".zcode-plugin",
             )
-        )
+        ]
         marketplace = json.loads(
             REPO_ROOT.joinpath(".claude-plugin", "marketplace.json").read_text(
                 encoding="utf-8"
             )
         )
-        self.assertEqual(claude_manifest["version"], codex_manifest["version"])
-        self.assertEqual(
-            claude_manifest["version"], marketplace["plugins"][0]["version"]
-        )
-        self.assertEqual(claude_manifest["version"], "5.0.0")
+        versions = {manifest["version"] for manifest in manifests}
+        versions.add(marketplace["plugins"][0]["version"])
+        self.assertEqual(versions, {"5.1.0"})
+        names = {manifest["name"] for manifest in manifests}
+        self.assertEqual(names, {"build-goals"})
 
     def test_claude_marketplace_manifest_is_allowed(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
@@ -634,6 +640,50 @@ class ValidatePluginTests(unittest.TestCase):
             result = self.run_validator(plugin)
             self.assertEqual(result.returncode, 1)
             self.assertIn("DUAL_VERSION_MISMATCH", result.stdout)
+
+    def test_all_platform_validation_passes(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            plugin = self.write_fixture(Path(temp))
+            result = self.run_validator(plugin, platform="all")
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+    def test_zcode_platform_requires_manifest(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            plugin = self.write_fixture(Path(temp))
+            zcode_dir = plugin / ".zcode-plugin"
+            for child in zcode_dir.iterdir():
+                child.unlink()
+            result = self.run_validator(plugin, platform="zcode")
+            self.assertEqual(result.returncode, 1)
+            self.assertIn("MANIFEST_REQUIRED", result.stdout)
+
+    def test_all_version_mismatch_detects_zcode_drift(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            plugin = self.write_fixture(Path(temp))
+            zcode = plugin / ".zcode-plugin" / "plugin.json"
+            data = json.loads(zcode.read_text(encoding="utf-8"))
+            data["version"] = "9.9.9"
+            zcode.write_text(
+                json.dumps(data, ensure_ascii=False, indent=2) + "\n",
+                encoding="utf-8",
+            )
+            result = self.run_validator(plugin, platform="all")
+            self.assertEqual(result.returncode, 1)
+            self.assertIn("ALL_VERSION_MISMATCH", result.stdout)
+
+    def test_zcode_skills_path_traversal_fails(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            plugin = self.write_fixture(Path(temp))
+            zcode = plugin / ".zcode-plugin" / "plugin.json"
+            data = json.loads(zcode.read_text(encoding="utf-8"))
+            data["skills"] = "./../skills/"
+            zcode.write_text(
+                json.dumps(data, ensure_ascii=False, indent=2) + "\n",
+                encoding="utf-8",
+            )
+            result = self.run_validator(plugin, platform="zcode")
+            self.assertEqual(result.returncode, 1)
+            self.assertIn("COMPONENT_PATH_TRAVERSAL", result.stdout)
 
     def test_manifest_path_escape_fails(self) -> None:
         with tempfile.TemporaryDirectory() as temp:

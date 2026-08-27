@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
-"""Install a source Skill into Claude Code or Codex.
+"""Install a source Skill into Claude Code, Codex, or ZCode.
 
 The repository itself is distributed as a Plugin for Claude Code and Codex.
 This compatibility installer creates a platform-specific standalone copy:
 - Claude Code preserves the source frontmatter and removes Codex UI metadata.
 - Codex removes Claude-only frontmatter and keeps agents/openai.yaml.
+- ZCode preserves the source frontmatter (unrecognized keys are ignored) and
+  removes Codex UI metadata.
 Repository-internal symlinks are dereferenced in the installed copy.
 """
 
@@ -73,17 +75,17 @@ def resolve_destination(
     project_dir: Optional[Path] = None,
     home_dir: Optional[Path] = None,
 ) -> Path:
-    if platform not in {"claude", "codex"}:
+    if platform not in {"claude", "codex", "zcode"}:
         raise InstallError(f"不支持的平台：{platform}")
     if scope not in {"user", "project"}:
         raise InstallError(f"不支持的安装范围：{scope}")
 
-    platform_root = ".claude" if platform == "claude" else ".agents"
+    platform_roots = {"claude": ".claude", "codex": ".agents", "zcode": ".zcode"}
     if scope == "user":
         base = (home_dir or Path.home()).expanduser().resolve()
     else:
         base = (project_dir or Path.cwd()).expanduser().resolve()
-    return base / platform_root / "skills" / skill_name
+    return base / platform_roots[platform] / "skills" / skill_name
 
 
 def run_validator(
@@ -198,11 +200,12 @@ def install_skill(
             )
             profile = "codex"
         else:
-            # Claude Code keeps the full frontmatter and drops Codex metadata.
+            # Claude Code keeps the full frontmatter; ZCode ignores the
+            # Claude-only keys at load time. Both drop Codex metadata.
             agents = stage / "agents"
             if agents.exists():
                 shutil.rmtree(agents)
-            profile = "claude"
+            profile = platform
 
         run_validator(validator, stage, profile, plugin_root=stage)
 
@@ -234,7 +237,9 @@ def build_parser() -> argparse.ArgumentParser:
         description="将 Skill 源安装为 Claude Code 或 Codex 的独立副本。"
     )
     parser.add_argument("skill", help="skills/ 下的 Skill 目录名")
-    parser.add_argument("--platform", choices=("claude", "codex"), required=True)
+    parser.add_argument(
+        "--platform", choices=("claude", "codex", "zcode"), required=True
+    )
     parser.add_argument("--scope", choices=("user", "project"), default="user")
     parser.add_argument(
         "--project-dir",

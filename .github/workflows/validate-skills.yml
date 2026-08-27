@@ -40,11 +40,11 @@ jobs:
           python3 skills/build-plugin/scripts/sync_shared_files.py
           --root .
 
-      - name: Validate dual-platform plugin
+      - name: Validate plugin across platforms
         run: |
           python3 skills/build-plugin/scripts/validate_plugin.py \
             . \
-            --platform dual \
+            --platform all \
             --strict
 
       - name: Run tests

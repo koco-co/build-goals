@@ -1,19 +1,19 @@
 ---
 name: build-plugin
-description: 创建、升级或迁移 Claude Code、Codex Plugin；涉及打包、平台适配、安装或分发时使用，不用于单独构建 Skill 或普通编码。
+description: 创建、升级或迁移 Claude Code、Codex、ZCode Plugin；涉及打包、平台适配、安装或分发时使用，不用于单独构建 Skill 或普通编码。
 compatibility: 需要互联网访问和 Python 3.9+ 运行内置静态校验脚本。
 metadata:
   author: koco-co
-  version: "2.2.0"
+  version: "2.3.0"
 ---
 
 # Outcome
 
-把明确的插件需求转化为可安装、可验证且权限可控的 Claude Code/Codex Plugin。
+把明确的插件需求转化为可安装、可验证且权限可控的 Claude Code/Codex/ZCode Plugin。
 
 ## Routing
 
-- 新建、升级或迁移 Plugin 时进入对应分支；双平台需求只维护一份核心内容，分别配置 Manifest。
+- 新建、升级或迁移 Plugin 时进入对应分支；多平台需求只维护一份核心内容，分别配置 Manifest。
 - Plugin 包含 Skill 时交给 `build-skill`；单独构建 Skill 且没有打包、安装或分发需求时退出并转交。
 - 由 `health-check` 受控调用时，审查阶段保持只读；上层取得修复确认后再修复。
 - 普通代码、文档或其他平台适配不属于本 Skill。

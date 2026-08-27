@@ -126,7 +126,7 @@ def _validate_claude_marketplace(plugin_root: Path, report: Report) -> None:
 
 def validate_plugin(plugin_dir: Path, platform: str = "dual") -> Report:
     report = _core.validate_plugin(plugin_dir, platform)
-    if platform in {"claude", "dual"} and Path(report.plugin_dir).is_dir():
+    if platform in {"claude", "dual", "all"} and Path(report.plugin_dir).is_dir():
         _validate_claude_marketplace(Path(report.plugin_dir), report)
     return report
 

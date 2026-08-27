@@ -32,7 +32,7 @@
 
 按需确认：
 
-- 目标平台是 Claude Code、Codex 还是双平台；
+- 目标平台覆盖 Claude Code、Codex、ZCode 中的哪些组合；
 - Plugin 是 Skills-only、MCP-only、混合型，还是包含 Hooks、Agents 或 UI；
 - 新建、升级、迁移或包装已有组件；
 - 用户级、项目级、Marketplace 或公开发布；

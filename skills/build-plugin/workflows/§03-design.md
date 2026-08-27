@@ -11,7 +11,7 @@ Skills + MCP
 Skills + Hooks / Agents
 Skills + MCP + UI
 已有仓库迁移
-双平台封装
+多平台封装
 ```
 
 只纳入用户当前需要的组件。
@@ -31,17 +31,18 @@ Skills + MCP + UI
 
 ## Phase 3：设计平台层
 
-双平台方案必须：
+多平台方案必须：
 
 - 核心组件只维护一份；
 - `.claude-plugin/plugin.json` 只描述 Claude Code 差异；
 - `.codex-plugin/plugin.json` 只描述 Codex 差异；
+- 目标包含 ZCode 时增加 `.zcode-plugin/plugin.json`，且三份 Manifest 的 name、version 和 Skills 路径一致；
 - 跨 Skill 运行依赖使用清单声明的普通镜像，并设计同步与漂移校验；
 - 无法等价实现的能力明确分支或降级。
 
 只设计当前方案实际需要的文件，不为未采用的平台入口、组件或目录生成占位骨架。
 
-创建平台 Manifest 时按需读取 `templates/claude-plugin.template.json` 或 `templates/codex-plugin.template.json`；模板只提供字段骨架，不扩大组件范围。
+创建平台 Manifest 时按需读取 `templates/claude-plugin.template.json`、`templates/codex-plugin.template.json` 或 `templates/zcode-plugin.template.json`；模板只提供字段骨架，不扩大组件范围。
 
 ## Phase 4：输出方案
 

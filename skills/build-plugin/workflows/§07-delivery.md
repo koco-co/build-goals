@@ -6,7 +6,7 @@
 
 - 最终交付了什么；
 - 哪些内容没有做；
-- Plugin 在 Claude Code 与 Codex 中如何发现、安装和调用；
+- Plugin 在 Claude Code、Codex 与 ZCode 中如何发现、安装和调用；
 - 哪些文件是规范源，哪些是平台适配；
 - 哪些文件是共享镜像、规范源在哪里，以及保留了哪些必要链接；
 - Plugin 中的 Skills 是否通过 `build-skill` 规范；
@@ -46,7 +46,8 @@
 3. 发布或更新明确存在的 Marketplace；
 4. 更新并核验 Claude Code Plugin；
 5. 更新并核验 Codex Plugin；
-6. 创建 Release，仅当目标仓库确实使用 Release 且前置条件已满足。
+6. 更新并核验 ZCode Plugin，仅当本地安装了 ZCode 客户端时适用；
+7. 创建 Release，仅当目标仓库确实使用 Release 且前置条件已满足。
 
 为每项动作写明真实目标、当前版本或拟发布版本，并给出推荐答案。明确用户可以全部授权或只授权其中部分动作。目标 Plugin 只支持一个平台时，不得列出另一平台更新；不存在远端、Marketplace、安装或 Release 流程时，不得虚构对应动作。
 

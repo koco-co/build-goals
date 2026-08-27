@@ -23,9 +23,10 @@ Plugin 负责组织可安装、可升级的能力包。它可以包含 Skills、
 ```text
 <plugin-root>/
 ├── .claude-plugin/
-│   ├── marketplace.json # 按需
+│   ├── marketplace.json # 按需；ZCode 也读取该文件
 │   └── plugin.json
 ├── .codex-plugin/plugin.json
+├── .zcode-plugin/plugin.json # 目标含 ZCode 时按需
 ├── skills/
 ├── agents/          # 按需
 ├── hooks/           # 按需
@@ -39,7 +40,7 @@ Plugin 负责组织可安装、可升级的能力包。它可以包含 Skills、
 
 ## 4. 单一规范源
 
-双平台共用的 Skills、规则、模板和脚本只维护一份。允许的复用顺序：
+多平台共用的 Skills、规则、模板和脚本只维护一份。允许的复用顺序：
 
 ```text
 同一路径直接共用

@@ -37,7 +37,7 @@ Frontmatter 只承载目标平台会读取的元数据和运行策略。每个�
 - 允许模型调用时，优先在跨平台 `description` 中写清适用场景、排除条件和相邻 Skill 边界；
 - 仅限用户调用时，由平台配置限制调用，不在正文重复权限说明；
 - 调用策略变化属于行为变化，必须取得设计确认并验证应触发与不应触发场景；
-- 双平台 Skill 不依赖 Claude Code 的 `when_to_use` 承担唯一触发语义。
+- 多平台 Skill 不依赖 Claude Code 的 `when_to_use` 承担唯一触发语义；ZCode 会把 `when_to_use` 与截断后的 `description` 一并交给模型，但不识别其余 Claude Code 专用字段。
 
 ## 3. `compatibility`
 
@@ -70,11 +70,12 @@ compatibility: 需要 Git、Docker 和互联网访问。
 
 ## 4. 平台隔离
 
-双平台共用源可以包含 Claude Code 字段和 `agents/openai.yaml`，但独立安装产物必须隔离：
+多平台共用源可以包含 Claude Code 字段和 `agents/openai.yaml`，但独立安装产物必须隔离：
 
 ```text
 Claude Code 副本：保留通用字段和 Claude Code 字段，移除 agents/
 Codex 副本：只保留通用 Agent Skills 字段，保留 agents/openai.yaml
+ZCode 副本：保留全部字段（未识别的键被忽略），移除 agents/
 ```
 
 不得把未知字段直接假定为跨平台字段。平台规范变化后，先更新字段分类、安装转换和测试，再在 Skill 中使用新字段。

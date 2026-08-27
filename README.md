@@ -6,6 +6,7 @@
 
 [![Claude Code](https://img.shields.io/badge/Claude_Code-Plugin-D97757?logo=anthropic&logoColor=white&cacheSeconds=3600)](https://code.claude.com/docs/en/plugins)
 [![Codex](https://img.shields.io/badge/Codex-Supported-000000?style=flat-square&logo=openai&logoColor=white&cacheSeconds=3600)](https://developers.openai.com/plugins/)
+[![ZCode](https://img.shields.io/badge/ZCode-Plugin-7B5CFF?cacheSeconds=3600)](https://z.ai)
 [![Agent Skills](https://img.shields.io/badge/Agent_Skills-Compatible-2563EB?cacheSeconds=3600)](https://github.com/agentskills/agentskills)
 [![Validate Plugin](https://github.com/koco-co/build-goals/actions/workflows/validate-skills.yml/badge.svg)](https://github.com/koco-co/build-goals/actions/workflows/validate-skills.yml)
 [![Python](https://img.shields.io/badge/Python-3.9%2B-3776AB?logo=python&logoColor=white&cacheSeconds=3600)](https://www.python.org/)
@@ -17,9 +18,9 @@
 
 <h2 align="center">𝑶𝒗𝒆𝒓𝒗𝒊𝒆𝒘 · 简介</h2>
 
-<p><code>build-goals</code> 是一个持续演进与沉淀的 <b>Agent</b> 目标构建仓库。它既是可以直接加载的 <b>Claude Code</b> 与 <b>Codex</b> 双平台 <b>Plugin</b>，也为没有跨 <b>Skill</b> 依赖的能力保留独立安装方式。</p>
+<p><code>build-goals</code> 是一个持续演进与沉淀的 <b>Agent</b> 目标构建仓库。它既是可以直接加载的 <b>Claude Code</b>、<b>Codex</b> 与 <b>ZCode</b> 多平台 <b>Plugin</b>，也为没有跨 <b>Skill</b> 依赖的能力保留独立安装方式。</p>
 
-- 当前直接适配 <b>Claude Code</b> 与 <b>Codex</b>。
+- 当前直接适配 <b>Claude Code</b>、<b>Codex</b> 与 <b>ZCode</b>。
 - 本仓库不再提供 <b>DeepSeek Harness</b> 专用包；<b>DSH</b> 使用其自身的 <b>Codex</b> 兼容能力，本仓库不单独验证该路径。
 - 其他 <b>Coding Agent</b> 尚未声明兼容；新增平台前会先核对真实能力与契约。
 
@@ -32,7 +33,7 @@
 | [`shape-idea`](skills/shape-idea/)           | 澄清目标与取舍，涉及界面时逐状态展示交互和业务状态流                      |
 | [`health-check`](skills/health-check/)       | 统一检查项目规范产物，报告问题并在确认后修复、验证和复检                  |
 | [`build-skill`](skills/build-skill/)         | 按能力设计 <b>Frontmatter</b>，构建并审查高质量 <b>Agent Skill</b>       |
-| [`build-plugin`](skills/build-plugin/)       | 构建、升级或迁移双平台 <b>Plugin</b>                                     |
+| [`build-plugin`](skills/build-plugin/)       | 构建、升级或迁移多平台 <b>Plugin</b>                                     |
 | [`build-prd`](skills/build-prd/)             | 生成包含真实输入输出、UI 状态与行为样例的可复制产品需求包                 |
 | [`vibe-coding`](skills/vibe-coding/)         | 按需求包编排架构、技术状态流、<b>TDD</b> 与多 <b>Agent</b> 全链路交付    |
 | [`build-readme`](skills/build-readme/)       | 探索项目并创建或更新 <b>GitHub</b> 风格 <b>README</b>                    |
@@ -91,7 +92,7 @@ flowchart LR
 - 确定性优先：已有 <b>CLI</b> → 脚本 → 模板 → <b>Few-shot</b> → 规则 → 提示词。
 - 渐进式读取：主 <code>SKILL.md</code> 只保留路由和主流程，复杂内容按需读取。
 - 验证可复现：静态检查、内容审查、文案审查与真实平台测试分别记录。
-- 平台差异隔离：<b>Claude Code</b> 与 <b>Codex</b> 的 <b>Manifest</b>、调用策略和平台扩展分别配置。
+- 平台差异隔离：<b>Claude Code</b>、<b>Codex</b> 与 <b>ZCode</b> 的 <b>Manifest</b>、调用策略和平台扩展分别配置。
 
 <a id="structure"></a>
 
@@ -109,6 +110,8 @@ build-goals/
 │   ├── marketplace.json
 │   └── plugin.json
 ├── .codex-plugin/
+│   └── plugin.json
+├── .zcode-plugin/
 │   └── plugin.json
 ├── .github/
 │   └── workflows/
@@ -154,13 +157,27 @@ codex plugin marketplace list
 codex plugin add build-goals@build-goals
 ```
 
-<p>安装完整 <b>Plugin</b> 后，可在 <b>Claude Code</b> 中调用 <code>/build-goals:health-check</code>，在 <b>Codex</b> 中调用 <code>$build-goals:health-check</code>；符合描述的项目健康检查请求也允许模型直接路由。<code>vibe-coding</code> 会在三个项目检查点自动使用该入口。</p>
+<a id="zcode"></a>
+
+<h3 align="center">𝒁𝑪𝒐𝒅𝒆 · 添加仓库 𝑴𝒂𝒓𝒌𝒆𝒕𝒑𝒍𝒂𝒄𝒆</h3>
+
+<p>在 <b>ZCode</b> 客户端中打开 <b>Settings → Plugin Management → Discover</b>，通过 <code>+</code> 按钮添加 <b>GitHub</b> 仓库 <code>koco-co/build-goals</code> 并安装 <b>Plugin</b>，或选择本地仓库目录。<b>ZCode</b> 沿用 <code>.claude-plugin/marketplace.json</code> 解析 <b>Marketplace</b>，并优先读取 <code>.zcode-plugin/plugin.json</code> 作为 <b>Plugin Manifest</b>。</p>
+
+<p>安装完整 <b>Plugin</b> 后，可在 <b>Claude Code</b> 中调用 <code>/build-goals:health-check</code>，在 <b>Codex</b> 中调用 <code>$build-goals:health-check</code>，在 <b>ZCode</b> 输入框的 <code>/</code> 菜单 <b>Skills</b> 分组中选择对应能力；符合描述的项目健康检查请求也允许模型直接路由。<code>vibe-coding</code> 会在三个项目检查点自动使用该入口。</p>
 
 <a id="standalone-skills"></a>
 
 <h2 align="center">𝑺𝒕𝒂𝒏𝒅𝒂𝒍𝒐𝒏𝒆 𝑺𝒌𝒊𝒍𝒍𝒔 · 独立安装</h2>
 
 <p><b>Plugin</b> 是推荐分发方式。确实只需要一个没有跨 <b>Skill</b> 依赖的能力时，仍可使用兼容安装器；<code>health-check</code> 与 <code>vibe-coding</code> 只随完整 <b>Plugin</b> 分发，安装器会拒绝独立安装。</p>
+
+<p><b>ZCode</b>：</p>
+
+```bash
+python3 scripts/install_skill.py build-skill \
+  --platform zcode \
+  --scope user
+```
 
 <p><b>Codex</b>：</p>
 
@@ -184,13 +201,13 @@ python3 scripts/install_skill.py build-skill \
 
 <h2 align="center">𝑽𝒂𝒍𝒊𝒅𝒂𝒕𝒊𝒐𝒏 · 验证</h2>
 
-<p>验证整个双平台 <b>Plugin</b>：</p>
+<p>验证整个多平台 <b>Plugin</b>（三份 <b>Manifest</b> 及版本一致性）：</p>
 
 ```bash
 python3 skills/build-plugin/scripts/sync_shared_files.py --root .
 python3 skills/build-plugin/scripts/validate_plugin.py \
   . \
-  --platform dual \
+  --platform all \
   --strict
 ```
 
@@ -283,6 +300,7 @@ python3 -m unittest discover -s tests -p 'test_*.py' -v
 | ------------------------ | --------------------------------------- | ---------------- | ------------------------------------------------- |
 | <b>Claude Code</b>       | `.claude-plugin/plugin.json`            | 已接入 <b>CI</b> | 需在本地 <b>Claude Code</b> 完成                  |
 | <b>Codex</b>             | `.codex-plugin/plugin.json`             | 已接入 <b>CI</b> | 需在支持 <b>Plugin</b> 的 <b>Codex</b> 客户端完成 |
+| <b>ZCode</b>             | `.zcode-plugin/plugin.json`（优先探测） | 已接入 <b>CI</b> | 需在本地 <b>ZCode</b> 客户端完成                  |
 | 其他 <b>Coding Agent</b> | 暂无                                    | 暂无             | 暂无                                              |
 
 <a id="license"></a>

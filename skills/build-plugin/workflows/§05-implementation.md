@@ -40,10 +40,16 @@ Codex：
 .codex-plugin/plugin.json
 ```
 
+ZCode：
+
+```text
+.zcode-plugin/plugin.json
+```
+
 组件仍位于 Plugin 根目录。Manifest 路径使用 `./` 开头的相对路径，不把 Skills、Hooks 或资源塞进 Manifest 目录。
 
 ## Phase 5：同步文档和版本
 
-更新 README、版本、安装命令、调用方式、变更说明和验证命令。两个 Manifest 的身份与版本保持一致，除非设计明确说明例外。
+更新 README、版本、安装命令、调用方式、变更说明和验证命令。各平台 Manifest 的身份与版本保持一致，除非设计明确说明例外。
 
 完成条件：设计中的全部组件已经落地，路径和版本一致，没有未授权副作用。
