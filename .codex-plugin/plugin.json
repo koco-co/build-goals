@@ -1,6 +1,6 @@
 {
   "name": "build-goals",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Clarify goals and build, review, and maintain Agent Skills, plugins, and project documentation.",
   "author": {
     "name": "koco-co",

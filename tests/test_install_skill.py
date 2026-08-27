@@ -329,19 +329,25 @@ class InstallSkillTests(unittest.TestCase):
                     )
                     if platform == "claude":
                         self.assertFalse(destination.joinpath("agents").exists())
-                        self.assertNotIn("disable-model-invocation:", skill_md)
+                        if skill_name == "build-docs":
+                            self.assertIn("disable-model-invocation: true", skill_md)
+                        else:
+                            self.assertNotIn("disable-model-invocation:", skill_md)
                     elif platform == "codex":
                         self.assertNotIn("disable-model-invocation:", skill_md)
                         adapter = destination.joinpath(
                             "agents", "openai.yaml"
                         ).read_text(encoding="utf-8")
                         self.assertIn(
-                            "allow_implicit_invocation: true",
+                            "allow_implicit_invocation: "
+                            + ("false" if skill_name == "build-docs" else "true"),
                             adapter,
                         )
                     else:
                         self.assertFalse(destination.joinpath("agents").exists())
                         self.assertIn(f"name: {skill_name}", skill_md)
+                        if skill_name == "build-docs":
+                            self.assertIn("disable-model-invocation: true", skill_md)
 
     def test_zcode_install_preserves_claude_frontmatter(self) -> None:
         with tempfile.TemporaryDirectory() as temp:

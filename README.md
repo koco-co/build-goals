@@ -36,6 +36,7 @@
 | [`build-plugin`](skills/build-plugin/)       | 构建、升级或迁移多平台 <b>Plugin</b>                                     |
 | [`build-readme`](skills/build-readme/)       | 探索项目并创建或更新 <b>GitHub</b> 风格 <b>README</b>                    |
 | [`build-agents-md`](skills/build-agents-md/) | 初始化或整体重构跨平台 <b>AGENTS.md</b> 与 <b>CLAUDE.md</b>              |
+| [`build-docs`](skills/build-docs/)           | 为大型项目从零建立、从已有实现提取或持续更新整套开发文档                  |
 | [`handoff`](skills/handoff/)                 | 整理跨会话交接文档并生成可直接复制的接续提示词                           |
 
 <p><code>health-check</code> 统一检查项目中的 <b>Agent Skill</b>、<b>Plugin</b>、<b>README</b>、<code>AGENTS.md</code> / <code>CLAUDE.md</code>。它先只读检查并一次性报告有证据的问题；用户确认后，直接组织对应领域修复、验证并重新检查，不生成持久化健康报告。</p>
@@ -45,6 +46,10 @@
 <p><code>build-readme</code> 会先了解代码、命令、测试、<b>CI</b>、文档和资源并提供具体修改预览；用户确认后才创建或更新 <b>README</b>，并分别报告静态检查、<b>GitHub</b> 渲染和未验证内容。</p>
 
 <p><code>build-agents-md</code> 会根据仓库证据筛选项目特有指令，并按应用、库、<b>CLI</b> 或 <b>Monorepo</b> 的实际结构组织根目录和子目录 <code>AGENTS.md</code>；用户确认完整内容预览后，才创建同目录真实 <code>CLAUDE.md</code>，其内容精确为 <code>@AGENTS.md</code>，供 <b>Claude Code</b> 导入同一正文。</p>
+
+<p><code>build-docs</code> 覆盖需求、架构、路线、数据、编码、测试、决策、术语、接续、变更、环境和风险共 12 类文档。它先确认整体规划，再分批预览、确认并写入；已有项目从代码、配置、测试和记录提取事实，沿用等价文档路径，并在 <code>AGENTS.md</code> 中维护一行 <code>@</code> 相对路径入口。它不处理小问题、小需求，也不执行产品代码开发。</p>
+
+<p><code>build-docs</code> 在 <b>Claude Code</b> 和 <b>Codex</b> 中仅限用户主动调用；<b>ZCode</b> 允许模型按上述适用范围调用。<a href="https://zcode.z.ai/en/docs/skill">ZCode 的 Skill 列表同时面向用户和模型</a>，不提供等价的仅用户调用开关。配置与安装校验不代表真实客户端行为已验证。</p>
 
 <a id="workflow"></a>
 
@@ -57,10 +62,12 @@ flowchart LR
     B --> D[Plugin]
     B --> F[README]
     B --> M[AGENTS.md]
+    B --> N[开发文档]
     C --> K[Validate]
     D --> K
     F --> K
     M --> K
+    N --> K
     K --> L[Handoff]
 ```
 
@@ -108,6 +115,7 @@ build-goals/
 │   ├── build-plugin/
 │   ├── build-readme/
 │   ├── build-agents-md/
+│   ├── build-docs/
 │   └── handoff/
 └── tests/
 ```
@@ -176,7 +184,7 @@ python3 scripts/install_skill.py build-skill \
   --scope user
 ```
 
-<p>将 <code>build-skill</code> 替换为 <code>build-plugin</code>、<code>build-readme</code>、<code>build-agents-md</code>、<code>shape-idea</code> 或 <code>handoff</code> 即可安装另一个独立 <b>Skill</b>。目标目录已存在时默认拒绝覆盖；明确确认后添加 <code>--force</code>。</p>
+<p>将 <code>build-skill</code> 替换为 <code>build-plugin</code>、<code>build-readme</code>、<code>build-agents-md</code>、<code>build-docs</code>、<code>shape-idea</code> 或 <code>handoff</code> 即可安装另一个独立 <b>Skill</b>。目标目录已存在时默认拒绝覆盖；明确确认后添加 <code>--force</code>。</p>
 
 <a id="validation"></a>
 

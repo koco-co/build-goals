@@ -1,0 +1,7 @@
+interface:
+  display_name: "Build Docs"
+  short_description: "建立、提取与维护大型项目开发文档"
+  default_prompt: "使用 $build-docs 为大型项目建立、从已有实现提取或更新开发文档；先确认整体规划，再分批预览、确认并写入，沿用已有路径并同步 AGENTS.md 的简短入口。"
+
+policy:
+  allow_implicit_invocation: false

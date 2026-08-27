@@ -105,6 +105,7 @@ class ValidatePluginTests(unittest.TestCase):
         self.assertIn("skills/build-plugin", result.stdout)
         self.assertIn("skills/build-readme", result.stdout)
         self.assertIn("skills/build-agents-md", result.stdout)
+        self.assertIn("skills/build-docs", result.stdout)
         self.assertIn("skills/health-check", result.stdout)
         self.assertIn("skills/shape-idea", result.stdout)
         self.assertIn("skills/handoff", result.stdout)
@@ -597,7 +598,7 @@ class ValidatePluginTests(unittest.TestCase):
         )
         versions = {manifest["version"] for manifest in manifests}
         versions.add(marketplace["plugins"][0]["version"])
-        self.assertEqual(versions, {"2.0.0"})
+        self.assertEqual(versions, {"2.1.0"})
         names = {manifest["name"] for manifest in manifests}
         self.assertEqual(names, {"build-goals"})
 

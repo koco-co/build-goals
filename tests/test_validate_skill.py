@@ -306,10 +306,14 @@ class ValidateSkillTests(unittest.TestCase):
             adapter = skill_md.parent.joinpath("agents", "openai.yaml").read_text(
                 encoding="utf-8"
             )
-            with self.subTest(skill=name, policy="model-invocable"):
-                self.assertIn(name, model_invocable)
-                self.assertNotIn("disable-model-invocation:", text)
-                self.assertIn("allow_implicit_invocation: true", adapter)
+            with self.subTest(skill=name, policy="confirmed"):
+                if name == "build-docs":
+                    self.assertIn("disable-model-invocation: true", text)
+                    self.assertIn("allow_implicit_invocation: false", adapter)
+                else:
+                    self.assertIn(name, model_invocable)
+                    self.assertNotIn("disable-model-invocation:", text)
+                    self.assertIn("allow_implicit_invocation: true", adapter)
                 self.assertIn("时使用", text.split("---", 2)[1])
                 self.assertRegex(text.split("---", 2)[1], r"不用于|不使用")
             for phrase in redundant_phrases:
@@ -432,6 +436,7 @@ class ValidateSkillTests(unittest.TestCase):
     def test_shipped_compatibility_describes_only_hard_requirements(self) -> None:
         expected = {
             "build-agents-md": "需要 Python 3.9+ 运行内置校验脚本。",
+            "build-docs": None,
             "build-plugin": "需要互联网访问和 Python 3.9+ 运行内置静态校验脚本。",
             "build-readme": "需要 Python 3.9+ 运行内置校验脚本。",
             "build-skill": "需要互联网访问和 Python 3.9+ 运行内置静态校验脚本。",
@@ -457,6 +462,7 @@ class ValidateSkillTests(unittest.TestCase):
     def test_behavior_changed_skill_versions_are_updated(self) -> None:
         expected = {
             "build-agents-md": 'version: "3.0.1"',
+            "build-docs": 'version: "1.0.0"',
             "build-plugin": 'version: "2.3.1"',
             "build-readme": 'version: "2.2.0"',
             "build-skill": 'version: "2.2.1"',
