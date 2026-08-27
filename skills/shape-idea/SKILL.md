@@ -3,7 +3,7 @@ name: shape-idea
 description: 通过事实核查和逐轮提问明确模糊想法；目标、范围或关键取舍仍需用户决策时使用，不用于普通问答、评审或直接实施。
 metadata:
   author: koco-co
-  version: "2.3.0"
+  version: "2.3.1"
 ---
 
 # Outcome

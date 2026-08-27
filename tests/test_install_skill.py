@@ -246,36 +246,6 @@ class InstallSkillTests(unittest.TestCase):
             validator["STANDARD_KEYS"],
         )
 
-    def test_build_prd_installs_for_all_platforms(self) -> None:
-        for platform, root_name in (
-            ("claude", ".claude"),
-            ("codex", ".agents"),
-            ("zcode", ".zcode"),
-        ):
-            with self.subTest(platform=platform), tempfile.TemporaryDirectory() as temp:
-                home = Path(temp)
-                result = self.run_installer(home, platform, "build-prd")
-                self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-
-                destination = home / root_name / "skills" / "build-prd"
-                self.assertTrue(destination.joinpath("SKILL.md").is_file())
-                self.assertTrue(
-                    destination.joinpath("scripts", "validate_prd.py").is_file()
-                )
-                self.assertTrue(
-                    destination.joinpath(
-                        "scripts", "validate_checkpoint.py"
-                    ).is_file()
-                )
-                if platform == "claude":
-                    self.assertFalse(destination.joinpath("agents").exists())
-                elif platform == "codex":
-                    self.assertTrue(
-                        destination.joinpath("agents", "openai.yaml").is_file()
-                    )
-                else:
-                    self.assertFalse(destination.joinpath("agents").exists())
-
     def test_build_readme_installs_for_all_platforms(self) -> None:
         for platform, root_name in (
             ("claude", ".claude"),
@@ -333,7 +303,7 @@ class InstallSkillTests(unittest.TestCase):
         skill_names = sorted(
             path.name
             for path in REPO_ROOT.joinpath("skills").iterdir()
-            if path.name not in {"health-check", "vibe-coding"}
+            if path.name not in {"health-check"}
         )
 
         for skill_name in skill_names:
@@ -385,7 +355,7 @@ class InstallSkillTests(unittest.TestCase):
             self.assertFalse(destination.joinpath("agents").exists())
 
     def test_plugin_only_skills_reject_standalone_installation(self) -> None:
-        for skill_name in ("health-check", "vibe-coding"):
+        for skill_name in ("health-check",):
             for platform in ("claude", "codex", "zcode"):
                 with (
                     self.subTest(skill=skill_name, platform=platform),

@@ -1,7 +1,0 @@
-interface:
-  display_name: "Build PRD"
-  short_description: "生成可复制的正式产品需求包"
-  default_prompt: "使用 $build-prd 生成可复制的正式需求包；逐域确认后写入 docs/产品需求/。"
-
-policy:
-  allow_implicit_invocation: true

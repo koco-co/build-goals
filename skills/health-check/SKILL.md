@@ -1,9 +1,9 @@
 ---
 name: health-check
-description: 检查项目的 Skill、Plugin、README、AGENTS.md/CLAUDE.md 与正式 PRD；用户要求健康检查或上层流程需要基线/交付复核时使用，不用于代码质量、安全、依赖、测试、CI 或性能审计。
+description: 检查项目的 Skill、Plugin、README、AGENTS.md/CLAUDE.md；用户要求项目规范健康检查时使用，不用于代码质量、安全、依赖、测试、CI 或性能审计。
 metadata:
   author: koco-co
-  version: "1.0.0"
+  version: "2.0.0"
 ---
 
 # Outcome
@@ -12,8 +12,7 @@ metadata:
 
 ## Routing
 
-- 独立调用检查五个规范领域：Agent Skill、Plugin、README、AGENTS.md/CLAUDE.md 和正式 PRD。
-- 由 `vibe-coding` 受控调用时，只检查上层指定的基线、就绪或最终交付范围；无问题时直接返回。
+- 独立调用检查四个规范领域：Agent Skill、Plugin、README、AGENTS.md/CLAUDE.md。
 - 本 Skill 只随完整 `build-goals` Plugin 分发；代码质量、安全、依赖、测试覆盖率、CI 和性能审计不属于本 Skill。
 
 ## Steps

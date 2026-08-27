@@ -4,7 +4,7 @@ description: 创建、升级或重构通用或项目级 Agent Skill；涉及 Ski
 compatibility: 需要互联网访问和 Python 3.9+ 运行内置静态校验脚本。
 metadata:
   author: koco-co
-  version: "2.2.0"
+  version: "2.2.1"
 ---
 
 # Outcome
@@ -15,7 +15,7 @@ metadata:
 
 - 新建通用 Skill、创建项目级 Skill 或升级已有 Skill 时进入对应分支。
 - 由 `health-check` 受控调用时，审查阶段保持只读；上层取得修复确认后再修复。
-- 由 `vibe-coding` 或 `build-plugin` 受控调用时，遵循上层任务、确认和恢复契约。
+- 由 `build-plugin` 受控调用时，遵循上层任务、确认和恢复契约。
 - Plugin 打包、安装、分发、普通文档或提示词润色不属于本 Skill。
 
 ## Steps

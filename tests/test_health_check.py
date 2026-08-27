@@ -60,7 +60,7 @@ class HealthCheckContractTests(unittest.TestCase):
             with self.subTest(prohibited=prohibited):
                 self.assertNotIn(prohibited, contract)
 
-    def test_domain_contract_covers_only_the_confirmed_five_domains(self) -> None:
+    def test_domain_contract_covers_only_the_confirmed_four_domains(self) -> None:
         contract = SKILL_ROOT.joinpath("rules", "domain-contract.md").read_text(
             encoding="utf-8"
         )
@@ -70,10 +70,11 @@ class HealthCheckContractTests(unittest.TestCase):
             "README",
             "AGENTS.md",
             "CLAUDE.md",
-            "正式 PRD 需求包",
         ):
             with self.subTest(domain=domain):
                 self.assertIn(domain, contract)
+        self.assertIn("四个项目规范领域", contract)
+        self.assertNotIn("PRD", contract)
         for excluded in (
             "代码质量",
             "安全",
@@ -89,7 +90,6 @@ class HealthCheckContractTests(unittest.TestCase):
         for name in (
             "build-agents-md",
             "build-plugin",
-            "build-prd",
             "build-readme",
             "build-skill",
         ):
@@ -100,53 +100,6 @@ class HealthCheckContractTests(unittest.TestCase):
                 self.assertIn("由 `health-check` 受控调用", text)
                 self.assertIn("审查阶段保持只读", text)
                 self.assertIn("上层取得修复确认后", text)
-
-    def test_vibe_coding_uses_health_check_at_three_checkpoints(self) -> None:
-        vibe = REPO_ROOT / "skills" / "vibe-coding"
-        companion = vibe.joinpath("rules", "companion-skills.md").read_text(
-            encoding="utf-8"
-        )
-        orchestration = vibe.joinpath(
-            "rules", "orchestration-contract.md"
-        ).read_text(encoding="utf-8")
-        workflows = "\n".join(
-            vibe.joinpath("workflows", name).read_text(encoding="utf-8")
-            for name in (
-                "§01-baseline-and-routing.md",
-                "§05-scaffold-and-worktrees.md",
-                "§07-validation.md",
-                "§08-delivery.md",
-            )
-        )
-
-        for contract in (companion, orchestration):
-            self.assertIn("health-check", contract)
-            for internal in (
-                "build-agents-md",
-                "build-plugin",
-                "build-prd",
-                "build-readme",
-                "build-skill",
-            ):
-                self.assertNotIn(internal, contract)
-
-        for checkpoint in ("基线检查点", "就绪检查点", "最终交付检查点"):
-            with self.subTest(checkpoint=checkpoint):
-                self.assertIn(checkpoint, workflows)
-        self.assertIn("没有发现问题时不与用户交互", workflows)
-        self.assertIn("暂停当前阶段", workflows)
-
-    def test_vibe_readiness_error_does_not_expose_an_internal_skill(self) -> None:
-        validator = REPO_ROOT.joinpath(
-            "skills",
-            "vibe-coding",
-            "scripts",
-            "vibe_validation",
-            "agent_instructions.py",
-        ).read_text(encoding="utf-8")
-
-        self.assertIn("项目指令严格校验器 validate_agents_md.py", validator)
-        self.assertNotIn("必须调用 build-agents-md", validator)
 
 
 if __name__ == "__main__":

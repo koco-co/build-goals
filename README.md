@@ -2,7 +2,7 @@
 
 # 𝓑𝓾𝓲𝓵𝓭 𝓖𝓸𝓪𝓵𝓼
 
-<p align="center">从目标澄清到可验证的软件交付 · 𝑭𝒓𝒐𝒎 𝑰𝒅𝒆𝒂𝒔 𝒕𝒐 𝑽𝒆𝒓𝒊𝒇𝒊𝒂𝒃𝒍𝒆 𝑫𝒆𝒍𝒊𝒗𝒆𝒓𝒚</p>
+<p align="center">从目标澄清到可验证的能力与文档 · 𝑭𝒓𝒐𝒎 𝑰𝒅𝒆𝒂𝒔 𝒕𝒐 𝑺𝒌𝒊𝒍𝒍𝒔 𝒂𝒏𝒅 𝑫𝒐𝒄𝒔</p>
 
 [![Claude Code](https://img.shields.io/badge/Claude_Code-Plugin-D97757?logo=anthropic&logoColor=white&cacheSeconds=3600)](https://code.claude.com/docs/en/plugins)
 [![Codex](https://img.shields.io/badge/Codex-Supported-000000?style=flat-square&logo=openai&logoColor=white&cacheSeconds=3600)](https://developers.openai.com/plugins/)
@@ -18,7 +18,7 @@
 
 <h2 align="center">𝑶𝒗𝒆𝒓𝒗𝒊𝒆𝒘 · 简介</h2>
 
-<p><code>build-goals</code> 是一个持续演进与沉淀的 <b>Agent</b> 目标构建仓库。它既是可以直接加载的 <b>Claude Code</b>、<b>Codex</b> 与 <b>ZCode</b> 多平台 <b>Plugin</b>，也为没有跨 <b>Skill</b> 依赖的能力保留独立安装方式。</p>
+<p><code>build-goals</code> 聚焦目标澄清、<b>Agent Skill</b> 与 <b>Plugin</b> 构建、项目文档及规范检查，不再提供端到端软件项目开发编排。它既是可以直接加载的 <b>Claude Code</b>、<b>Codex</b> 与 <b>ZCode</b> 多平台 <b>Plugin</b>，也为没有跨 <b>Skill</b> 依赖的能力保留独立安装方式。</p>
 
 - 当前直接适配 <b>Claude Code</b>、<b>Codex</b> 与 <b>ZCode</b>。
 - 本仓库不再提供 <b>DeepSeek Harness</b> 专用包；<b>DSH</b> 使用其自身的 <b>Codex</b> 兼容能力，本仓库不单独验证该路径。
@@ -34,19 +34,13 @@
 | [`health-check`](skills/health-check/)       | 统一检查项目规范产物，报告问题并在确认后修复、验证和复检                  |
 | [`build-skill`](skills/build-skill/)         | 按能力设计 <b>Frontmatter</b>，构建并审查高质量 <b>Agent Skill</b>       |
 | [`build-plugin`](skills/build-plugin/)       | 构建、升级或迁移多平台 <b>Plugin</b>                                     |
-| [`build-prd`](skills/build-prd/)             | 生成包含真实输入输出、UI 状态与行为样例的可复制产品需求包                 |
-| [`vibe-coding`](skills/vibe-coding/)         | 按需求包编排架构、技术状态流、<b>TDD</b> 与多 <b>Agent</b> 全链路交付    |
 | [`build-readme`](skills/build-readme/)       | 探索项目并创建或更新 <b>GitHub</b> 风格 <b>README</b>                    |
 | [`build-agents-md`](skills/build-agents-md/) | 初始化或整体重构跨平台 <b>AGENTS.md</b> 与 <b>CLAUDE.md</b>              |
 | [`handoff`](skills/handoff/)                 | 整理跨会话交接文档并生成可直接复制的接续提示词                           |
 
-<p><code>health-check</code> 统一检查项目中的 <b>Agent Skill</b>、<b>Plugin</b>、<b>README</b>、<code>AGENTS.md</code> / <code>CLAUDE.md</code> 和正式产品需求包。它先只读检查并一次性报告有证据的问题；用户确认后，直接组织对应领域修复、验证并重新检查，不生成持久化健康报告。</p>
-
-<p><code>build-prd</code> 支持从已有项目提取完整对外行为，也能把尚不完整的想法完善为产品需求包。它先确认功能域地图，再逐域确认用户输入、追问、输出固定结构与语义、对外契约、异常边界和行为样例；涉及界面时，会在对话中枚举受影响完整流程的全部可见状态与产品状态流，并把最终确认版本写入功能域需求。大项目可在 <code>.build-goals/build-prd/</code> 保存已确认的逐域检查点，最终生成可独立复制和校验的 <code>docs/产品需求/</code>。</p>
+<p><code>health-check</code> 统一检查项目中的 <b>Agent Skill</b>、<b>Plugin</b>、<b>README</b>、<code>AGENTS.md</code> / <code>CLAUDE.md</code>。它先只读检查并一次性报告有证据的问题；用户确认后，直接组织对应领域修复、验证并重新检查，不生成持久化健康报告。</p>
 
 <p><code>build-skill</code> 会根据调用方式、参数、权限、上下文与硬性环境要求形成 <b>Frontmatter</b> 字段决策矩阵；实现后分别完成内容审查、文案审查、内容回归和适用的独立 <b>Reviewer</b> 审查。</p>
-
-<p><code>vibe-coding</code> 是端到端软件交付总控：它按用户原话选择“新项目只按需求实现”“新项目仅参考旧项目指定部分”“现有项目按需求续建”或“现有项目架构/技术栈迁移”。外部需求包会复制为目标项目本地快照，不与来源实时联动；涉及界面时，第一次架构确认会复用产品状态并补充前后端边界、数据更新、异步处理与失败回滚等技术状态流。架构方案和整体实施路线经过两次全局确认后，按功能域组织 <b>TDD</b>、多 <b>Agent</b> 与可选 <b>Git worktrees</b>，并在基线、就绪和最终交付三个检查点自动调用 <code>health-check</code>。没有问题时继续执行；发现问题时暂停当前阶段，报告、确认、修复并复检后恢复。</p>
 
 <p><code>build-readme</code> 会先了解代码、命令、测试、<b>CI</b>、文档和资源并提供具体修改预览；用户确认后才创建或更新 <b>README</b>，并分别报告静态检查、<b>GitHub</b> 渲染和未验证内容。</p>
 
@@ -61,19 +55,8 @@ flowchart LR
     A[Shape Idea] --> B{Build Goal}
     B --> C[Skill]
     B --> D[Plugin]
-    B --> E[Requirement Package]
     B --> F[README]
     B --> M[AGENTS.md]
-    E --> G[Vibe Coding]
-    G --> Q[Health Check: Baseline]
-    Q --> H[Architecture Approval]
-    H --> I[Task Approval]
-    I --> N[Scaffold]
-    N --> R[Health Check: Readiness]
-    R --> J[TDD Agent Team]
-    J --> V[Cross-domain Validation]
-    V --> S[Health Check: Final]
-    S --> L[Handoff]
     C --> K[Validate]
     D --> K
     F --> K
@@ -123,15 +106,13 @@ build-goals/
 │   ├── health-check/
 │   ├── build-skill/
 │   ├── build-plugin/
-│   ├── build-prd/
-│   ├── vibe-coding/
 │   ├── build-readme/
 │   ├── build-agents-md/
 │   └── handoff/
 └── tests/
 ```
 
-<p><code>build-plugin</code> 与 <code>vibe-coding</code> 复用的规则、模板、校验器和 <b>Reviewer Agent</b> 在 <code>.plugin-shared-files.json</code> 中声明规范源。仓库保存内容一致的普通镜像，避免 <b>Codex</b> 运行缓存省略嵌套软链接；<code>skills/build-plugin/scripts/sync_shared_files.py</code> 负责显式同步，严格校验会拒绝缺失、软链接或内容漂移。</p>
+<p><code>build-plugin</code> 从 <code>build-skill</code> 复用的规则、模板、校验器和 <b>Reviewer Agent</b> 在 <code>.plugin-shared-files.json</code> 中声明规范源。仓库保存内容一致的普通镜像，避免 <b>Codex</b> 运行缓存省略嵌套软链接；<code>skills/build-plugin/scripts/sync_shared_files.py</code> 负责显式同步，严格校验会拒绝缺失、软链接或内容漂移。</p>
 
 <a id="quick-start"></a>
 
@@ -163,13 +144,13 @@ codex plugin add build-goals@build-goals
 
 <p>在 <b>ZCode</b> 客户端中打开 <b>Settings → Plugin Management → Discover</b>，通过 <code>+</code> 按钮添加 <b>GitHub</b> 仓库 <code>koco-co/build-goals</code> 并安装 <b>Plugin</b>，或选择本地仓库目录。<b>ZCode</b> 沿用 <code>.claude-plugin/marketplace.json</code> 解析 <b>Marketplace</b>，并优先读取 <code>.zcode-plugin/plugin.json</code> 作为 <b>Plugin Manifest</b>。</p>
 
-<p>安装完整 <b>Plugin</b> 后，可在 <b>Claude Code</b> 中调用 <code>/build-goals:health-check</code>，在 <b>Codex</b> 中调用 <code>$build-goals:health-check</code>，在 <b>ZCode</b> 输入框的 <code>/</code> 菜单 <b>Skills</b> 分组中选择对应能力；符合描述的项目健康检查请求也允许模型直接路由。<code>vibe-coding</code> 会在三个项目检查点自动使用该入口。</p>
+<p>安装完整 <b>Plugin</b> 后，可在 <b>Claude Code</b> 中调用 <code>/build-goals:health-check</code>，在 <b>Codex</b> 中调用 <code>$build-goals:health-check</code>，在 <b>ZCode</b> 输入框的 <code>/</code> 菜单 <b>Skills</b> 分组中选择对应能力；符合描述的项目健康检查请求也允许模型直接路由。</p>
 
 <a id="standalone-skills"></a>
 
 <h2 align="center">𝑺𝒕𝒂𝒏𝒅𝒂𝒍𝒐𝒏𝒆 𝑺𝒌𝒊𝒍𝒍𝒔 · 独立安装</h2>
 
-<p><b>Plugin</b> 是推荐分发方式。确实只需要一个没有跨 <b>Skill</b> 依赖的能力时，仍可使用兼容安装器；<code>health-check</code> 与 <code>vibe-coding</code> 只随完整 <b>Plugin</b> 分发，安装器会拒绝独立安装。</p>
+<p><b>Plugin</b> 是推荐分发方式。确实只需要一个没有跨 <b>Skill</b> 依赖的能力时，仍可使用兼容安装器；<code>health-check</code> 只随完整 <b>Plugin</b> 分发，安装器会拒绝独立安装。</p>
 
 <p><b>ZCode</b>：</p>
 
@@ -195,7 +176,7 @@ python3 scripts/install_skill.py build-skill \
   --scope user
 ```
 
-<p>将 <code>build-skill</code> 替换为 <code>build-plugin</code>、<code>build-prd</code>、<code>build-readme</code>、<code>build-agents-md</code>、<code>shape-idea</code> 或 <code>handoff</code> 即可安装另一个独立 <b>Skill</b>。目标目录已存在时默认拒绝覆盖；明确确认后添加 <code>--force</code>。</p>
+<p>将 <code>build-skill</code> 替换为 <code>build-plugin</code>、<code>build-readme</code>、<code>build-agents-md</code>、<code>shape-idea</code> 或 <code>handoff</code> 即可安装另一个独立 <b>Skill</b>。目标目录已存在时默认拒绝覆盖；明确确认后添加 <code>--force</code>。</p>
 
 <a id="validation"></a>
 
@@ -218,41 +199,6 @@ python3 skills/build-skill/scripts/validate_skill.py \
   skills/health-check \
   --profile dual \
   --plugin-root . \
-  --strict
-```
-
-<p>验证 <code>build-prd</code> 生成的正式需求包：</p>
-
-```bash
-python3 skills/build-prd/scripts/validate_prd.py \
-  /path/to/project \
-  --strict
-```
-
-<p>验证 <code>build-prd</code> 的逐功能域过程检查点：</p>
-
-```bash
-python3 skills/build-prd/scripts/validate_checkpoint.py \
-  /path/to/project \
-  --strict
-```
-
-<p>比较并导入外部需求包快照（默认只读；确认后添加 <code>--write</code>）：</p>
-
-```bash
-python3 skills/vibe-coding/scripts/import_requirements.py \
-  /path/to/source/docs/产品需求 \
-  /path/to/target
-```
-
-<p>验证 <code>vibe-coding</code> 的架构、任务追踪和最终交付：</p>
-
-```bash
-python3 skills/vibe-coding/scripts/validate_delivery.py \
-  /path/to/project \
-  --mode greenfield \
-  --phase delivery \
-  --require-clean \
   --strict
 ```
 

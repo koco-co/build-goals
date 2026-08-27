@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import contextlib
-import io
 import json
 import subprocess
 import sys
@@ -13,7 +11,6 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SKILL_VALIDATOR = REPO_ROOT / "skills" / "build-skill" / "scripts" / "validate_skill.py"
 PLUGIN_VALIDATOR = REPO_ROOT / "skills" / "build-plugin" / "scripts" / "validate_plugin.py"
-VIBE_SCRIPTS = REPO_ROOT / "skills" / "vibe-coding" / "scripts"
 
 VALID_BODY = """# Outcome
 
@@ -101,27 +98,6 @@ class StrictStatusTests(unittest.TestCase):
             self.assertEqual(payload["status"], "fail")
             self.assertTrue(payload["strict"])
             self.assertGreater(payload["warning_count"], 0)
-
-    def test_vibe_warning_status_is_consistent_for_json_and_human_output(self) -> None:
-        sys.path.insert(0, str(VIBE_SCRIPTS))
-        try:
-            from vibe_validation.model import Issue, Report
-            from validate_delivery import print_human
-
-            report = Report(
-                project_root="/fixture",
-                mode="greenfield",
-                phase="delivery",
-                issues=[Issue("warning", "FIXTURE_WARNING", ".", "warning only")],
-            )
-            self.assertEqual(report.to_dict(strict=False)["status"], "pass")
-            self.assertEqual(report.to_dict(strict=True)["status"], "fail")
-            output = io.StringIO()
-            with contextlib.redirect_stdout(output):
-                print_human(report, strict=True)
-            self.assertIn("FAIL:", output.getvalue())
-        finally:
-            sys.path.remove(str(VIBE_SCRIPTS))
 
     def test_claude_marketplace_version_must_match_plugin_manifest(self) -> None:
         with tempfile.TemporaryDirectory() as temp:

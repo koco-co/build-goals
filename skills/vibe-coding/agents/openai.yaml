@@ -1,7 +1,0 @@
-interface:
-  display_name: "Vibe Coding"
-  short_description: "按需求包完成项目交付"
-  default_prompt: "使用 $vibe-coding 按已确认需求包选择新建、续建、指定范围参考或迁移路线，并完成全链路交付。"
-
-policy:
-  allow_implicit_invocation: false

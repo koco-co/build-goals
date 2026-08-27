@@ -293,7 +293,6 @@ class ValidateSkillTests(unittest.TestCase):
         model_invocable = {
             "build-agents-md",
             "build-plugin",
-            "build-prd",
             "build-readme",
             "build-skill",
             "handoff",
@@ -307,17 +306,12 @@ class ValidateSkillTests(unittest.TestCase):
             adapter = skill_md.parent.joinpath("agents", "openai.yaml").read_text(
                 encoding="utf-8"
             )
-            if name in model_invocable:
-                with self.subTest(skill=name, policy="model-invocable"):
-                    self.assertNotIn("disable-model-invocation:", text)
-                    self.assertIn("allow_implicit_invocation: true", adapter)
-                    self.assertIn("时使用", text.split("---", 2)[1])
-                    self.assertRegex(text.split("---", 2)[1], r"不用于|不使用")
-            else:
-                with self.subTest(skill=name, policy="user-only"):
-                    self.assertEqual(name, "vibe-coding")
-                    self.assertIn("disable-model-invocation: true", text)
-                    self.assertIn("allow_implicit_invocation: false", adapter)
+            with self.subTest(skill=name, policy="model-invocable"):
+                self.assertIn(name, model_invocable)
+                self.assertNotIn("disable-model-invocation:", text)
+                self.assertIn("allow_implicit_invocation: true", adapter)
+                self.assertIn("时使用", text.split("---", 2)[1])
+                self.assertRegex(text.split("---", 2)[1], r"不用于|不使用")
             for phrase in redundant_phrases:
                 with self.subTest(skill=name, phrase=phrase):
                     self.assertNotIn(phrase, text)
@@ -439,13 +433,11 @@ class ValidateSkillTests(unittest.TestCase):
         expected = {
             "build-agents-md": "需要 Python 3.9+ 运行内置校验脚本。",
             "build-plugin": "需要互联网访问和 Python 3.9+ 运行内置静态校验脚本。",
-            "build-prd": "需要互联网访问、Python 3.9+，以及对来源项目和目标文档目录的本地读写权限。",
             "build-readme": "需要 Python 3.9+ 运行内置校验脚本。",
             "build-skill": "需要互联网访问和 Python 3.9+ 运行内置静态校验脚本。",
             "handoff": None,
             "health-check": None,
             "shape-idea": None,
-            "vibe-coding": "需要 Python 3.9+、Git，以及目标项目实际使用的构建与验证工具；调研公开资料时需要互联网访问。",
         }
         prohibited = ("当前适配", "目前适配", "目前仅适配")
 
@@ -464,15 +456,13 @@ class ValidateSkillTests(unittest.TestCase):
 
     def test_behavior_changed_skill_versions_are_updated(self) -> None:
         expected = {
-            "build-agents-md": 'version: "3.0.0"',
-            "build-plugin": 'version: "2.3.0"',
-            "build-prd": 'version: "2.3.0"',
+            "build-agents-md": 'version: "3.0.1"',
+            "build-plugin": 'version: "2.3.1"',
             "build-readme": 'version: "2.2.0"',
-            "build-skill": 'version: "2.2.0"',
+            "build-skill": 'version: "2.2.1"',
             "handoff": 'version: "2.1.0"',
-            "health-check": 'version: "1.0.0"',
-            "shape-idea": 'version: "2.3.0"',
-            "vibe-coding": 'version: "2.2.0"',
+            "health-check": 'version: "2.0.0"',
+            "shape-idea": 'version: "2.3.1"',
         }
 
         for name, version_line in expected.items():
@@ -565,13 +555,6 @@ class ValidateSkillTests(unittest.TestCase):
                 "checklists/plugin-design-review.md",
                 "checklists/plugin-semantic-acceptance.md",
             ),
-            ("build-prd", "workflows/§03-authoring.md"): (
-                "examples/产品需求/PRD需求文档.md",
-                "examples/产品需求/功能域/任务管理.md",
-                "examples/产品需求/行为样例/产品行为样例集.yaml",
-                "examples/产品需求/行为样例/任务管理.yaml",
-                "examples/产品需求/需求包清单.yaml",
-            ),
             ("build-readme", "workflows/§02-preview.md"): (
                 "templates/readme-preview.template.md",
             ),
@@ -585,29 +568,6 @@ class ValidateSkillTests(unittest.TestCase):
                 "examples/global-skill.example.md",
                 "examples/project-skill.example.md",
                 "templates/design-proposal.template.md",
-            ),
-            ("vibe-coding", "workflows/§02-requirements-architecture.md"): (
-                "checklists/architecture-acceptance.md",
-            ),
-            ("vibe-coding", "workflows/§03-migration-audit.md"): (
-                "templates/architecture-migration.template.md",
-            ),
-            ("vibe-coding", "workflows/§04-plan-and-approval.md"): (
-                "templates/implementation-plan.template.md",
-                "templates/domain-implementation.template.md",
-                "examples/implementation-plan.example.md",
-            ),
-            ("vibe-coding", "workflows/§05-scaffold-and-worktrees.md"): (
-                "checklists/implementation-readiness.md",
-            ),
-            ("vibe-coding", "workflows/§06-feature-delivery.md"): (
-                "rules/tdd-and-quality-gates.md",
-                "prompts/feature-developer.agent.md",
-            ),
-            ("vibe-coding", "workflows/§08-delivery.md"): (
-                "templates/delivery-report.template.md",
-                "templates/domain-delivery.template.md",
-                "examples/delivery-report.example.md",
             ),
         }
 
@@ -636,109 +596,6 @@ class ValidateSkillTests(unittest.TestCase):
             self.assertIn("平台契约", text)
             self.assertIn("可复现缺陷", text)
             self.assertIn("明确安全要求", text)
-
-    def test_vibe_coding_defines_companion_skill_lifecycle(self) -> None:
-        skill_root = REPO_ROOT / "skills" / "vibe-coding"
-        contract = "\n".join(
-            path.read_text(encoding="utf-8")
-            for path in (
-                skill_root / "SKILL.md",
-                skill_root / "rules" / "companion-skills.md",
-                skill_root / "rules" / "orchestration-contract.md",
-            )
-        )
-
-        for name in ("shape-idea", "health-check", "handoff"):
-            with self.subTest(skill=name):
-                self.assertIn(name, contract)
-                row = next(
-                    line
-                    for line in contract.splitlines()
-                    if line.startswith(f"| `{name}` |")
-                )
-                cells = [cell.strip() for cell in row.strip("|").split("|")]
-                self.assertEqual(len(cells), 6)
-                self.assertTrue(all(cells))
-        for required in (
-            "触发证据",
-            "调用阶段",
-            "是否阻断",
-            "恢复条件",
-            "可直接复制",
-            "两个全局决策门禁",
-            "按需产物确认",
-            "功能开发前",
-            "已证实",
-            "纯文案",
-            "暂停",
-        ):
-            with self.subTest(required=required):
-                self.assertIn(required, contract)
-
-    def test_build_prd_and_vibe_coding_define_portable_domain_workflow(self) -> None:
-        build_prd = REPO_ROOT / "skills" / "build-prd"
-        prd_contract = "\n".join(
-            path.read_text(encoding="utf-8")
-            for path in (
-                build_prd / "SKILL.md",
-                build_prd / "workflows" / "§02-domain-confirmation.md",
-                build_prd / "workflows" / "§03-authoring.md",
-                build_prd / "rules" / "prd-quality-standard.md",
-            )
-        )
-        for required in (
-            "docs/产品需求/",
-            ".build-goals/build-prd/",
-            "不按问题数量",
-            "语义要求",
-            "normal",
-            "clarification",
-            "invalid",
-            "boundary",
-            "不能实施",
-        ):
-            with self.subTest(contract="build-prd", required=required):
-                self.assertIn(required, prd_contract)
-        self.assertIn(
-            "已启动的 vibe-coding 流程缺少合格需求包时使用", prd_contract
-        )
-        self.assertNotIn("项目实施缺少已确认需求时使用", prd_contract)
-        for relative in (
-            "templates/requirement-manifest.template.yaml",
-            "templates/domain-requirements.template.md",
-            "templates/domain-behavior.template.yaml",
-            "templates/checkpoint-session.template.yaml",
-            "templates/checkpoint-domain.template.yaml",
-            "scripts/validate_checkpoint.py",
-        ):
-            self.assertTrue(build_prd.joinpath(relative).is_file(), relative)
-
-        vibe = REPO_ROOT / "skills" / "vibe-coding"
-        vibe_contract = "\n".join(
-            path.read_text(encoding="utf-8")
-            for path in (
-                vibe / "SKILL.md",
-                vibe / "workflows" / "§01-baseline-and-routing.md",
-                vibe / "workflows" / "§02-requirements-architecture.md",
-                vibe / "rules" / "orchestration-contract.md",
-            )
-        )
-        for required in (
-            "新项目，只按需求实现",
-            "新项目，参考旧项目的指定部分",
-            "现有项目，按需求续建",
-            "现有项目，架构或技术栈迁移",
-            "scripts/import_requirements.py",
-            "不会自动同步",
-            "不再询问",
-            "当前功能域",
-            "直接依赖",
-        ):
-            with self.subTest(contract="vibe-coding", required=required):
-                self.assertIn(required, vibe_contract)
-        self.assertTrue(
-            vibe.joinpath("prompts", "legacy-reference-inspector.agent.md").is_file()
-        )
 
     def test_build_agents_md_defines_nested_orchestration_contract(self) -> None:
         skill_root = REPO_ROOT / "skills" / "build-agents-md"

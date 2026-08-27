@@ -31,7 +31,7 @@ PORTABLE_FRONTMATTER_FIELDS = {
     "metadata",
     "allowed-tools",
 }
-PLUGIN_ONLY_SKILLS = {"health-check", "vibe-coding"}
+PLUGIN_ONLY_SKILLS = {"health-check"}
 
 
 class InstallError(RuntimeError):

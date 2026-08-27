@@ -1,7 +1,7 @@
 {
   "name": "build-goals",
-  "version": "5.1.0",
-  "description": "A focused toolkit for clarifying goals and delivering verifiable software artifacts.",
+  "version": "2.0.0",
+  "description": "Clarify goals and build, review, and maintain Agent Skills, plugins, and project documentation.",
   "author": {
     "name": "koco-co",
     "url": "https://github.com/koco-co"
@@ -14,13 +14,8 @@
     "codex",
     "claude-code",
     "plugin-development",
-    "product-requirements",
     "readme-generation",
-    "agents-md",
-    "vibe-coding",
-    "software-delivery",
-    "multi-agent-development",
-    "tdd"
+    "agents-md"
   ],
   "skills": "./skills/"
 }

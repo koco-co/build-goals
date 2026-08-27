@@ -103,7 +103,6 @@ class ValidatePluginTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertIn("skills/build-skill", result.stdout)
         self.assertIn("skills/build-plugin", result.stdout)
-        self.assertIn("skills/build-prd", result.stdout)
         self.assertIn("skills/build-readme", result.stdout)
         self.assertIn("skills/build-agents-md", result.stdout)
         self.assertIn("skills/health-check", result.stdout)
@@ -171,12 +170,6 @@ class ValidatePluginTests(unittest.TestCase):
             "skills/build-plugin/scripts/validate_skill.py": "skills/build-skill/scripts/validate_skill.py",
             "skills/build-plugin/scripts/validate_skill_core.py": "skills/build-skill/scripts/validate_skill_core.py",
             "skills/build-plugin/templates/skill.template.md": "skills/build-skill/templates/skill.template.md",
-            "skills/vibe-coding/scripts/validate_agents_md.py": "skills/build-agents-md/scripts/validate_agents_md.py",
-            "skills/vibe-coding/scripts/validate_prd.py": "skills/build-prd/scripts/validate_prd.py",
-            "skills/build-prd/rules/ui-interaction-preview.md": "skills/shape-idea/rules/ui-interaction-preview.md",
-            "skills/vibe-coding/rules/ui-interaction-preview.md": "skills/shape-idea/rules/ui-interaction-preview.md",
-            "skills/build-prd/templates/ui-interaction-preview.template.md": "skills/shape-idea/templates/ui-interaction-preview.template.md",
-            "skills/vibe-coding/templates/ui-interaction-preview.template.md": "skills/shape-idea/templates/ui-interaction-preview.template.md",
         }
         manifest = json.loads(
             REPO_ROOT.joinpath(".plugin-shared-files.json").read_text(encoding="utf-8")
@@ -604,7 +597,7 @@ class ValidatePluginTests(unittest.TestCase):
         )
         versions = {manifest["version"] for manifest in manifests}
         versions.add(marketplace["plugins"][0]["version"])
-        self.assertEqual(versions, {"5.1.0"})
+        self.assertEqual(versions, {"2.0.0"})
         names = {manifest["name"] for manifest in manifests}
         self.assertEqual(names, {"build-goals"})
 
