@@ -23,6 +23,20 @@ DOCUMENT_TEMPLATES = {
     "ENVIRONMENT_SETUP.md": "environment-setup",
     "RISKS_AND_KNOWN_ISSUES.md": "risks-and-known-issues",
 }
+DEFAULT_DOCUMENT_PATHS = {
+    "AGENT_BRIEF.md": "docs/spec/AGENT_BRIEF.md",
+    "PRD.md": "docs/spec/product/PRD.md",
+    "ROADMAP.md": "docs/spec/product/ROADMAP.md",
+    "GLOSSARY.md": "docs/spec/product/GLOSSARY.md",
+    "ARCHITECTURE.md": "docs/spec/architecture/ARCHITECTURE.md",
+    "DATA_MODEL.md": "docs/spec/architecture/DATA_MODEL.md",
+    "adr/": "docs/spec/architecture/adr/",
+    "CODING_STANDARDS.md": "docs/spec/engineering/CODING_STANDARDS.md",
+    "TESTING_STRATEGY.md": "docs/spec/engineering/TESTING_STRATEGY.md",
+    "ENVIRONMENT_SETUP.md": "docs/spec/engineering/ENVIRONMENT_SETUP.md",
+    "CHANGELOG.md": "docs/spec/status/CHANGELOG.md",
+    "RISKS_AND_KNOWN_ISSUES.md": "docs/spec/status/RISKS_AND_KNOWN_ISSUES.md",
+}
 
 
 class BuildDocsContractTests(unittest.TestCase):
@@ -44,6 +58,27 @@ class BuildDocsContractTests(unittest.TestCase):
                 relative = f"templates/{template}.template.md"
                 self.assertIn(f"`{relative}`", catalog)
                 self.assertTrue(self.read(relative).startswith("# "))
+
+    def test_default_paths_match_the_confirmed_directory_structure(self) -> None:
+        catalog = self.read("rules/documents.md")
+        paths = dict(re.findall(r"^\| `([^`]+)` \| `(docs/[^`]+)` \|", catalog, re.M))
+        self.assertEqual(paths, DEFAULT_DOCUMENT_PATHS)
+
+    def test_brief_index_groups_match_document_roles(self) -> None:
+        template = self.read("templates/agent-brief.template.md")
+        rows = re.findall(
+            r"^\| (product|architecture|engineering|status) \| [^|]*? ([A-Z_]+) \|",
+            template,
+            re.M,
+        )
+        expected = {
+            (path.split("/")[2], "ADR" if document == "adr/" else document[:-3])
+            for document, path in DEFAULT_DOCUMENT_PATHS.items()
+            if document != "AGENT_BRIEF.md"
+        }
+        self.assertEqual(len(rows), len(expected))
+        self.assertEqual(set(rows), expected)
+        self.assertIn("实际位置", template)
 
     def test_existing_project_extraction_distinguishes_evidence_from_decisions(self) -> None:
         research = self.read("workflows/§01-research.md")
@@ -71,7 +106,8 @@ class BuildDocsContractTests(unittest.TestCase):
         authoring = self.read("workflows/§03-authoring.md")
         self.assertIn("等价文档", plan)
         self.assertIn("沿用现有路径", plan)
-        self.assertIn("项目状态与开发文档入口：@docs/AGENT_BRIEF.md", authoring)
+        self.assertIn("迁移另行确认", plan)
+        self.assertIn("项目状态与开发文档入口：@docs/spec/AGENT_BRIEF.md", authoring)
         self.assertIn("相对路径", authoring)
         self.assertIn("一行", authoring)
         self.assertIn("不整体重写", authoring)

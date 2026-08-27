@@ -49,6 +49,8 @@
 
 <p><code>build-docs</code> 覆盖需求、架构、路线、数据、编码、测试、决策、术语、接续、变更、环境和风险共 12 类文档。它先确认整体规划，再分批预览、确认并写入；已有项目从代码、配置、测试和记录提取事实，沿用等价文档路径，并在 <code>AGENTS.md</code> 中维护一行 <code>@</code> 相对路径入口。它不处理小问题、小需求，也不执行产品代码开发。</p>
 
+<p>本 <b>Skill</b> 新建的文档统一放在 <code>docs/spec/</code>，按 <code>product/</code>、<code>architecture/</code>、<code>engineering/</code> 和 <code>status/</code> 分组，接续入口为 <code>docs/spec/AGENT_BRIEF.md</code>；完整路径见 <a href="skills/build-docs/rules/documents.md">文档职责表</a>。已有文档沿用原路径，目录迁移另行确认。</p>
+
 <p><code>build-docs</code> 在 <b>Claude Code</b> 和 <b>Codex</b> 中仅限用户主动调用；<b>ZCode</b> 允许模型按上述适用范围调用。<a href="https://zcode.z.ai/en/docs/skill">ZCode 的 Skill 列表同时面向用户和模型</a>，不提供等价的仅用户调用开关。配置与安装校验不代表真实客户端行为已验证。</p>
 
 <a id="workflow"></a>

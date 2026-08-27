@@ -14,18 +14,18 @@
 
 ## 文档索引
 
-| 职责 | 实际位置 | 状态 |
-| --- | --- | --- |
-| 需求 PRD | {{相对本页的路径或章节链接}} | {{已建立 / 待建立}} |
-| 架构 ARCHITECTURE | {{实际位置}} | {{状态}} |
-| 路线 ROADMAP | {{实际位置}} | {{状态}} |
-| 数据 DATA_MODEL | {{实际位置}} | {{状态}} |
-| 编码 CODING_STANDARDS | {{实际位置}} | {{状态}} |
-| 测试 TESTING_STRATEGY | {{实际位置}} | {{状态}} |
-| 决策 ADR | {{实际记录链接或目录；无记录时用普通文字说明}} | {{状态}} |
-| 术语 GLOSSARY | {{实际位置}} | {{状态}} |
-| 变更 CHANGELOG | {{实际位置}} | {{状态}} |
-| 环境 ENVIRONMENT_SETUP | {{实际位置}} | {{状态}} |
-| 风险 RISKS_AND_KNOWN_ISSUES | {{实际位置}} | {{状态}} |
+| 分组 | 职责 | 实际位置 | 状态 |
+| --- | --- | --- | --- |
+| product | 需求 PRD | {{相对本页的实际路径或章节链接}} | {{已建立 / 待建立}} |
+| product | 路线 ROADMAP | {{实际位置}} | {{状态}} |
+| product | 术语 GLOSSARY | {{实际位置}} | {{状态}} |
+| architecture | 架构 ARCHITECTURE | {{实际位置}} | {{状态}} |
+| architecture | 数据 DATA_MODEL | {{实际位置}} | {{状态}} |
+| architecture | 决策 ADR | {{实际记录链接或目录；无记录时用普通文字说明}} | {{状态}} |
+| engineering | 编码 CODING_STANDARDS | {{实际位置}} | {{状态}} |
+| engineering | 测试 TESTING_STRATEGY | {{实际位置}} | {{状态}} |
+| engineering | 环境 ENVIRONMENT_SETUP | {{实际位置}} | {{状态}} |
+| status | 变更 CHANGELOG | {{实际位置}} | {{状态}} |
+| status | 风险 RISKS_AND_KNOWN_ISSUES | {{实际位置}} | {{状态}} |
 
-{{本页承担 AGENT_BRIEF 职责。未建立的目标只写拟定路径，文件存在后再建立链接。}}
+{{本页承担 AGENT_BRIEF 职责。实际位置按确认映射填写为相对本页的路径；未建立的目标只写拟定路径，文件存在后再建立链接。}}
