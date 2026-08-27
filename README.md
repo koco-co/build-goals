@@ -36,7 +36,7 @@
 | [`build-plugin`](skills/build-plugin/)       | 构建、升级或迁移多平台 <b>Plugin</b>                                     |
 | [`build-readme`](skills/build-readme/)       | 探索项目并创建或更新 <b>GitHub</b> 风格 <b>README</b>                    |
 | [`build-agents-md`](skills/build-agents-md/) | 初始化或整体重构跨平台 <b>AGENTS.md</b> 与 <b>CLAUDE.md</b>              |
-| [`build-docs`](skills/build-docs/)           | 为大型项目从零建立、从已有实现提取或持续更新整套开发文档                  |
+| [`build-docs`](skills/build-docs/)           | 为大型项目建立、提取、更新开发文档，并复核外部审查报告                    |
 | [`handoff`](skills/handoff/)                 | 整理跨会话交接文档并生成可直接复制的接续提示词                           |
 
 <p><code>health-check</code> 统一检查项目中的 <b>Agent Skill</b>、<b>Plugin</b>、<b>README</b>、<code>AGENTS.md</code> / <code>CLAUDE.md</code>。它先只读检查并一次性报告有证据的问题；用户确认后，直接组织对应领域修复、验证并重新检查，不生成持久化健康报告。</p>
@@ -48,6 +48,8 @@
 <p><code>build-agents-md</code> 会根据仓库证据筛选项目特有指令，并按应用、库、<b>CLI</b> 或 <b>Monorepo</b> 的实际结构组织根目录和子目录 <code>AGENTS.md</code>；用户确认完整内容预览后，才创建同目录真实 <code>CLAUDE.md</code>，其内容精确为 <code>@AGENTS.md</code>，供 <b>Claude Code</b> 导入同一正文。</p>
 
 <p><code>build-docs</code> 覆盖需求、架构、路线、数据、编码、测试、决策、术语、接续、变更、环境和风险共 12 类文档。它先确认整体规划，再分批预览、确认并写入；已有项目从代码、配置、测试和记录提取事实，沿用等价文档路径，并在 <code>AGENTS.md</code> 中维护一行 <code>@</code> 相对路径入口。它不处理小问题、小需求，也不执行产品代码开发。</p>
+
+<p>收到针对已有文档的外部审查报告时，进入独立的「审查报告复核」分支：逐项说明采纳、部分采纳或不采纳的依据与理由，展示文档修改 <b>Diff</b>；一次确认同时授权所展示的修改与 <code>commit</code>，验证通过后仅提交本次改动，不 <code>push</code>。该分支不重复整体规划或逐批确认，也不新建文档；原有三个分支仍不提交。</p>
 
 <p>本 <b>Skill</b> 新建的文档统一放在 <code>docs/spec/</code>，按 <code>product/</code>、<code>architecture/</code>、<code>engineering/</code> 和 <code>status/</code> 分组，接续入口为 <code>docs/spec/AGENT_BRIEF.md</code>；完整路径见 <a href="skills/build-docs/rules/documents.md">文档职责表</a>。已有文档沿用原路径，目录迁移另行确认。</p>
 

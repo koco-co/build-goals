@@ -43,12 +43,61 @@ class BuildDocsContractTests(unittest.TestCase):
     def read(self, relative: str) -> str:
         return SKILL_ROOT.joinpath(relative).read_text(encoding="utf-8")
 
-    def test_routes_include_creation_extraction_and_update_but_exclude_small_tasks(self) -> None:
+    def test_routes_include_review_reconciliation_but_exclude_small_tasks(self) -> None:
         entry = self.read("SKILL.md")
-        for scenario in ("从零建立", "已有项目提取", "持续更新", "小问题", "小需求"):
+        for scenario in ("从零建立", "已有项目提取", "持续更新", "审查报告复核", "小问题", "小需求"):
             with self.subTest(scenario=scenario):
                 self.assertIn(scenario, entry)
         self.assertIn("不修改产品代码", entry)
+
+    def test_review_route_bypasses_the_original_planning_and_batch_gates(self) -> None:
+        entry = self.read("SKILL.md")
+        review = self.read("workflows/§05-review.md")
+        self.assertIn("workflows/§05-review.md", entry)
+        self.assertIn("其余三个分支", entry)
+        self.assertIn("不进入整体规划或逐批确认", review)
+        self.assertIn("审查报告复核", self.read("agents/openai.yaml"))
+
+    def test_review_verdicts_require_evidence_and_explicit_partial_scope(self) -> None:
+        review = self.read("workflows/§05-review.md")
+        template = self.read("templates/review-summary.template.md")
+        for requirement in ("报告原编号", "当前文档", "代码", "历史决策", "证据不足", "不进入修改计划"):
+            with self.subTest(requirement=requirement):
+                self.assertIn(requirement, review)
+        for verdict in ("采纳", "部分采纳", "不采纳"):
+            self.assertIn(verdict, template)
+        for requirement in ("依据", "具体理由", "接受", "舍弃", "Diff"):
+            self.assertIn(requirement, template)
+
+    def test_review_confirmation_covers_exact_diff_and_commit_without_writing_report(self) -> None:
+        review = self.read("workflows/§05-review.md")
+        template = self.read("templates/review-summary.template.md")
+        self.assertIn("确认前保持只读", review)
+        self.assertIn("templates/review-summary.template.md", review)
+        self.assertIn("不另存审查报告", review)
+        self.assertIn("文档修改", template)
+        self.assertIn("commit", template)
+        self.assertIn("不 push", template)
+        self.assertIn("只修改不提交", review)
+
+    def test_review_writes_only_existing_affected_docs_and_reuses_consistency_checks(self) -> None:
+        review = self.read("workflows/§05-review.md")
+        self.assertIn("沿用现有路径", review)
+        self.assertIn("已有文档", review)
+        self.assertIn("不新建或迁移文档", review)
+        self.assertIn("workflows/§03-authoring.md", review)
+        self.assertIn("workflows/§04-validation.md", review)
+        self.assertIn("AGENT_BRIEF", review)
+        self.assertIn("CHANGELOG", review)
+
+    def test_review_commit_excludes_existing_changes_and_requires_validation(self) -> None:
+        entry = self.read("SKILL.md")
+        review = self.read("workflows/§05-review.md")
+        self.assertIn("仅审查报告复核分支", entry)
+        self.assertIn("其他分支不提交", entry)
+        for requirement in ("验证通过后", "暂存区", "同一文件", "已确认的 Diff", "提交哈希", "无实质修改", "不创建空提交"):
+            with self.subTest(requirement=requirement):
+                self.assertIn(requirement, review)
 
     def test_each_document_has_a_reachable_template(self) -> None:
         catalog = self.read("rules/documents.md")
