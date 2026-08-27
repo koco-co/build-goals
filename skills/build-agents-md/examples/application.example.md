@@ -46,4 +46,4 @@ Atlas Desk 是 TypeScript 客服工单应用：`apps/web` 为 Next.js 前端，`
 - `.env.local` 只保存本机配置，任何凭据都不得进入 fixture、日志或提交。
 ```
 
-根目录 `CLAUDE.md` 应为 `AGENTS.md` 的相对符号链接。若各应用没有额外差异，不应仅因目录存在而创建嵌套文件。
+根目录 `CLAUDE.md` 应为只包含 `@AGENTS.md` 的普通文件。若各应用没有额外差异，不应仅因目录存在而创建嵌套文件。

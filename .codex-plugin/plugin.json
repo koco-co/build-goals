@@ -1,6 +1,6 @@
 {
   "name": "build-goals",
-  "version": "4.1.0",
+  "version": "5.0.0",
   "description": "A focused toolkit for clarifying goals and delivering verifiable software artifacts.",
   "author": {
     "name": "koco-co",

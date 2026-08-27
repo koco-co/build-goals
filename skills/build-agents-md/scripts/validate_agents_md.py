@@ -59,6 +59,7 @@ REMOTE_SCHEMES = {
     "ssh",
     "tel",
 }
+CLAUDE_IMPORT_CONTENT = b"@AGENTS.md"
 
 
 @dataclass(frozen=True)
@@ -234,63 +235,39 @@ def validate_claude_pair(
         )
         return
 
-    if claude.is_symlink():
-        try:
-            target = os.readlink(claude)
-        except OSError as exc:
-            add_issue(
-                issues,
-                "error",
-                "CLAUDE_LINK_TARGET",
-                claude,
-                f"无法读取符号链接：{exc}",
-                root,
-            )
-            return
-
-        if target != "AGENTS.md":
-            add_issue(
-                issues,
-                "error",
-                "CLAUDE_LINK_TARGET",
-                claude,
-                "CLAUDE.md 必须使用精确相对目标 AGENTS.md。",
-                root,
-            )
-            return
-
-        try:
-            resolved = claude.resolve(strict=True)
-        except (OSError, RuntimeError):
-            add_issue(
-                issues,
-                "error",
-                "CLAUDE_LINK_TARGET",
-                claude,
-                "CLAUDE.md 符号链接已断开。",
-                root,
-            )
-            return
-
-        if resolved != agents.resolve():
-            add_issue(
-                issues,
-                "error",
-                "CLAUDE_LINK_TARGET",
-                claude,
-                "CLAUDE.md 必须解析到同目录 AGENTS.md。",
-                root,
-            )
+    if claude.is_symlink() or not claude.is_file():
+        add_issue(
+            issues,
+            "error",
+            "CLAUDE_REGULAR_FILE_REQUIRED",
+            claude,
+            "CLAUDE.md 必须是包含精确 @AGENTS.md 的普通文件，不能是符号链接。",
+            root,
+        )
         return
 
-    add_issue(
-        issues,
-        "error",
-        "CLAUDE_SYMLINK_REQUIRED",
-        claude,
-        "CLAUDE.md 必须是指向同目录 AGENTS.md 的相对符号链接。",
-        root,
-    )
+    try:
+        content = claude.read_bytes()
+    except OSError as exc:
+        add_issue(
+            issues,
+            "error",
+            "CLAUDE_IMPORT_CONTENT",
+            claude,
+            f"无法读取 CLAUDE.md：{exc}",
+            root,
+        )
+        return
+
+    if content != CLAUDE_IMPORT_CONTENT:
+        add_issue(
+            issues,
+            "error",
+            "CLAUDE_IMPORT_CONTENT",
+            claude,
+            "CLAUDE.md 必须只包含 @AGENTS.md，不得包含换行或其他内容。",
+            root,
+        )
 
 
 def validate_project(

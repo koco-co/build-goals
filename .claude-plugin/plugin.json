@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "build-goals",
   "displayName": "Build Goals",
-  "version": "4.1.0",
+  "version": "5.0.0",
   "description": "Clarify goals and deliver verifiable Agent Skills, plugins, requirement packages, project documentation, and software projects.",
   "author": {
     "name": "koco-co",

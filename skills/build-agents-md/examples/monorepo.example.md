@@ -5,14 +5,14 @@
 ```text
 orbit/
 ├── AGENTS.md
-├── CLAUDE.md -> AGENTS.md
+├── CLAUDE.md
 ├── package.json
 ├── packages/
 │   └── ui/
 └── services/
     └── api/
         ├── AGENTS.md
-        ├── CLAUDE.md -> AGENTS.md
+        ├── CLAUDE.md
         └── go.mod
 ```
 
@@ -82,4 +82,4 @@ Orbit 是 pnpm 与 Turborepo 管理的产品 Monorepo。TypeScript 工作区共�
 - SQL 或迁移：运行数据库集成测试，并验证从上一版本升级和回滚。
 ```
 
-两个作用域各自拥有 `CLAUDE.md -> AGENTS.md`。嵌套文件不重复根命令或通用 JS 规则。
+两个作用域各自拥有只包含 `@AGENTS.md` 的真实 `CLAUDE.md`。嵌套文件不重复根命令或通用 JS 规则。

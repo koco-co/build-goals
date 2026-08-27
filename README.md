@@ -49,7 +49,7 @@
 
 <p><code>build-readme</code> 会先了解代码、命令、测试、<b>CI</b>、文档和资源并提供具体修改预览；用户确认后才创建或更新 <b>README</b>，并分别报告静态检查、<b>GitHub</b> 渲染和未验证内容。</p>
 
-<p><code>build-agents-md</code> 会根据仓库证据筛选项目特有指令，并按应用、库、<b>CLI</b> 或 <b>Monorepo</b> 的实际结构组织根目录和子目录 <code>AGENTS.md</code>；用户确认完整内容预览后，才创建同目录 <code>CLAUDE.md</code> 相对符号链接，供两个平台共用正文。</p>
+<p><code>build-agents-md</code> 会根据仓库证据筛选项目特有指令，并按应用、库、<b>CLI</b> 或 <b>Monorepo</b> 的实际结构组织根目录和子目录 <code>AGENTS.md</code>；用户确认完整内容预览后，才创建同目录真实 <code>CLAUDE.md</code>，其内容精确为 <code>@AGENTS.md</code>，供 <b>Claude Code</b> 导入同一正文。</p>
 
 <a id="workflow"></a>
 
@@ -100,7 +100,7 @@ flowchart LR
 ```text
 build-goals/
 ├── AGENTS.md
-├── CLAUDE.md -> AGENTS.md
+├── CLAUDE.md
 ├── .plugin-shared-files.json
 ├── .agents/
 │   └── plugins/

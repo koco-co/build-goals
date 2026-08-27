@@ -73,7 +73,7 @@ TASK-001 与 TASK-002 串行；本示例只有一个功能域，不创建无收�
 
 - 状态：已更新并验证
 - 触发证据：新项目没有根 `AGENTS.md` 与同目录 `CLAUDE.md` 单一来源入口。
-- 内容确认：已确认 `AGENTS.md` 完整正文、`CLAUDE.md` 相对符号链接及全部文件操作。
+- 内容确认：已确认 `AGENTS.md` 完整正文、只包含 `@AGENTS.md` 的 `CLAUDE.md` 及全部文件操作。
 - 验证命令：`python3 <vibe-coding>/scripts/validate_agents_md.py . --strict`
 - 验证结果：通过。
 - 治理提交：`a1b2c3d`

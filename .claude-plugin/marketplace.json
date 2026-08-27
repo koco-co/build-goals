@@ -11,7 +11,7 @@
       "name": "build-goals",
       "source": "./",
       "description": "Clarify goals and deliver verifiable Agent Skills, plugins, requirement packages, project documentation, and software projects.",
-      "version": "4.1.0",
+      "version": "5.0.0",
       "author": {
         "name": "koco-co",
         "url": "https://github.com/koco-co"

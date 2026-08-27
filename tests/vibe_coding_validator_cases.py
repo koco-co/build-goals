@@ -283,7 +283,7 @@ class VibeCodingValidatorTests(unittest.TestCase):
 
     def write_agent_instructions(self, root: Path) -> None:
         root.joinpath("AGENTS.md").write_text(AGENTS_MD, encoding="utf-8")
-        root.joinpath("CLAUDE.md").symlink_to("AGENTS.md")
+        root.joinpath("CLAUDE.md").write_bytes(b"@AGENTS.md")
 
     def init_git(self, root: Path) -> None:
         subprocess.run(["git", "init", "-q", str(root)], check=True)
@@ -899,7 +899,7 @@ class VibeCodingValidatorTests(unittest.TestCase):
                 + "\n".join(f"- Rule {index}" for index in range(121)),
                 encoding="utf-8",
             )
-            root.joinpath("CLAUDE.md").symlink_to("AGENTS.md")
+            root.joinpath("CLAUDE.md").write_bytes(b"@AGENTS.md")
 
             result = self.run_validator(root, "greenfield", "readiness")
 
@@ -924,7 +924,7 @@ class VibeCodingValidatorTests(unittest.TestCase):
                 "# API instructions\n\n- `python -m unittest tests.api`\n",
                 encoding="utf-8",
             )
-            nested.joinpath("CLAUDE.md").symlink_to("AGENTS.md")
+            nested.joinpath("CLAUDE.md").write_bytes(b"@AGENTS.md")
 
             result = self.run_validator(root, "greenfield", "readiness")
 
@@ -947,7 +947,7 @@ class VibeCodingValidatorTests(unittest.TestCase):
                 "# API instructions\n\n- `python -m unittest tests.api`\n",
                 encoding="utf-8",
             )
-            nested.joinpath("CLAUDE.md").symlink_to("AGENTS.md")
+            nested.joinpath("CLAUDE.md").write_bytes(b"@AGENTS.md")
             governance = self.commit_paths(
                 root,
                 "docs(agent): establish API instructions",
@@ -977,7 +977,7 @@ class VibeCodingValidatorTests(unittest.TestCase):
                 "# API instructions\n\n- `python -m unittest tests.api`\n",
                 encoding="utf-8",
             )
-            nested.joinpath("CLAUDE.md").symlink_to("AGENTS.md")
+            nested.joinpath("CLAUDE.md").write_bytes(b"@AGENTS.md")
             governance = self.commit_paths(
                 root,
                 "docs(agent): establish all project instructions",
@@ -998,7 +998,7 @@ class VibeCodingValidatorTests(unittest.TestCase):
 
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
-    def test_readiness_requires_claude_md_relative_symlink(self) -> None:
+    def test_readiness_requires_exact_claude_md_import(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
             self.write_architecture(root, "greenfield")
@@ -1010,12 +1010,12 @@ class VibeCodingValidatorTests(unittest.TestCase):
                 baseline="当前已确认基线",
             )
             root.joinpath("AGENTS.md").write_text(AGENTS_MD, encoding="utf-8")
-            root.joinpath("CLAUDE.md").write_text("@AGENTS.md\n", encoding="utf-8")
+            root.joinpath("CLAUDE.md").write_bytes(b"@AGENTS.md\n")
 
             result = self.run_validator(root, "greenfield", "readiness")
 
             self.assertEqual(result.returncode, 1)
-            self.assertIn("CLAUDE_SYMLINK_REQUIRED", result.stdout)
+            self.assertIn("CLAUDE_IMPORT_CONTENT", result.stdout)
 
     def test_readiness_rejects_feature_worktree_created_too_early(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
@@ -1170,12 +1170,12 @@ class VibeCodingValidatorTests(unittest.TestCase):
             )
             self.write_report(root, "F-001 F-001-AC-01", sha)
             root.joinpath("CLAUDE.md").unlink()
-            root.joinpath("CLAUDE.md").symlink_to("WRONG.md")
+            root.joinpath("CLAUDE.md").write_bytes(b"@WRONG.md")
 
             result = self.run_validator(root, "greenfield", "delivery")
 
             self.assertEqual(result.returncode, 1)
-            self.assertIn("CLAUDE_LINK_TARGET", result.stdout)
+            self.assertIn("CLAUDE_IMPORT_CONTENT", result.stdout)
 
     def test_delivery_checks_real_commit_and_clean_worktree(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
@@ -1372,7 +1372,7 @@ class VibeCodingValidatorTests(unittest.TestCase):
                 "# API instructions\n\n- `python -m unittest tests.api`\n",
                 encoding="utf-8",
             )
-            nested.joinpath("CLAUDE.md").symlink_to("AGENTS.md")
+            nested.joinpath("CLAUDE.md").write_bytes(b"@AGENTS.md")
             governance = self.commit_paths(
                 root,
                 "docs(agent): establish project instructions",

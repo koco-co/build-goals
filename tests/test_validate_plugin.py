@@ -515,8 +515,9 @@ class ValidatePluginTests(unittest.TestCase):
         claude = REPO_ROOT / "CLAUDE.md"
 
         self.assertTrue(agents.is_file())
-        self.assertTrue(claude.is_symlink())
-        self.assertEqual(os.readlink(claude), "AGENTS.md")
+        self.assertTrue(claude.is_file())
+        self.assertFalse(claude.is_symlink())
+        self.assertEqual(claude.read_bytes(), b"@AGENTS.md")
 
         instructions = agents.read_text(encoding="utf-8")
         for required in (
@@ -599,7 +600,7 @@ class ValidatePluginTests(unittest.TestCase):
         self.assertEqual(
             claude_manifest["version"], marketplace["plugins"][0]["version"]
         )
-        self.assertEqual(claude_manifest["version"], "4.1.0")
+        self.assertEqual(claude_manifest["version"], "5.0.0")
 
     def test_claude_marketplace_manifest_is_allowed(self) -> None:
         with tempfile.TemporaryDirectory() as temp:

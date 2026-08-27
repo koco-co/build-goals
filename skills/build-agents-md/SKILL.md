@@ -1,10 +1,10 @@
 ---
 name: build-agents-md
-description: 初始化或重构项目的 AGENTS.md，并以相对 CLAUDE.md 供 Claude Code 与 Codex 共用；项目指令缺失、失效或与事实不符时使用，不用于普通文档、CI 或测试建设。
+description: 初始化或重构项目的 AGENTS.md，并以内容为 @AGENTS.md 的真实 CLAUDE.md 供 Claude Code 与 Codex 共用；项目指令缺失、失效或与事实不符时使用，不用于普通文档、CI 或测试建设。
 compatibility: 需要 Python 3.9+ 运行内置校验脚本。
 metadata:
   author: koco-co
-  version: "2.2.0"
+  version: "3.0.0"
 ---
 
 # Outcome
@@ -21,8 +21,8 @@ metadata:
 ## Steps
 
 1. 读取 `workflows/§01-research.md` 和 `rules/content-admission.md`，只用仓库事实确定内容和文件范围。
-2. 读取 `workflows/§02-preview.md`，展示完整正文及新增、替换、删除和链接操作，等待确认。
-3. 确认后读取 `workflows/§03-authoring.md`、`rules/platform-and-scope.md` 和 `templates/agents-md.template.md`，写入 `AGENTS.md` 与相对 `CLAUDE.md` 链接。
+2. 读取 `workflows/§02-preview.md`，展示完整正文及新增、替换、删除和导入文件操作，等待确认。
+3. 确认后读取 `workflows/§03-authoring.md`、`rules/platform-and-scope.md` 和 `templates/agents-md.template.md`，写入 `AGENTS.md` 与内容精确为 `@AGENTS.md` 的真实 `CLAUDE.md`。
 4. 读取 `workflows/§04-validation.md` 和清单，运行校验器及适用项目命令。
 5. 读取 `workflows/§05-delivery.md`，报告变更、证据、未验证项和恢复条件。
 

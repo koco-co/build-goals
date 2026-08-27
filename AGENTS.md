@@ -4,7 +4,7 @@
 
 - 本仓库同时分发 Claude Code 与 Codex 两个版本的 `build-goals` Plugin，也支持从 `skills/` 单独安装没有跨 Skill 依赖的能力。
 - `skills/` 是 Skill 行为的权威来源；Claude Code 专用配置写在 `SKILL.md` Frontmatter，Codex 专用配置写在 `agents/openai.yaml`。
-- `AGENTS.md` 是仓库开发说明的唯一正文；`CLAUDE.md` 必须保持为指向它的相对符号链接。
+- `AGENTS.md` 是仓库开发说明的唯一正文；真实 `CLAUDE.md` 只包含 `@AGENTS.md`，供 Claude Code 导入同一正文。
 
 ## 仓库结构
 
@@ -22,7 +22,7 @@
 - `python3 -m unittest discover -s tests -p 'test_*.py' -v`：运行全部回归测试。
 - `python3 skills/build-plugin/scripts/validate_plugin.py . --platform dual --strict`：检查双平台 Plugin。
 - `python3 skills/build-skill/scripts/validate_skill.py skills/build-agents-md --profile dual --plugin-root . --strict`：检查单个 Skill；修改其他 Skill 时替换目标路径。
-- `python3 skills/build-agents-md/scripts/validate_agents_md.py . --strict`：检查项目指令和 `CLAUDE.md` 符号链接。
+- `python3 skills/build-agents-md/scripts/validate_agents_md.py . --strict`：检查项目指令和 `CLAUDE.md` 导入文件。
 - `python3 skills/build-readme/scripts/validate_readme.py README.md --project-root . --strict`：检查 README 结构和本地引用。
 - `python3 skills/build-plugin/scripts/sync_shared_files.py --root .`：只读检查跨 Skill 镜像是否与规范源一致；需要刷新时显式添加 `--write`。
 - `git diff --check`：检查空白和补丁格式问题。
@@ -33,7 +33,7 @@
 - 主 `SKILL.md` 只保留目标、路由/退出、执行顺序和必要红线；新增的本地引用必须存在，工作流文件使用 `§NN-name.md` 命名；无依据或与附属规范重复的内容删除，详见 `skills/build-skill/rules/quality-standard.md`。
 - 调用策略写在平台配置中；目标 Skill 允许模型调用时，按 `skills/build-skill/rules/quality-standard.md` 写清触发条件和排除条件。
 - 跨 Skill 运行依赖在 `.plugin-shared-files.json` 中声明，仓库保存普通镜像；修改规范源后显式同步，严格校验必须拒绝缺失、软链接或内容漂移。
-- `CLAUDE.md` 等确需使用的符号链接必须是仓库内相对链接；不得假设 Plugin 客户端缓存会保留嵌套软链接。
+- 项目级 `CLAUDE.md` 不使用符号链接，必须是只包含 `@AGENTS.md` 的普通文件；其他确需使用的符号链接必须是仓库内相对链接，不得假设 Plugin 客户端缓存会保留嵌套软链接。
 - Claude Code 安装副本保留 Claude Code 支持的 Frontmatter，并移除 `agents/`；Codex 安装副本移除 Claude Code 专用 Frontmatter，并保留 `agents/openai.yaml`。
 - 当前只直接维护 Claude Code 与 Codex；不再维护 DSH 专用包、镜像、安装分支或验证链路。
 - 破坏性兼容变更递增 Plugin major 版本，新增向后兼容能力递增 minor 版本，修复递增 patch 版本；三个正式版本号（`.claude-plugin/plugin.json`、`.claude-plugin/marketplace.json` 与 `.codex-plugin/plugin.json`）必须一致。Skill 的 `metadata.version` 独立维护。
@@ -45,7 +45,7 @@
 | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
 | 新建或修改 Skill             | 先补行为测试，再运行目标 Skill 检查和相关单元测试                                                                            |
 | Manifest、平台适配或共享文件 | 镜像检查、双平台 Plugin 检查、安装器测试和完整回归                                                                           |
-| `AGENTS.md` / `CLAUDE.md`    | `validate_agents_md.py --strict`，并检查 Git 中的链接模式                                                                    |
+| `AGENTS.md` / `CLAUDE.md`    | `validate_agents_md.py --strict`，并检查 Git 中的普通文件与导入内容                                                          |
 | README                       | `validate_readme.py`，并核对公开命令与当前仓库一致                                                                           |
 | 正式版本                     | 核对 `.claude-plugin/plugin.json`、`.claude-plugin/marketplace.json` 和 `.codex-plugin/plugin.json`                           |
 

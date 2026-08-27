@@ -464,7 +464,7 @@ class ValidateSkillTests(unittest.TestCase):
 
     def test_behavior_changed_skill_versions_are_updated(self) -> None:
         expected = {
-            "build-agents-md": 'version: "2.2.0"',
+            "build-agents-md": 'version: "3.0.0"',
             "build-plugin": 'version: "2.2.0"',
             "build-prd": 'version: "2.3.0"',
             "build-readme": 'version: "2.2.0"',
@@ -496,9 +496,9 @@ class ValidateSkillTests(unittest.TestCase):
             "每轮只问一个",
             "共同理解最终确认前",
             "不写项目",
-            "“确认”“继续”“好的”不授权实施",
+            "每次回答只解决当前问题",
             "是否确认并开始实施",
-            "肯定回答才授权",
+            "得到最终确认后退出",
             "新决策时回到第 2 步",
             "rules/ui-interaction-preview.md",
         ):

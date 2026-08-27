@@ -36,4 +36,4 @@ streamlint 是 Python 3.10+ 的流式文本检查 CLI。`src/streamlint/` 是实
 - 打包元数据：运行完整测试和 `python -m build`，检查生成包内容。
 ```
 
-同目录 `CLAUDE.md` 应为指向 `AGENTS.md` 的相对符号链接。
+同目录 `CLAUDE.md` 应为只包含 `@AGENTS.md` 的普通文件。

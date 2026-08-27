@@ -8,7 +8,7 @@
 python3 scripts/validate_agents_md.py /path/to/project --strict
 ```
 
-校验器检查根文件、嵌套文件与软长度预算；断链与占位符由脚本覆盖（错误码 `LOCAL_LINK_NOT_FOUND`/`PLACEHOLDER`），详见 `validate_agents_md.py`。软长度提示不因 `--strict` 变成失败。
+校验器检查根文件、嵌套文件与软长度预算；`CLAUDE.md` 的普通文件类型和精确导入内容、断链与占位符由脚本覆盖（错误码 `CLAUDE_REGULAR_FILE_REQUIRED`/`CLAUDE_IMPORT_CONTENT`/`LOCAL_LINK_NOT_FOUND`/`PLACEHOLDER`），详见 `validate_agents_md.py`。软长度提示不因 `--strict` 变成失败。
 
 ## 项目验证
 
@@ -27,6 +27,6 @@ python3 scripts/validate_agents_md.py /path/to/project --strict
 最后检查：
 
 - 变更只包含确认过的 `AGENTS.md`、`CLAUDE.md` 及本次 Skill 开发自身文件；
-- 符号链接在 Git 中仍表现为链接；
+- `CLAUDE.md` 在 Git 中是普通文件，内容精确为 `@AGENTS.md`；
 - 没有占位符、绝对本地路径、失效链接或复制的双正文；
 - 用户原有不相关改动未被覆盖。
