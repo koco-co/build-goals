@@ -468,7 +468,7 @@ class ValidateSkillTests(unittest.TestCase):
             "build-skill": 'version: "2.2.2"',
             "handoff": 'version: "2.1.1"',
             "health-check": 'version: "2.0.0"',
-            "shape-idea": 'version: "2.3.2"',
+            "shape-idea": 'version: "2.3.3"',
         }
 
         for name, version_line in expected.items():
@@ -485,24 +485,64 @@ class ValidateSkillTests(unittest.TestCase):
         adapter = REPO_ROOT.joinpath(
             "skills", "shape-idea", "agents", "openai.yaml"
         ).read_text(encoding="utf-8")
+        ui_rule = REPO_ROOT.joinpath(
+            "skills", "shape-idea", "rules", "ui-interaction-preview.md"
+        ).read_text(encoding="utf-8")
 
         for required in (
             "目标已明确或用户直接要求实施时退出",
-            "先查事实",
-            "每轮只问一个",
-            "共同理解最终确认前",
-            "不写项目",
-            "每次回答只解决当前问题",
-            "是否确认并开始实施",
-            "得到最终确认后退出",
-            "新决策时回到第 2 步",
+            "每轮只提出一个需要用户决定、且会影响结果的问题",
+            "等待用户回答",
+            "共同理解得到最终确认前",
+            "不得改动项目内容",
+            "每次回答聚焦当前问题",
+            "请用户确认是否开始实施",
+            "得到用户最终确认后，才允许按照已确认的范围编辑项目内容",
+            "出现新的待决策事项时，回到第 2 步",
             "rules/ui-interaction-preview.md",
         ):
             with self.subTest(required=required):
                 self.assertIn(required, shape)
 
-        self.assertIn("只读不改项目", adapter)
-        self.assertIn("是否确认并开始实施", adapter)
+        self.assertIn("确认前不得改动项目内容", adapter)
+        self.assertIn("确认是否开始实施", adapter)
+        self.assertIn("共同理解得到最终确认前", ui_rule)
+        self.assertIn("不得改动项目内容", ui_rule)
+
+    def test_shape_idea_combines_research_and_reports_scope_before_confirmation(self) -> None:
+        shape = REPO_ROOT.joinpath("skills", "shape-idea", "SKILL.md").read_text(
+            encoding="utf-8"
+        )
+        steps = {
+            line.split(". ", 1)[0]: line.split(". ", 1)[1]
+            for line in shape.splitlines()
+            if line[:1].isdigit() and ". " in line
+        }
+
+        for required in (
+            "了解项目现状",
+            "模型已有知识",
+            "查阅相关资料并开展市场调研",
+            "同类产品、常见做法和可选方案",
+            "综合比较后提出推荐方案",
+            "推荐理由与主要取舍",
+            "能够自行查明的信息，不再询问用户",
+        ):
+            with self.subTest(research=required):
+                self.assertIn(required, steps["1"])
+
+        summary, confirmation = steps["5"].split("随后", 1)
+        for required in (
+            "所有决策梳理清楚后",
+            "总结共同理解",
+            "目标、选定方案、选择依据和关键取舍",
+            "结合项目实际内容",
+            "哪些功能、模块或使用流程会受到影响",
+            "计划修改哪些文件和具体内容",
+        ):
+            with self.subTest(summary=required):
+                self.assertIn(required, summary)
+        self.assertIn("请用户确认是否开始实施", confirmation)
 
     def test_skill_template_keeps_implicit_invocation_boundaries(self) -> None:
         template = REPO_ROOT.joinpath(
