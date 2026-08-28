@@ -598,7 +598,7 @@ class ValidatePluginTests(unittest.TestCase):
         )
         versions = {manifest["version"] for manifest in manifests}
         versions.add(marketplace["plugins"][0]["version"])
-        self.assertEqual(versions, {"2.3.0"})
+        self.assertEqual(versions, {"2.3.1"})
         names = {manifest["name"] for manifest in manifests}
         self.assertEqual(names, {"build-goals"})
 

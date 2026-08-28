@@ -1,4 +1,4 @@
-# <plugin-name></plugin> 交付报告
+# <plugin-name> 交付报告
 
 ## 1. 完成情况
 
@@ -32,6 +32,8 @@
 ### Claude Code
 
 ### Codex
+
+### ZCode
 
 ## 5. Skill 子任务
 

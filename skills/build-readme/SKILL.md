@@ -4,7 +4,7 @@ description: 基于真实项目事实创建或更新 README；文件缺失或与
 compatibility: 需要 Python 3.9+ 运行内置校验脚本。
 metadata:
   author: koco-co
-  version: "2.2.0"
+  version: "2.2.1"
 ---
 
 # Outcome

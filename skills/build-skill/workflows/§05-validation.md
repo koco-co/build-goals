@@ -15,9 +15,10 @@ python3 scripts/validate_skill.py /path/to/skill --profile portable --strict
 ```bash
 python3 scripts/validate_skill.py /path/to/skill --profile claude --strict
 python3 scripts/validate_skill.py /path/to/skill --profile codex --strict
+python3 scripts/validate_skill.py /path/to/skill --profile zcode --strict
 ```
 
-该脚本已覆盖结构、Frontmatter、引用、工作流编号、命名、空文件与软链接；本清单只处理脚本无法判断的内容与场景项。
+该脚本已覆盖结构、Frontmatter、引用、工作流编号、命名、空文件与软链接；后续各项清单只处理脚本无法判断的内容与场景项。
 
 ## Phase 2：设计落实审查
 

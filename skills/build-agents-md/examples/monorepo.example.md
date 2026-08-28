@@ -27,9 +27,7 @@ Orbit 是 pnpm 与 Turborepo 管理的产品 Monorepo。TypeScript 工作区共�
 
 ## 仓库结构
 
-- `apps/console/`：React 管理端。
 - `packages/ui/`：共享组件，API 由包根导出。
-- `packages/config/`：共享 TypeScript、ESLint 和构建配置。
 - `services/api/`：Go API；进入该目录时同时遵循其 `AGENTS.md`。
 
 ## 常用命令

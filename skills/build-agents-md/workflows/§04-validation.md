@@ -26,7 +26,7 @@ python3 scripts/validate_agents_md.py /path/to/project --strict
 
 最后检查：
 
-- 变更只包含确认过的 `AGENTS.md`、`CLAUDE.md` 及本次 Skill 开发自身文件；
+- 变更只包含确认过的 `AGENTS.md`、`CLAUDE.md`；
 - `CLAUDE.md` 在 Git 中是普通文件，内容精确为 `@AGENTS.md`；
 - 没有占位符、绝对本地路径、失效链接或复制的双正文；
 - 用户原有不相关改动未被覆盖。

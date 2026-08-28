@@ -1,4 +1,4 @@
-# <plugin-name></plugin> 设计方案
+# <plugin-name> 设计方案
 
 ## 1. 目标
 
@@ -14,8 +14,8 @@
 
 ## 4. 平台与插件形态
 
-- 平台：Claude Code / Codex / 双平台
-- 形态：Skills-only / MCP-only / 混合型 / 仓库迁移
+- 平台：Claude Code / Codex / ZCode / 组合
+- 形态：Skills-only / MCP-only / 混合型 / 多平台封装 / 仓库迁移
 - 安装与分发：
 
 ## 5. 输入、输出和分支
@@ -45,9 +45,9 @@
 
 ## 9. 平台差异
 
-| 能力 | Claude Code | Codex | 共用方式 |
-| ---- | ----------- | ----- | -------- |
-|      |             |       |          |
+| 能力 | Claude Code | Codex | ZCode | 共用方式 |
+| ---- | ----------- | ----- | ----- | -------- |
+|      |             |       |       |          |
 
 ## 10. 权限与数据流
 

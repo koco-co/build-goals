@@ -4,7 +4,7 @@ description: 创建、升级或迁移 Claude Code、Codex、ZCode Plugin；涉�
 compatibility: 需要互联网访问和 Python 3.9+ 运行内置静态校验脚本。
 metadata:
   author: koco-co
-  version: "2.3.1"
+  version: "2.3.2"
 ---
 
 # Outcome

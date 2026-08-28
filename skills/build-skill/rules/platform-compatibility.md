@@ -2,22 +2,23 @@
 
 平台能力会持续演进。实施平台专属配置前，重新核对目标平台当前官方文档；本文件只规定隔离方式，不替代平台契约。字段选择遵循 `rules/frontmatter.md`。
 
-## 1. 双平台规范源
+## 1. 多平台规范源
 
-本仓库当前直接作为 Claude Code 与 Codex Plugin 使用，因此 `skills/*/SKILL.md` 是两个平台共用的规范源：
+本仓库当前直接作为 Claude Code、Codex 与 ZCode Plugin 使用，因此 `skills/*/SKILL.md` 是各平台共用的规范源：
 
 - 通用字段遵循 Agent Skills 规范；
 - Claude Code 的调用权限字段保留在共用源中；
 - Codex 的调用策略保留在 `agents/openai.yaml`；
 - 核心工作流、模板、示例、规则、脚本和清单只维护一份；
-- 平台 Manifest 分别放在根目录 `.claude-plugin/` 与 `.codex-plugin/`。
+- 平台 Manifest 分别放在根目录 `.claude-plugin/`、`.codex-plugin/` 与 `.zcode-plugin/`。
 
-独立安装器会生成平台专用副本：
+独立安装器会生成平台专用副本，字段分类遵循 `rules/frontmatter.md`：
 
 ```text
-双平台 Skill 源
-├── Claude Code：保留通用字段和 Claude Code 字段，移除 agents/openai.yaml
-└── Codex：只保留通用 Agent Skills 字段，保留 agents/openai.yaml
+多平台 Skill 源
+├── Claude Code：保留通用字段和 Claude Code 字段，移除 agents/
+├── Codex：只保留通用 Agent Skills 字段，保留 agents/openai.yaml
+└── ZCode：保留全部字段（未识别的键被忽略），移除 agents/
 ```
 
 ## 2. Claude Code
@@ -113,7 +114,7 @@ Claude Code 专属字段及其嵌套 YAML 内容必须完整移除；不能只�
 
 ## 4. 共享文件与软链接
 
-已在 Codex 的实际 Plugin 安装缓存中观察到嵌套软链接被省略，因此双平台 Plugin 的跨 Skill 运行依赖不应依赖软链接。优先使用同一路径直接共用；确需保留 Skill 内本地入口时，使用清单声明、脚本同步和逐字节校验的普通镜像。
+已在 Codex 的实际 Plugin 安装缓存中观察到嵌套软链接被省略，因此多平台 Plugin 的跨 Skill 运行依赖不应依赖软链接。优先使用同一路径直接共用；确需保留 Skill 内本地入口时，使用清单声明、脚本同步和逐字节校验的普通镜像。
 
 项目级 `CLAUDE.md` 应为普通文件，内容精确为 `@AGENTS.md`，不使用符号链接。受控构建流程中其他必要软链接必须同时满足：
 
@@ -145,7 +146,8 @@ Claude Code 专属字段及其嵌套 YAML 内容必须完整移除；不能只�
 
 交付报告分别标明：
 
-- 双平台共用源的静态检查；
+- 各平台共用源的静态检查；
 - Claude Code Manifest 与真实加载结果；
 - Codex Manifest、Marketplace 与真实安装结果；
+- ZCode Manifest 与真实加载结果；
 - 未运行平台及其具体限制。

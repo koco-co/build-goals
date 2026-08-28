@@ -4,7 +4,7 @@ description: 创建、升级或重构通用或项目级 Agent Skill；涉及 Ski
 compatibility: 需要互联网访问和 Python 3.9+ 运行内置静态校验脚本。
 metadata:
   author: koco-co
-  version: "2.2.1"
+  version: "2.2.2"
 ---
 
 # Outcome

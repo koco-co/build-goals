@@ -96,6 +96,6 @@
 
 改写：
 
-> 运行 `python3 <build-skill>/scripts/validate_skill.py <目标 Skill> --profile <claude|codex|dual> --strict`；正文只处理校验器无法判断的内容与场景。
+> 运行 `python3 <build-skill>/scripts/validate_skill.py <目标 Skill> --profile <portable|claude|codex|zcode|dual> --strict`；正文只处理校验器无法判断的内容与场景。
 
 理由：校验器能确定性保证的检查项，正文逐条复述只会制造两处权威定义和漂移风险；正文保留“执行校验器”这一动作，删除对规则的复述。
