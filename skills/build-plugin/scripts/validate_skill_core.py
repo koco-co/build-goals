@@ -233,7 +233,7 @@ def validate_frontmatter(
     name = data.get("name")
     if not isinstance(name, str) or not name.strip():
         add_issue(
-            issues, "error", "NAME_REQUIRED", skill_md, "缺少非空 name。", skill_dir
+            issues, "error", "NAME_REQUIRED", skill_md, "name 必须是非空字符串。", skill_dir
         )
     else:
         if len(name) > 64 or not NAME_RE.fullmatch(name):
@@ -242,7 +242,7 @@ def validate_frontmatter(
                 "error",
                 "NAME_FORMAT",
                 skill_md,
-                "name 必须为 1–64 个小写字母、数字或单个连字符，且不能以连字符开头或结尾。",
+                "name 长度必须为 1–64 个字符，只能包含小写字母、数字和连字符；连字符不能连续，也不能位于开头或结尾。",
                 skill_dir,
             )
         if name != skill_dir.name:
@@ -262,7 +262,7 @@ def validate_frontmatter(
             "error",
             "DESCRIPTION_REQUIRED",
             skill_md,
-            "缺少非空 description。",
+            "description 必须是非空字符串。",
             skill_dir,
         )
     elif len(description) > 1024:
@@ -357,13 +357,13 @@ def validate_headings(
         missing = "、".join(
             heading.lstrip("# ") for heading in RECOMMENDED_HEADINGS if heading not in positions
         )
-        detail = f"缺失：{missing}" if missing else "顺序与推荐不同"
+        detail = f"未采用的推荐章节：{missing}" if missing else "顺序与推荐不同"
         add_issue(
             issues,
             "info",
             "HEADING_SKELETON",
             skill_md,
-            f"未使用默认推荐骨架（{detail}）；"
+            f"未采用默认推荐章节结构（{detail}）；"
             "Outcome/Routing/Steps/Delivery/Guardrails/References 为建议而非必需，"
             "确认结构满足内容需要即可，省略准则见 rules/architecture.md。",
             skill_dir,
@@ -489,7 +489,7 @@ def validate_workflows(
                 "warning",
                 "WORKFLOW_UNREFERENCED",
                 path,
-                "该工作流没有在 SKILL.md 中被反引号路径引用。",
+                "SKILL.md 未使用反引号包裹的路径引用该工作流。",
                 skill_dir,
             )
 
@@ -834,7 +834,7 @@ def build_parser() -> argparse.ArgumentParser:
         "--profile",
         choices=("portable", "claude", "codex", "zcode", "dual"),
         default="portable",
-        help="按目标平台允许对应 Frontmatter 与适配配置",
+        help="选择目标平台，并按该平台规则检查 Frontmatter 和适配配置",
     )
     parser.add_argument(
         "--plugin-root",

@@ -18,11 +18,11 @@
 
 <h2 align="center">𝑶𝒗𝒆𝒓𝒗𝒊𝒆𝒘 · 简介</h2>
 
-<p><code>build-goals</code> 聚焦目标澄清、<b>Agent Skill</b> 与 <b>Plugin</b> 构建、项目文档及规范检查，不再提供端到端软件项目开发编排。它既是可以直接加载的 <b>Claude Code</b>、<b>Codex</b> 与 <b>ZCode</b> 多平台 <b>Plugin</b>，也为没有跨 <b>Skill</b> 依赖的能力保留独立安装方式。</p>
+<p><code>build-goals</code> 用于澄清目标、构建 <b>Agent Skill</b> 与 <b>Plugin</b>、维护项目文档和检查项目规范，不负责组织软件项目的完整开发流程。你可以在 <b>Claude Code</b>、<b>Codex</b> 或 <b>ZCode</b> 中安装完整 <b>Plugin</b>，也可以单独安装不依赖其他 <b>Skill</b> 的能力。</p>
 
 - 当前直接适配 <b>Claude Code</b>、<b>Codex</b> 与 <b>ZCode</b>。
 - 本仓库不再提供 <b>DeepSeek Harness</b> 专用包；<b>DSH</b> 使用其自身的 <b>Codex</b> 兼容能力，本仓库不单独验证该路径。
-- 其他 <b>Coding Agent</b> 尚未声明兼容；新增平台前会先核对真实能力与契约。
+- 其他 <b>Coding Agent</b> 的兼容性尚未确认；新增支持前会先核对平台能力与使用规范。
 
 <a id="capabilities"></a>
 
@@ -30,28 +30,28 @@
 
 | <b>Skill</b>                                 | 作用                                                                     |
 | -------------------------------------------- | ------------------------------------------------------------------------ |
-| [`shape-idea`](skills/shape-idea/)           | 澄清目标与取舍，涉及界面时逐状态展示交互和业务状态流                      |
-| [`health-check`](skills/health-check/)       | 统一检查项目规范产物，报告问题并在确认后修复、验证和复检                  |
-| [`build-skill`](skills/build-skill/)         | 按能力设计 <b>Frontmatter</b>，构建并审查高质量 <b>Agent Skill</b>       |
+| [`shape-idea`](skills/shape-idea/)           | 综合调研后明确目标、方案与改动范围，涉及界面时展示交互和业务状态流        |
+| [`health-check`](skills/health-check/)       | 检查项目规范文件，报告问题，并在确认后修复、验证和复检                    |
+| [`build-skill`](skills/build-skill/)         | 根据实际需求设计 <b>Frontmatter</b>，构建并审查 <b>Agent Skill</b>      |
 | [`build-plugin`](skills/build-plugin/)       | 构建、升级或迁移多平台 <b>Plugin</b>                                     |
-| [`build-readme`](skills/build-readme/)       | 探索项目并创建或更新 <b>GitHub</b> 风格 <b>README</b>                    |
+| [`build-readme`](skills/build-readme/)       | 了解项目现状，创建或更新 <b>GitHub</b> 风格 <b>README</b>                |
 | [`build-agents-md`](skills/build-agents-md/) | 初始化或整体重构跨平台 <b>AGENTS.md</b> 与 <b>CLAUDE.md</b>              |
 | [`build-docs`](skills/build-docs/)           | 为大型项目建立、提取、更新开发文档，并复核外部审查报告                    |
-| [`handoff`](skills/handoff/)                 | 整理跨会话交接文档并生成可直接复制的接续提示词                           |
+| [`handoff`](skills/handoff/)                 | 整理跨会话交接文档，生成供下一位助手继续工作的提示词                      |
 
-<p><code>health-check</code> 统一检查项目中的 <b>Agent Skill</b>、<b>Plugin</b>、<b>README</b>、<code>AGENTS.md</code> / <code>CLAUDE.md</code>。它先只读检查并一次性报告有证据的问题；用户确认后，直接组织对应领域修复、验证并重新检查，不生成持久化健康报告。</p>
+<p><code>health-check</code> 统一检查项目中的 <b>Agent Skill</b>、<b>Plugin</b>、<b>README</b>、<code>AGENTS.md</code> / <code>CLAUDE.md</code>。检查阶段不修改文件，一次性报告已查实的问题；用户确认后，调用相应能力完成修复、验证和复检，报告只展示在对话中。</p>
 
-<p><code>build-skill</code> 会根据调用方式、参数、权限、上下文与硬性环境要求形成 <b>Frontmatter</b> 字段决策矩阵；实现后分别完成内容审查、文案审查、内容回归和适用的独立 <b>Reviewer</b> 审查。</p>
+<p><code>build-skill</code> 会根据调用方式、参数、权限、上下文和必要环境条件，逐项说明 <b>Frontmatter</b> 字段的选择依据；实现后分别检查行为和措辞，复核润色是否改变原意，并在适用时交由独立 <b>Reviewer</b> 审查。</p>
 
 <p><code>build-readme</code> 会先了解代码、命令、测试、<b>CI</b>、文档和资源并提供具体修改预览；用户确认后才创建或更新 <b>README</b>，并分别报告静态检查、<b>GitHub</b> 渲染和未验证内容。</p>
 
-<p><code>build-agents-md</code> 会根据仓库证据筛选项目特有指令，并按应用、库、<b>CLI</b> 或 <b>Monorepo</b> 的实际结构组织根目录和子目录 <code>AGENTS.md</code>；用户确认完整内容预览后，才创建同目录真实 <code>CLAUDE.md</code>，其内容精确为 <code>@AGENTS.md</code>，供 <b>Claude Code</b> 导入同一正文。</p>
+<p><code>build-agents-md</code> 会根据仓库事实筛选项目特有指令，并按应用、库、<b>CLI</b> 或 <b>Monorepo</b> 的实际结构安排根目录和子目录的 <code>AGENTS.md</code>。用户确认完整内容预览后，才写入指南及同目录的普通文件 <code>CLAUDE.md</code>；后者的内容精确为 <code>@AGENTS.md</code>，供 <b>Claude Code</b> 导入同一正文。</p>
 
-<p><code>build-docs</code> 覆盖需求、架构、路线、数据、编码、测试、决策、术语、接续、变更、环境和风险共 12 类文档。它先确认整体规划，再分批预览、确认并写入；已有项目从代码、配置、测试和记录提取事实，沿用等价文档路径，并在 <code>AGENTS.md</code> 中维护一行 <code>@</code> 相对路径入口。它不处理小问题、小需求，也不执行产品代码开发。</p>
+<p><code>build-docs</code> 覆盖需求、架构、路线图、数据、编码、测试、决策、术语、工作交接、变更、环境和风险共 12 类文档。它先确认整体规划，再分批预览、确认并写入；对于已有项目，从代码、配置、测试和记录中提取事实，沿用职责相同的已有文档路径，并在 <code>AGENTS.md</code> 中维护一行入口说明，其中用 <code>@</code> 加相对路径引用文档。它不处理小问题、小需求，也不开发产品代码。</p>
 
 <p>收到针对已有文档的外部审查报告时，进入独立的「审查报告复核」分支：逐项说明采纳、部分采纳或不采纳的依据与理由，展示文档修改 <b>Diff</b>；一次确认同时授权所展示的修改与 <code>commit</code>，验证通过后仅提交本次改动，不 <code>push</code>。该分支不重复整体规划或逐批确认，也不新建文档；原有三个分支仍不提交。</p>
 
-<p>本 <b>Skill</b> 新建的文档统一放在 <code>docs/spec/</code>，按 <code>product/</code>、<code>architecture/</code>、<code>engineering/</code> 和 <code>status/</code> 分组，接续入口为 <code>docs/spec/AGENT_BRIEF.md</code>；完整路径见 <a href="skills/build-docs/rules/documents.md">文档职责表</a>。已有文档沿用原路径，目录迁移另行确认。</p>
+<p><code>build-docs</code> 新建的文档统一放在 <code>docs/spec/</code>，按 <code>product/</code>、<code>architecture/</code>、<code>engineering/</code> 和 <code>status/</code> 分组；下一位助手从 <code>docs/spec/AGENT_BRIEF.md</code> 了解当前状态并继续工作。完整路径见 <a href="skills/build-docs/rules/documents.md">文档职责表</a>。已有文档沿用原路径，目录迁移另行确认。</p>
 
 <p><code>build-docs</code> 在 <b>Claude Code</b> 和 <b>Codex</b> 中仅限用户主动调用；<b>ZCode</b> 允许模型按上述适用范围调用。<a href="https://zcode.z.ai/en/docs/skill">ZCode 的 Skill 列表同时面向用户和模型</a>，不提供等价的仅用户调用开关。配置与安装校验不代表真实客户端行为已验证。</p>
 
@@ -79,12 +79,12 @@ flowchart LR
 
 <h2 align="center">𝑷𝒓𝒊𝒏𝒄𝒊𝒑𝒍𝒆𝒔 · 核心原则</h2>
 
-- 先查明，再设计：先读取需求、仓库与平台约定，再提出方案。
+- 先了解事实，再设计：阅读需求和项目内容，核对平台规范，再提出方案。
 - 确认后实施：用户确认目录、边界和验收标准前，不修改目标文件。
-- 保护当前工作：最新 <b>HEAD</b>、未提交修改和新增文件都视为用户资产，不回滚、不覆盖。
-- 单一规范源：跨 <b>Skill</b> 运行依赖由清单声明，并以可校验、可同步的普通镜像兼容两端客户端缓存。
-- 确定性优先：已有 <b>CLI</b> → 脚本 → 模板 → <b>Few-shot</b> → 规则 → 提示词。
-- 渐进式读取：主 <code>SKILL.md</code> 只保留路由和主流程，复杂内容按需读取。
+- 保留已有工作：保留最新 <b>HEAD</b>、未提交修改和新增文件，不擅自回滚或覆盖。
+- 单一规范源：跨 <b>Skill</b> 依赖由清单声明，以可校验、可同步的普通文件副本适配客户端缓存。
+- 优先使用可靠工具：已有 <b>CLI</b> → 脚本 → 模板 → 示例 → 规则 → 提示词。
+- 按需读取：主 <code>SKILL.md</code> 只保留适用范围和主流程，详细规则需要时再读取。
 - 验证可复现：静态检查、内容审查、文案审查与真实平台测试分别记录。
 - 平台差异隔离：<b>Claude Code</b>、<b>Codex</b> 与 <b>ZCode</b> 的 <b>Manifest</b>、调用策略和平台扩展分别配置。
 
@@ -124,7 +124,7 @@ build-goals/
 └── tests/
 ```
 
-<p><code>build-plugin</code> 从 <code>build-skill</code> 复用的规则、模板、校验器和 <b>Reviewer Agent</b> 在 <code>.plugin-shared-files.json</code> 中声明规范源。仓库保存内容一致的普通镜像，避免 <b>Codex</b> 运行缓存省略嵌套软链接；<code>skills/build-plugin/scripts/sync_shared_files.py</code> 负责显式同步，严格校验会拒绝缺失、软链接或内容漂移。</p>
+<p><code>build-plugin</code> 从 <code>build-skill</code> 复用的规则、模板、校验器和 <b>Reviewer Agent</b>，均在 <code>.plugin-shared-files.json</code> 中记录规范源。仓库保存内容一致的普通文件副本，避免 <b>Codex</b> 缓存遗漏嵌套软链接。修改规范源后，使用 <code>skills/build-plugin/scripts/sync_shared_files.py</code> 同步；副本缺失、使用软链接或内容与规范源不一致时，严格校验不会通过。</p>
 
 <a id="quick-start"></a>
 
@@ -156,13 +156,13 @@ codex plugin add build-goals@build-goals
 
 <p>在 <b>ZCode</b> 客户端中打开 <b>Settings → Plugin Management → Discover</b>，通过 <code>+</code> 按钮添加 <b>GitHub</b> 仓库 <code>koco-co/build-goals</code> 并安装 <b>Plugin</b>，或选择本地仓库目录。<b>ZCode</b> 沿用 <code>.claude-plugin/marketplace.json</code> 解析 <b>Marketplace</b>，并优先读取 <code>.zcode-plugin/plugin.json</code> 作为 <b>Plugin Manifest</b>。</p>
 
-<p>安装完整 <b>Plugin</b> 后，可在 <b>Claude Code</b> 中调用 <code>/build-goals:health-check</code>，在 <b>Codex</b> 中调用 <code>$build-goals:health-check</code>，在 <b>ZCode</b> 输入框的 <code>/</code> 菜单 <b>Skills</b> 分组中选择对应能力；符合描述的项目健康检查请求也允许模型直接路由。</p>
+<p>安装完整 <b>Plugin</b> 后，可在 <b>Claude Code</b> 中调用 <code>/build-goals:health-check</code>，在 <b>Codex</b> 中调用 <code>$build-goals:health-check</code>，在 <b>ZCode</b> 输入框的 <code>/</code> 菜单 <b>Skills</b> 分组中选择对应能力。请求符合项目规范检查的适用范围时，模型也可以直接调用。</p>
 
 <a id="standalone-skills"></a>
 
 <h2 align="center">𝑺𝒕𝒂𝒏𝒅𝒂𝒍𝒐𝒏𝒆 𝑺𝒌𝒊𝒍𝒍𝒔 · 独立安装</h2>
 
-<p><b>Plugin</b> 是推荐分发方式。确实只需要一个没有跨 <b>Skill</b> 依赖的能力时，仍可使用兼容安装器；<code>health-check</code> 只随完整 <b>Plugin</b> 分发，安装器会拒绝独立安装。</p>
+<p>建议安装完整 <b>Plugin</b>。如果只需要一个不依赖其他 <b>Skill</b> 的能力，也可以使用独立安装脚本；<code>health-check</code> 需要其他 <b>Skill</b> 配合，只随完整 <b>Plugin</b> 分发，不能独立安装。</p>
 
 <p><b>ZCode</b>：</p>
 

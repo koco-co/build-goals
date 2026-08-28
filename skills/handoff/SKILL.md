@@ -4,12 +4,12 @@ description: 把当前会话整理为可复制的临时交接文档；需要切�
 argument-hint: "下一次会话将用于什么？"
 metadata:
   author: koco-co
-  version: "2.1.1"
+  version: "2.1.2"
 ---
 
 # Outcome
 
-生成精简的临时交接文档和一段可直接复制的接续提示词。
+生成精简的临时交接文档，以及可直接复制到下次会话的提示词。
 
 ## Steps
 

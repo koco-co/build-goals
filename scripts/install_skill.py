@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Install a source Skill into Claude Code, Codex, or ZCode.
 
-The repository itself is distributed as a Plugin for Claude Code and Codex.
-This compatibility installer creates a platform-specific standalone copy:
+The repository is distributed as a Plugin for Claude Code, Codex, and ZCode.
+This installer creates a standalone copy for the selected platform:
 - Claude Code preserves the source frontmatter and removes Codex UI metadata.
 - Codex removes Claude-only frontmatter and keeps agents/openai.yaml.
 - ZCode preserves the source frontmatter (unrecognized keys are ignored) and
@@ -136,7 +136,7 @@ def install_skill(
     dry_run: bool = False,
 ) -> Path:
     if not NAME_PATTERN.fullmatch(skill_name):
-        raise InstallError("Skill 名称只能包含小写字母、数字和单个连字符。")
+        raise InstallError("Skill 名称只能包含小写字母、数字及分隔词组的单个连字符。")
     if skill_name in PLUGIN_ONLY_SKILLS:
         raise InstallError(
             f"{skill_name} 只能随 build-goals Plugin 使用，不能独立安装。"
@@ -234,7 +234,7 @@ def install_skill(
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="将 Skill 源安装为 Claude Code 或 Codex 的独立副本。"
+        description="为 Claude Code、Codex 或 ZCode 安装独立的 Skill 副本。"
     )
     parser.add_argument("skill", help="skills/ 下的 Skill 目录名")
     parser.add_argument(
@@ -250,7 +250,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--dry-run",
         action="store_true",
-        help="完成校验与适配，但不写入目标目录",
+        help="校验并准备平台专用副本，但不写入目标目录",
     )
     return parser
 

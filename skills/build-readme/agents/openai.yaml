@@ -1,7 +1,7 @@
 interface:
   display_name: "Build README"
   short_description: "创建或更新项目 README"
-  default_prompt: "使用 $build-readme 研究项目，预览后创建或更新 README.md。"
+  default_prompt: "使用 $build-readme 核查项目事实，展示预览并获得确认后，创建或更新 README.md。"
 
 policy:
   allow_implicit_invocation: true

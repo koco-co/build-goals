@@ -1,7 +1,7 @@
 interface:
   display_name: "Build AGENTS.md"
   short_description: "创建或重构项目 Agent 指令"
-  default_prompt: "使用 $build-agents-md 研究项目，预览后创建或更新 AGENTS.md 与只包含 @AGENTS.md 的真实 CLAUDE.md。"
+  default_prompt: "使用 $build-agents-md 核查项目事实，展示预览并获得确认后，创建或更新 AGENTS.md 与只包含 @AGENTS.md 的普通 CLAUDE.md 文件。"
 
 policy:
   allow_implicit_invocation: true

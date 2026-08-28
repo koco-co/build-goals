@@ -2,9 +2,9 @@
 
 ## 项目概览
 
-- 本仓库同时分发 Claude Code、Codex 与 ZCode 三个版本的 `build-goals` Plugin，也支持从 `skills/` 单独安装没有跨 Skill 依赖的能力。
+- 本仓库为 Claude Code、Codex 与 ZCode 分发 `build-goals` Plugin，也支持从 `skills/` 单独安装不依赖其他 Skill 的能力。
 - `skills/` 是 Skill 行为的权威来源；Claude Code 专用配置写在 `SKILL.md` Frontmatter，Codex 专用配置写在 `agents/openai.yaml`。
-- `AGENTS.md` 是仓库开发说明的唯一正文；真实 `CLAUDE.md` 只包含 `@AGENTS.md`，供 Claude Code 导入同一正文。
+- `AGENTS.md` 是仓库开发说明的唯一正文；`CLAUDE.md` 是只包含 `@AGENTS.md` 的普通文件，供 Claude Code 导入同一正文。
 
 ## 仓库结构
 
@@ -12,7 +12,7 @@
 - `skills/build-skill/scripts/validate_skill.py`：检查单个 Skill 的结构和多平台配置。
 - `skills/build-plugin/scripts/validate_plugin.py`：检查 Plugin Manifest、组件、共享文件镜像、符号链接安全和版本号。
 - `scripts/install_skill.py`：将单个 Skill 安装到 Claude Code、Codex 或 ZCode。
-- `.plugin-shared-files.json`、`skills/build-plugin/scripts/sync_shared_files.py`：声明并显式同步跨 Skill 的普通镜像文件，兼容不会保留嵌套软链接的客户端缓存。
+- `.plugin-shared-files.json`、`skills/build-plugin/scripts/sync_shared_files.py`：记录跨 Skill 共享文件的规范源，并同步普通文件副本，避免客户端缓存遗漏嵌套软链接。
 - `.claude-plugin/`、`.codex-plugin/` 与 `.zcode-plugin/`：三个平台的 Plugin Manifest；`.claude-plugin/marketplace.json` 同时是 Claude Code 与 ZCode 的 Marketplace 配置，`.agents/plugins/marketplace.json` 是 Codex Marketplace 配置。
 - `tests/`：校验器、安装器和仓库约定的回归测试。
 - `README.md`：面向使用者说明能力、安装方法和验证命令，不重复 Skill 的详细流程。
@@ -29,15 +29,15 @@
 
 ## 关键约定
 
-- 最高优先级：禁止防御性编程和防御性提示词。只实现有用户需求、仓库事实、平台契约、可复现缺陷或明确安全要求支持的行为；不得为未经证实的假设增加代码、分支、兜底、兼容、校验、权限门禁、提示词或流程。必要的输入校验、数据安全、权限边界和错误处理必须能指出上述依据。
-- 主 `SKILL.md` 只保留目标、路由/退出、执行顺序和必要红线；新增的本地引用必须存在，工作流文件使用 `§NN-name.md` 命名；无依据或与附属规范重复的内容删除，详见 `skills/build-skill/rules/quality-standard.md`。
+- 最高优先级：禁止防御性编程和防御性提示词。所有行为都必须有用户需求、仓库事实、平台契约、可复现缺陷或明确安全要求作为依据；不得仅凭假设增加代码、分支、兜底、兼容、校验、权限确认、提示词或流程。输入校验、数据安全、权限边界和错误处理同样需要说明具体依据。
+- 主 `SKILL.md` 只保留目标、适用与退出条件、执行顺序和必要限制。引用的本地文件必须存在，工作流文件使用 `§NN-name.md` 命名；删除没有依据或与附属规范重复的内容，详见 `skills/build-skill/rules/quality-standard.md`。
 - 调用策略写在平台配置中；目标 Skill 允许模型调用时，按 `skills/build-skill/rules/quality-standard.md` 写清触发条件和排除条件。
-- 跨 Skill 运行依赖在 `.plugin-shared-files.json` 中声明，仓库保存普通镜像；修改规范源后显式同步，严格校验必须拒绝缺失、软链接或内容漂移。
+- 跨 Skill 运行依赖在 `.plugin-shared-files.json` 中声明，仓库保存普通文件副本。修改规范源后执行同步；副本缺失、使用软链接或内容与规范源不一致时，严格校验必须失败。
 - 项目级 `CLAUDE.md` 不使用符号链接，必须是只包含 `@AGENTS.md` 的普通文件；其他确需使用的符号链接必须是仓库内相对链接，不得假设 Plugin 客户端缓存会保留嵌套软链接。
 - Claude Code 安装副本保留 Claude Code 支持的 Frontmatter，并移除 `agents/`；Codex 安装副本移除 Claude Code 专用 Frontmatter，并保留 `agents/openai.yaml`；ZCode 忽略未识别的 Frontmatter 键，安装副本保留完整 Frontmatter 并移除 `agents/`。
-- 当前只直接维护 Claude Code、Codex 与 ZCode；不再维护 DSH 专用包、镜像、安装分支或验证链路。
+- 当前只直接维护 Claude Code、Codex 与 ZCode；不再维护 DSH 专用包、镜像、安装分支或验证流程。
 - 破坏性兼容变更递增 Plugin major 版本，新增向后兼容能力递增 minor 版本，修复递增 patch 版本；四个正式版本号（`.claude-plugin/plugin.json`、`.claude-plugin/marketplace.json`、`.codex-plugin/plugin.json` 与 `.zcode-plugin/plugin.json`）必须一致。Skill 的 `metadata.version` 独立维护。
-- 静态校验、安装成功和测试发现都不能代替真实 Claude Code/Codex/ZCode 客户端中的行为验证。
+- 静态校验、安装成功和测试用例能被识别，都不能代替在真实 Claude Code/Codex/ZCode 客户端中验证行为。
 
 ## 验证流程
 

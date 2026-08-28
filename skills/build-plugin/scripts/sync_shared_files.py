@@ -152,7 +152,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--write",
         action="store_true",
-        help="显式更新缺失或漂移的普通镜像文件；默认只检查。",
+        help="创建缺失的普通镜像文件，或将内容不一致的镜像更新为规范源内容；默认只检查。",
     )
     return parser
 

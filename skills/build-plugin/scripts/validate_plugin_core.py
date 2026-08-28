@@ -753,7 +753,7 @@ def validate_marketplace(plugin_root: Path, issues: List[Issue]) -> None:
                 "error",
                 "MARKETPLACE_SOURCE",
                 path,
-                f"plugins[{index}] 缺少 source.path。",
+                f"plugins[{index}] 必须提供字符串形式的 source，或包含字符串 path 的 source 对象。",
                 plugin_root,
             )
         else:

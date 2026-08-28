@@ -18,7 +18,7 @@ streamlint 是 Python 3.10+ 的流式文本检查 CLI。`src/streamlint/` 是实
 ## 常用命令
 
 - `python -m pytest`：完整测试。
-- `python -m pytest tests/test_cli.py -q`：CLI 聚焦回归。
+- `python -m pytest tests/test_cli.py -q`：运行 CLI 相关回归测试。
 - `python -m ruff check src tests`：静态检查。
 - `python -m build`：构建 wheel 与 sdist。
 

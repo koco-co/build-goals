@@ -290,7 +290,7 @@ def validate_hero(text: str, path: Path, issues: list[Issue]) -> None:
             "TITLE_SCRIPT",
             path,
             line_number(text, title.start()),
-            "一级项目标题必须包含 Mathematical Script 花体字形。",
+            "一级项目标题中的拉丁字母必须使用 Mathematical Bold Script 花体字形。",
         )
 
     tagline = TAGLINE_RE.search(hero)
@@ -543,7 +543,7 @@ def validate_section_style(text: str, path: Path, issues: list[Issue]) -> None:
             "SECTION_HEADING_STYLE",
             path,
             line_number(masked, body_offset + markdown_heading.start()),
-            "二级及以下章节标题必须使用居中的 HTML heading。",
+            "二级及以下章节标题必须使用居中的 HTML 标题标签。",
         )
 
     headings = list(HTML_HEADING_RE.finditer(body))
@@ -834,7 +834,7 @@ def verify_remote_urls(
                 "REMOTE_URL_SKIPPED",
                 readme,
                 1,
-                f"远程检查跳过非公网地址：{url}",
+                f"无法确认 URL 指向公网地址，已跳过远程检查：{url}",
             )
             continue
         request = urllib.request.Request(
@@ -899,7 +899,7 @@ def validate_readme(
             "UNRESOLVED_CONTENT",
             path,
             line_number(masked, placeholder.start()),
-            f"README 包含未解决占位内容：{placeholder.group(0)}",
+            f"README 包含未替换的占位内容：{placeholder.group(0)}",
         )
 
     validate_html_balance(text, path, issues)

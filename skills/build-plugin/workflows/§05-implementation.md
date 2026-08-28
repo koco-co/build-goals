@@ -1,6 +1,6 @@
 # Plugin 实施
 
-## Phase 1：建立安全基线
+## Phase 1：记录实施前的状态与授权范围
 
 实施前记录当前分支、工作区状态、Manifest 版本、现有安装接口和可回滚点。提交、推送、发布、删除和权限变更需要独立授权。
 
@@ -24,7 +24,7 @@ python3 <build-plugin-skill-dir>/scripts/sync_shared_files.py --root <plugin-roo
 python3 <build-plugin-skill-dir>/scripts/sync_shared_files.py --root <plugin-root>
 ```
 
-两条命令都必须成功；第二条只读检查用于确认写入后没有缺失、软链接、越界路径或内容漂移。
+两条命令都必须成功；第二条命令只做检查，用于确认同步后的镜像文件均存在、未使用软链接、路径没有越界，且内容与规范源一致。
 
 ## Phase 4：写入平台配置
 
@@ -52,4 +52,4 @@ ZCode：
 
 更新 README、版本、安装命令、调用方式、变更说明和验证命令。各平台 Manifest 的身份与版本保持一致，除非设计明确说明例外。
 
-完成条件：设计中的全部组件已经落地，路径和版本一致，没有未授权副作用。
+完成条件：设计中的全部组件已经实现，路径和版本一致，没有未授权副作用。

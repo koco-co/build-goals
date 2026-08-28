@@ -1,6 +1,6 @@
 {
   "name": "build-goals",
-  "version": "2.3.1",
+  "version": "2.3.2",
   "description": "Clarify goals and build, review, and maintain Agent Skills, plugins, and project documentation.",
   "author": {
     "name": "koco-co",
@@ -32,7 +32,7 @@
     "websiteURL": "https://github.com/koco-co/build-goals",
     "defaultPrompt": [
       "Use shape-idea to clarify a rough idea before implementation.",
-      "Use health-check as the project norm entrypoint; it reports evidence-backed issues first, then repairs and rechecks after confirmation.",
+      "Use health-check to review project Skills, plugins, README, and AGENTS.md/CLAUDE.md, report verified issues, then repair and recheck after confirmation.",
       "Use a specialized build-goals Skill to build or maintain Agent Skills, plugins, README, or project instructions."
     ],
     "brandColor": "#111827"

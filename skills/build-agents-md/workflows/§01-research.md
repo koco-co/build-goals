@@ -30,7 +30,7 @@
 
 列出候选子目录，并按 `rules/content-admission.md` 的“何时添加子目录指令”逐一判断。没有独立差异时只保留根文件；有差异时，只补充不同于根文件的内容。
 
-需要判断项目形态或内容粒度时，再按形态读取 `examples/library-or-cli.example.md`、`examples/application.example.md` 或 `examples/monorepo.example.md`；不为示例复制固定章节。
+需要判断项目形态或内容粒度时，再按形态读取 `examples/library-or-cli.example.md`、`examples/application.example.md` 或 `examples/monorepo.example.md`；不要照搬示例中的固定章节。
 
 ## 完成标准
 

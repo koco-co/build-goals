@@ -37,7 +37,7 @@ python3 scripts/validate_skill.py /path/to/skill --profile zcode --strict
 
 逐项执行 `checklists/content-review.md`，回答“行为是否正确、完整”：
 
-- 已确认路由、步骤、可复现失败和完成条件是否闭合；
+- 已确认的路由和步骤是否完整，可复现的失败是否有处理方式，完成条件是否明确；
 - 决策、权限和平台行为是否符合确认结果；
 - Frontmatter 可选字段是否有真实依据；
 - 输出与验证是否足以完成用户目标；
@@ -56,7 +56,7 @@ python3 scripts/validate_skill.py /path/to/skill --profile zcode --strict
 文案发生修改后重新执行受影响的 `checklists/content-review.md` 项目，并重跑相关静态检查。确认：
 
 - 行为和顺序没有变化；
-- 确认门禁与权限没有被弱化；
+- 用户确认要求与权限限制没有被弱化；
 - 必要条件和完成证据没有被删减；
 - 新措辞没有产生歧义或平台差异。
 
@@ -90,7 +90,7 @@ Reviewer 只读审查并分别输出内容审查结果与文案审查结果。�
 - 是否执行了真实运行测试；
 - 未能运行时，完成了哪些静态检查。
 
-## Phase 9：失败闭环
+## Phase 9：失败项的修复与复验
 
 实际出现的失败项记录：
 

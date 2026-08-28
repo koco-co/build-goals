@@ -1,10 +1,10 @@
 ---
 name: build-skill
 description: 创建、升级或重构通用或项目级 Agent Skill；涉及 Skill 设计、实现或审查时使用，不用于 Plugin 打包、普通提示词润色或一般编码。
-compatibility: 需要互联网访问和 Python 3.9+ 运行内置静态校验脚本。
+compatibility: 需要访问互联网；内置静态校验脚本需要 Python 3.9+。
 metadata:
   author: koco-co
-  version: "2.2.2"
+  version: "2.2.3"
 ---
 
 # Outcome
@@ -14,8 +14,8 @@ metadata:
 ## Routing
 
 - 新建通用 Skill、创建项目级 Skill 或升级已有 Skill 时进入对应分支。
-- 由 `health-check` 受控调用时，审查阶段保持只读；上层取得修复确认后再修复。
-- 由 `build-plugin` 受控调用时，遵循上层任务、确认和恢复契约。
+- 由 `health-check` 调用时，审查阶段保持只读；上层取得修复确认后再修复。
+- 由 `build-plugin` 统筹并调用时，遵循它规定的任务范围、确认要求和恢复条件。
 - Plugin 打包、安装、分发、普通文档或提示词润色不属于本 Skill。
 
 ## Steps

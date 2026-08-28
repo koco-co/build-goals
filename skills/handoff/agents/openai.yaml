@@ -1,7 +1,7 @@
 interface:
   display_name: "Handoff"
   short_description: "生成临时会话交接文档"
-  default_prompt: "使用 $handoff 生成临时交接文档和可复制的接续提示词。"
+  default_prompt: "使用 $handoff 生成临时交接文档，以及可复制到下次会话的提示词。"
 
 policy:
   allow_implicit_invocation: true

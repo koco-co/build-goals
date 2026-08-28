@@ -4,7 +4,7 @@ description: 基于真实项目事实创建或更新 README；文件缺失或与
 compatibility: 需要 Python 3.9+ 运行内置校验脚本。
 metadata:
   author: koco-co
-  version: "2.2.1"
+  version: "2.2.2"
 ---
 
 # Outcome
@@ -16,7 +16,7 @@ metadata:
 - 没有根目录 `README.md` 时创建；已有时保留事实并更新。
 - 已有伴随 README 时一并列出并在确认后同步；不存在时不创建。
 - 仅审查或预览时保持只读；普通文档、代码、发布和仓库主页配置不属于本 Skill。
-- 由 `health-check` 受控调用时，审查阶段保持只读；上层取得修复确认后再修复。
+- 由 `health-check` 调用时，审查阶段保持只读；上层取得修复确认后再修复。
 
 ## Steps
 

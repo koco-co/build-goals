@@ -76,7 +76,7 @@ class UiInteractionContractTests(unittest.TestCase):
                 self.assertIn(required, rule)
         self.assertIn("## 状态 1：", template)
         self.assertIn("```text", template)
-        self.assertIn("## 不可见状态流", template)
+        self.assertIn("## 状态流", template)
 
 
 if __name__ == "__main__":

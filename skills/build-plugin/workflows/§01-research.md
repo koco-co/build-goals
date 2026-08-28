@@ -21,8 +21,8 @@
 只核对本次目标平台：
 
 - Claude Code：Manifest、组件目录、命名空间、权限、缓存、共享文件、安装和验证；
-- Codex：Manifest、Skills、MCP、Hooks、Marketplace、调用策略和安装表面。
-- ZCode：Manifest 探测顺序、组件路径校验、Skill Frontmatter 识别键、Marketplace 来源与客户端安装表面。
+- Codex：Manifest、Skills、MCP、Hooks、Marketplace、调用策略和安装方式。
+- ZCode：Manifest 探测顺序、组件路径校验、Skill Frontmatter 识别键、Marketplace 来源与客户端安装方式。
 
 平台规范可能变化，实施前以当前官方文档和本地客户端行为为准。其他 Coding Agent 只记录为后续项。
 

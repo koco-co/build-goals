@@ -97,7 +97,7 @@ class HealthCheckContractTests(unittest.TestCase):
                 text = REPO_ROOT.joinpath("skills", name, "SKILL.md").read_text(
                     encoding="utf-8"
                 )
-                self.assertIn("由 `health-check` 受控调用", text)
+                self.assertIn("由 `health-check` 调用", text)
                 self.assertIn("审查阶段保持只读", text)
                 self.assertIn("上层取得修复确认后", text)
 

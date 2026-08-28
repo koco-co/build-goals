@@ -437,9 +437,9 @@ class ValidateSkillTests(unittest.TestCase):
         expected = {
             "build-agents-md": "需要 Python 3.9+ 运行内置校验脚本。",
             "build-docs": None,
-            "build-plugin": "需要互联网访问和 Python 3.9+ 运行内置静态校验脚本。",
+            "build-plugin": "需要访问互联网；内置静态校验脚本需要 Python 3.9+。",
             "build-readme": "需要 Python 3.9+ 运行内置校验脚本。",
-            "build-skill": "需要互联网访问和 Python 3.9+ 运行内置静态校验脚本。",
+            "build-skill": "需要访问互联网；内置静态校验脚本需要 Python 3.9+。",
             "handoff": None,
             "health-check": None,
             "shape-idea": None,
@@ -461,14 +461,14 @@ class ValidateSkillTests(unittest.TestCase):
 
     def test_behavior_changed_skill_versions_are_updated(self) -> None:
         expected = {
-            "build-agents-md": 'version: "3.0.2"',
-            "build-docs": 'version: "1.2.0"',
-            "build-plugin": 'version: "2.3.2"',
-            "build-readme": 'version: "2.2.1"',
-            "build-skill": 'version: "2.2.2"',
-            "handoff": 'version: "2.1.1"',
-            "health-check": 'version: "2.0.0"',
-            "shape-idea": 'version: "2.3.3"',
+            "build-agents-md": 'version: "3.0.3"',
+            "build-docs": 'version: "1.2.1"',
+            "build-plugin": 'version: "2.3.3"',
+            "build-readme": 'version: "2.2.2"',
+            "build-skill": 'version: "2.2.3"',
+            "handoff": 'version: "2.1.2"',
+            "health-check": 'version: "2.0.1"',
+            "shape-idea": 'version: "2.3.4"',
         }
 
         for name, version_line in expected.items():
@@ -558,7 +558,7 @@ class ValidateSkillTests(unittest.TestCase):
 
         for required in (
             "最小充分",
-            "用户需求、仓库事实或可复现缺陷",
+            "用户需求、仓库事实、可复现缺陷、平台契约或明确安全要求",
             "说不出具体依据就删除",
         ):
             with self.subTest(required=required):
@@ -653,7 +653,7 @@ class ValidateSkillTests(unittest.TestCase):
             )
         )
 
-        self.assertIn("上层总控", contract)
+        self.assertIn("由上层 Skill 统筹", contract)
         self.assertIn("不重复询问", contract)
         self.assertIn("确认依据", contract)
         self.assertIn("恢复条件", contract)
@@ -675,7 +675,7 @@ class ValidateSkillTests(unittest.TestCase):
                 self.assertIn("独立调用", contract)
                 self.assertIn("受控调用", contract)
                 self.assertIn("不重复询问", contract)
-                self.assertIn("上层总控", contract)
+                self.assertIn("由上层 Skill 统筹", contract)
                 self.assertIn("确认依据", contract)
                 self.assertIn("验证", contract)
                 self.assertIn("未验证", contract)

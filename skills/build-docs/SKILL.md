@@ -4,7 +4,7 @@ description: 为大型代码项目建立、提取、更新开发文档或复核�
 disable-model-invocation: true
 metadata:
   author: koco-co
-  version: "1.2.0"
+  version: "1.2.1"
 ---
 
 # Outcome

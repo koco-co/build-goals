@@ -44,7 +44,7 @@ Orbit 是 pnpm 与 Turborepo 管理的产品 Monorepo。TypeScript 工作区共�
 
 ## 验证流程
 
-- 包内行为：运行目标包测试，再运行受影响任务图。
+- 包内行为：运行目标包测试，再运行任务图中受影响的任务。
 - 公共 export 或共享配置：运行所有下游包的类型检查与测试。
 - `services/api` 变更：按该目录的增量指令验证。
 ```
@@ -80,4 +80,4 @@ Orbit 是 pnpm 与 Turborepo 管理的产品 Monorepo。TypeScript 工作区共�
 - SQL 或迁移：运行数据库集成测试，并验证从上一版本升级和回滚。
 ```
 
-两个作用域各自拥有只包含 `@AGENTS.md` 的真实 `CLAUDE.md`。嵌套文件不重复根命令或通用 JS 规则。
+两个作用域分别使用只包含 `@AGENTS.md` 的普通 `CLAUDE.md` 文件。嵌套文件不重复根命令或通用 JS 规则。

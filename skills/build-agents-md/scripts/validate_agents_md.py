@@ -230,7 +230,7 @@ def validate_claude_pair(
             "error" if strict else "warning",
             "CLAUDE_NOT_FOUND",
             claude,
-            "同目录缺少 CLAUDE.md 单一来源入口。",
+            "同目录缺少用于导入 AGENTS.md 的 CLAUDE.md。",
             root,
         )
         return
@@ -322,7 +322,7 @@ def validate_project(
                 "warning",
                 "AGENTS_LENGTH_SOFT",
                 agents,
-                f"共 {line_count} 行，超过 120 行软复查预算；必要内容可保留。",
+                f"共 {line_count} 行，超过建议的 120 行；请检查是否需要精简，必要内容可保留。",
                 root,
             )
 
@@ -359,7 +359,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--strict",
         action="store_true",
-        help="Require every AGENTS.md companion and validate local content.",
+        help="要求每份 AGENTS.md 都有同目录 CLAUDE.md，并检查本地链接和占位符。",
     )
     parser.add_argument(
         "--json",

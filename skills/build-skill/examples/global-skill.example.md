@@ -24,7 +24,7 @@
 | `agents/openai.yaml` | 添加 | Codex 禁止模型隐式调用并提供展示信息 |
 | `compatibility` | 省略 | 没有通用 Skill 自身无法处理的硬性环境要求 |
 | `argument-hint` | 添加到 Claude Code 源 | 用户需要传入一个或多个契约路径 |
-| `metadata` | 省略 | 没有注册表或安装器消费该信息 |
+| `metadata` | 省略 | 没有注册表或安装器需要读取这些信息 |
 
 ## 推荐结构
 
@@ -48,7 +48,7 @@ api-contract-review/
     └── semantic-review.md
 ```
 
-六键骨架是默认建议而非必需：本示例因有独立分支和红线，使用完整的 `Outcome / Routing / Steps / Delivery / Guardrails / References`；无附属文件的 Skill 应删除 `References` 整节，无红线时删除 `Guardrails`，均属合法形态。
+包含六个章节的结构只是默认建议，并非必须采用：本示例因有独立分支和红线，使用完整的 `Outcome / Routing / Steps / Delivery / Guardrails / References`；无附属文件的 Skill 应删除 `References` 整节，无红线时删除 `Guardrails`，均属合法形态。
 
 ## 设计理由
 

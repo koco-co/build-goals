@@ -1,4 +1,4 @@
-# 写入预览与确认门禁
+# 写入预览与确认
 
 使用 `templates/readme-preview.template.md` 输出一次可实施预览。
 

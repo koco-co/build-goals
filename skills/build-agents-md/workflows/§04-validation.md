@@ -8,7 +8,7 @@
 python3 scripts/validate_agents_md.py /path/to/project --strict
 ```
 
-校验器检查根文件、嵌套文件与软长度预算；`CLAUDE.md` 的普通文件类型和精确导入内容、断链与占位符由脚本覆盖（错误码 `CLAUDE_REGULAR_FILE_REQUIRED`/`CLAUDE_IMPORT_CONTENT`/`LOCAL_LINK_NOT_FOUND`/`PLACEHOLDER`），详见 `validate_agents_md.py`。软长度提示不因 `--strict` 变成失败。
+校验器检查根文件、嵌套文件与软长度预算；`CLAUDE.md` 的普通文件类型和精确导入内容、断链与占位符由脚本覆盖（错误码 `CLAUDE_REGULAR_FILE_REQUIRED`/`CLAUDE_IMPORT_CONTENT`/`LOCAL_LINK_NOT_FOUND`/`PLACEHOLDER`），详见 `validate_agents_md.py`。超出建议长度的提示不因 `--strict` 变成失败。
 
 ## 项目验证
 
