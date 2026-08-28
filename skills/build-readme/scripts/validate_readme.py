@@ -4,8 +4,10 @@
 from __future__ import annotations
 
 import argparse
+import ipaddress
 import json
 import re
+import socket
 import unicodedata
 import urllib.error
 import urllib.parse
@@ -788,17 +790,60 @@ def validate_mermaid(text: str, readme: Path, issues: list[Issue]) -> None:
             )
 
 
+def _is_public_http_url(url: str) -> bool:
+    """远程验证只允许解析到公网地址的 http(s) 链接，禁止借 README 链接探测内网。"""
+    parsed = urllib.parse.urlparse(url)
+    if parsed.scheme not in {"http", "https"} or not parsed.hostname:
+        return False
+    default_port = 443 if parsed.scheme == "https" else 80
+    try:
+        infos = socket.getaddrinfo(
+            parsed.hostname, parsed.port or default_port, proto=socket.IPPROTO_TCP
+        )
+    except (OSError, UnicodeError):
+        return False
+    addresses = []
+    for info in infos:
+        try:
+            addresses.append(ipaddress.ip_address(info[4][0]))
+        except ValueError:
+            return False
+    return bool(addresses) and all(address.is_global for address in addresses)
+
+
+class _PublicRedirectHandler(urllib.request.HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        if not _is_public_http_url(newurl):
+            raise urllib.error.HTTPError(
+                newurl, code, "重定向到非公网地址被拒绝", headers, fp
+            )
+        return super().redirect_request(req, fp, code, msg, headers, newurl)
+
+
+_REMOTE_OPENER = urllib.request.build_opener(_PublicRedirectHandler())
+
+
 def verify_remote_urls(
     urls: Iterable[str], readme: Path, timeout: float, issues: list[Issue]
 ) -> None:
     for url in sorted(set(urls)):
+        if not _is_public_http_url(url):
+            add_issue(
+                issues,
+                "warning",
+                "REMOTE_URL_SKIPPED",
+                readme,
+                1,
+                f"远程检查跳过非公网地址：{url}",
+            )
+            continue
         request = urllib.request.Request(
             url,
             method="GET",
             headers={"User-Agent": "build-readme-validator/1.0"},
         )
         try:
-            with urllib.request.urlopen(request, timeout=timeout) as response:
+            with _REMOTE_OPENER.open(request, timeout=timeout) as response:
                 if response.status >= 400:
                     raise urllib.error.HTTPError(
                         url, response.status, "HTTP error", response.headers, None
