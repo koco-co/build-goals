@@ -305,7 +305,7 @@ class InstallSkillTests(unittest.TestCase):
         skill_names = sorted(
             path.name
             for path in REPO_ROOT.joinpath("skills").iterdir()
-            if path.name not in {"health-check"}
+            if path.name not in {"audit-agent-setup"}
         )
 
         for skill_name in skill_names:
@@ -332,7 +332,7 @@ class InstallSkillTests(unittest.TestCase):
                     )
                     if platform == "claude":
                         self.assertFalse(destination.joinpath("agents").exists())
-                        if skill_name == "build-docs":
+                        if skill_name == "build-dev-docs":
                             self.assertIn("disable-model-invocation: true", skill_md)
                         else:
                             self.assertNotIn("disable-model-invocation:", skill_md)
@@ -343,13 +343,13 @@ class InstallSkillTests(unittest.TestCase):
                         ).read_text(encoding="utf-8")
                         self.assertIn(
                             "allow_implicit_invocation: "
-                            + ("false" if skill_name == "build-docs" else "true"),
+                            + ("false" if skill_name == "build-dev-docs" else "true"),
                             adapter,
                         )
                     else:
                         self.assertFalse(destination.joinpath("agents").exists())
                         self.assertIn(f"name: {skill_name}", skill_md)
-                        if skill_name == "build-docs":
+                        if skill_name == "build-dev-docs":
                             self.assertIn("disable-model-invocation: true", skill_md)
 
     def test_zcode_install_preserves_claude_frontmatter(self) -> None:
@@ -364,7 +364,7 @@ class InstallSkillTests(unittest.TestCase):
             self.assertFalse(destination.joinpath("agents").exists())
 
     def test_full_package_only_skills_reject_standalone_installation(self) -> None:
-        for skill_name in ("health-check",):
+        for skill_name in ("audit-agent-setup",):
             for platform in ("claude", "codex", "zcode", "pi"):
                 with (
                     self.subTest(skill=skill_name, platform=platform),
@@ -373,7 +373,7 @@ class InstallSkillTests(unittest.TestCase):
                     result = self.run_installer(Path(temp), platform, skill_name)
                     self.assertEqual(result.returncode, 1)
                     self.assertIn(
-                        f"{skill_name} 只能随 build-goals 完整分发包使用",
+                        f"{skill_name} 只能随 agent-build-kit 完整分发包使用",
                         result.stderr,
                     )
 

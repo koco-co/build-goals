@@ -1,11 +1,11 @@
 {
-  "name": "build-goals",
+  "name": "agent-build-kit",
   "interface": {
-    "displayName": "Build Goals"
+    "displayName": "Agent Build Kit"
   },
   "plugins": [
     {
-      "name": "build-goals",
+      "name": "agent-build-kit",
       "source": {
         "source": "local",
         "path": "./"

@@ -1,13 +1,13 @@
 {
-  "name": "build-goals",
-  "version": "2.4.0",
-  "description": "Clarify goals and build, review, and maintain Agent Skills, plugins, and project documentation.",
+  "name": "agent-build-kit",
+  "version": "3.0.0",
+  "description": "Clarify ideas and build, audit, and maintain Agent Skills, plugins, README, project instructions, and developer documentation.",
   "author": {
     "name": "koco-co",
     "url": "https://github.com/koco-co"
   },
-  "homepage": "https://github.com/koco-co/build-goals",
-  "repository": "https://github.com/koco-co/build-goals",
+  "homepage": "https://github.com/koco-co/agent-build-kit",
+  "repository": "https://github.com/koco-co/agent-build-kit",
   "keywords": [
     "agent-skills",
     "codex",
@@ -20,9 +20,9 @@
   ],
   "skills": "./skills/",
   "interface": {
-    "displayName": "Build Goals",
-    "shortDescription": "Build and maintain Agent Skills, plugins, and project docs",
-    "longDescription": "Clarify goals and build, review, and maintain Agent Skills, plugins, and project documentation.",
+    "displayName": "Agent Build Kit",
+    "shortDescription": "Build and audit Agent Skills, plugins, and developer docs",
+    "longDescription": "Clarify ideas and build, audit, and maintain Agent Skills, plugins, README, project instructions, and developer documentation.",
     "developerName": "koco-co",
     "category": "Productivity",
     "capabilities": [
@@ -30,12 +30,13 @@
       "Write",
       "Web Research"
     ],
-    "websiteURL": "https://github.com/koco-co/build-goals",
+    "websiteURL": "https://github.com/koco-co/agent-build-kit",
     "defaultPrompt": [
-      "Use shape-idea to clarify a rough idea before implementation.",
-      "Use health-check to review project Skills, plugins, README, and AGENTS.md/CLAUDE.md, report verified issues, then repair and recheck after confirmation.",
-      "Use a specialized build-goals Skill to build or maintain Agent Skills, plugins, README, or project instructions."
+      "Use clarify-idea to clarify a rough idea before implementation.",
+      "Use audit-agent-setup to review Agent Skills, plugins, README, and project instructions, then repair verified issues after confirmation.",
+      "Use the matching Agent Build Kit Skill to build or maintain Agent Skills, plugins, README, project instructions, or developer documentation."
     ],
     "brandColor": "#111827"
-  }
+  },
+  "license": "MIT"
 }

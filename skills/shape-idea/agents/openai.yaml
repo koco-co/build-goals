@@ -1,7 +1,0 @@
-interface:
-  display_name: "Shape Idea"
-  short_description: "明确模糊想法的目标与关键决策"
-  default_prompt: "使用 $shape-idea，结合项目现状、已有知识和市场调研明确方案、影响范围与改动范围；总结共同理解后，请我确认是否开始实施，确认前不得改动项目内容。"
-
-policy:
-  allow_implicit_invocation: true

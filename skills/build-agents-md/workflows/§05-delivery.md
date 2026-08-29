@@ -18,7 +18,7 @@
 
 ## 后续动作确认
 
-先判断本次是独立调用，还是由 `health-check` 等上层 Skill 调用。
+先判断本次是独立调用，还是由 `audit-agent-setup` 等上层 Skill 调用。
 
 ### 受控调用（由上层 Skill 统筹）
 

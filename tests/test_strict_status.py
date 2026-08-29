@@ -10,7 +10,9 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 SKILL_VALIDATOR = REPO_ROOT / "skills" / "build-skill" / "scripts" / "validate_skill.py"
-PLUGIN_VALIDATOR = REPO_ROOT / "skills" / "build-plugin" / "scripts" / "validate_plugin.py"
+PLUGIN_VALIDATOR = (
+    REPO_ROOT / "skills" / "build-plugin" / "scripts" / "validate_plugin.py"
+)
 
 VALID_BODY = """# Outcome
 
@@ -48,13 +50,17 @@ class StrictStatusTests(unittest.TestCase):
                 "name: warning-skill\n"
                 "description: strict status fixture\n"
                 "compatibility: 当前适配 Claude Code 与 Codex。\n"
-                "---\n\n"
-                + textwrap.dedent(VALID_BODY).strip()
-                + "\n",
+                "---\n\n" + textwrap.dedent(VALID_BODY).strip() + "\n",
                 encoding="utf-8",
             )
             result = subprocess.run(
-                [sys.executable, str(SKILL_VALIDATOR), str(skill), "--strict", "--json"],
+                [
+                    sys.executable,
+                    str(SKILL_VALIDATOR),
+                    str(skill),
+                    "--strict",
+                    "--json",
+                ],
                 check=False,
                 text=True,
                 capture_output=True,
@@ -134,7 +140,13 @@ class StrictStatusTests(unittest.TestCase):
                 encoding="utf-8",
             )
             result = subprocess.run(
-                [sys.executable, str(PLUGIN_VALIDATOR), str(plugin), "--platform", "dual"],
+                [
+                    sys.executable,
+                    str(PLUGIN_VALIDATOR),
+                    str(plugin),
+                    "--platform",
+                    "dual",
+                ],
                 check=False,
                 text=True,
                 capture_output=True,

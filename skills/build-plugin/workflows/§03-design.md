@@ -45,8 +45,8 @@ Skills + MCP + UI
 
 创建平台配置时按需读取 `templates/claude-plugin.template.json`、`templates/codex-plugin.template.json`、`templates/zcode-plugin.template.json` 或 `templates/pi-package.template.json`；模板只提供字段结构，不扩大组件范围。
 
-## Phase 4：输出方案
+## Phase 4：落实方案
 
 使用 `templates/plugin-design-proposal.template.md` 汇总目标、分支、目录、组件职责、Skill 委派、权限、平台、安装发布、验证、实施范围和回滚；不在本工作流重复维护模板字段清单。
 
-输出后只请求一次实施确认。确认前保持只读。
+用户要求先看设计时，输出后只请求一次实施确认。存在会改变 Plugin 形态、平台、权限或验收的未知选择时，说明差异和推荐方案后询问。明确的创建、升级或迁移请求且无未决选择时直接实施。

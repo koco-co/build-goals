@@ -8,9 +8,9 @@ import json
 import os
 import re
 import sys
+from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Dict, Iterable, List, Mapping, Optional, Sequence, Set, Tuple
 
 SKILLS_VALIDATOR_DIR = Path(__file__).resolve().parent
 if str(SKILLS_VALIDATOR_DIR) not in sys.path:
@@ -38,18 +38,18 @@ class Issue:
 class Report:
     plugin_dir: str
     platform: str
-    issues: List[Issue]
-    skills_checked: List[str]
+    issues: list[Issue]
+    skills_checked: list[str]
 
     @property
-    def errors(self) -> List[Issue]:
+    def errors(self) -> list[Issue]:
         return [issue for issue in self.issues if issue.severity == "error"]
 
     @property
-    def warnings(self) -> List[Issue]:
+    def warnings(self) -> list[Issue]:
         return [issue for issue in self.issues if issue.severity == "warning"]
 
-    def to_dict(self) -> Dict[str, object]:
+    def to_dict(self) -> dict[str, object]:
         return {
             "plugin_dir": self.plugin_dir,
             "platform": self.platform,
@@ -77,7 +77,7 @@ def display_path(path: Path, root: Path) -> str:
 
 
 def add_issue(
-    issues: List[Issue],
+    issues: list[Issue],
     severity: str,
     code: str,
     path: Path,
@@ -88,8 +88,8 @@ def add_issue(
 
 
 def load_json(
-    path: Path, plugin_root: Path, issues: List[Issue]
-) -> Optional[Mapping[str, object]]:
+    path: Path, plugin_root: Path, issues: list[Issue]
+) -> Mapping[str, object] | None:
     if not path.is_file():
         add_issue(
             issues, "error", "MANIFEST_REQUIRED", path, "缺少 Manifest。", plugin_root
@@ -146,8 +146,8 @@ def validate_identity(
     data: Mapping[str, object],
     path: Path,
     plugin_root: Path,
-    issues: List[Issue],
-) -> Tuple[Optional[str], Optional[str]]:
+    issues: list[Issue],
+) -> tuple[str | None, str | None]:
     name = data.get("name")
     version = data.get("version")
     description = data.get("description")
@@ -161,7 +161,7 @@ def validate_identity(
             "name 必须是 kebab-case，且只能包含小写字母、数字和单个连字符。",
             plugin_root,
         )
-        normalized_name: Optional[str] = None
+        normalized_name: str | None = None
     else:
         normalized_name = name
 
@@ -174,7 +174,7 @@ def validate_identity(
             "version 必须使用 SemVer，例如 1.0.0。",
             plugin_root,
         )
-        normalized_version: Optional[str] = None
+        normalized_version: str | None = None
     else:
         normalized_version = version
 
@@ -206,9 +206,9 @@ def validate_component_path(
     field: str,
     manifest_path: Path,
     plugin_root: Path,
-    issues: List[Issue],
-    expect: Optional[str] = None,
-) -> Optional[Path]:
+    issues: list[Issue],
+    expect: str | None = None,
+) -> Path | None:
     if not raw_path.startswith("./"):
         add_issue(
             issues,
@@ -295,7 +295,7 @@ def validate_component_path(
 def validate_manifest_directory(
     config_dir: Path,
     plugin_root: Path,
-    issues: List[Issue],
+    issues: list[Issue],
     *,
     allow_marketplace: bool = False,
 ) -> None:
@@ -321,14 +321,14 @@ def validate_manifest(
     platform: str,
     manifest_path: Path,
     plugin_root: Path,
-    issues: List[Issue],
-) -> Tuple[Optional[Mapping[str, object]], Optional[str], Optional[str], Set[Path]]:
+    issues: list[Issue],
+) -> tuple[Mapping[str, object] | None, str | None, str | None, set[Path]]:
     data = load_json(manifest_path, plugin_root, issues)
     if data is None:
         return None, None, None, set()
 
     name, version = validate_identity(data, manifest_path, plugin_root, issues)
-    skill_roots: Set[Path] = set()
+    skill_roots: set[Path] = set()
 
     skills_value = data.get("skills")
     if skills_value is None:
@@ -406,7 +406,7 @@ def validate_manifest(
     return data, name, version, skill_roots
 
 
-def validate_symlinks(plugin_root: Path, issues: List[Issue]) -> None:
+def validate_symlinks(plugin_root: Path, issues: list[Issue]) -> None:
     for path in plugin_root.rglob("*"):
         if not path.is_symlink():
             continue
@@ -475,9 +475,9 @@ def shared_file_path(
     *,
     manifest_path: Path,
     plugin_root: Path,
-    issues: List[Issue],
+    issues: list[Issue],
     field: str,
-) -> Optional[Path]:
+) -> Path | None:
     if not isinstance(raw_path, str) or not raw_path.strip():
         add_issue(
             issues,
@@ -527,7 +527,7 @@ def shared_file_path(
     return candidate
 
 
-def validate_shared_mirrors(plugin_root: Path, issues: List[Issue]) -> None:
+def validate_shared_mirrors(plugin_root: Path, issues: list[Issue]) -> None:
     manifest_path = plugin_root / ".plugin-shared-files.json"
     if not manifest_path.exists():
         return
@@ -557,8 +557,8 @@ def validate_shared_mirrors(plugin_root: Path, issues: List[Issue]) -> None:
         )
         return
 
-    declared_sources: Set[Path] = set()
-    seen_targets: Set[Path] = set()
+    declared_sources: set[Path] = set()
+    seen_targets: set[Path] = set()
     for index, contract in enumerate(contracts):
         if not isinstance(contract, dict):
             add_issue(
@@ -593,7 +593,7 @@ def validate_shared_mirrors(plugin_root: Path, issues: List[Issue]) -> None:
             continue
         declared_sources.add(source.absolute())
 
-        target_paths: List[Path] = []
+        target_paths: list[Path] = []
         for target_index, raw_target in enumerate(targets):
             target = shared_file_path(
                 raw_target,
@@ -696,7 +696,7 @@ def validate_shared_mirrors(plugin_root: Path, issues: List[Issue]) -> None:
         )
 
 
-def validate_marketplace(plugin_root: Path, issues: List[Issue]) -> None:
+def validate_marketplace(plugin_root: Path, issues: list[Issue]) -> None:
     path = plugin_root / ".agents" / "plugins" / "marketplace.json"
     if not path.exists():
         return
@@ -739,7 +739,7 @@ def validate_marketplace(plugin_root: Path, issues: List[Issue]) -> None:
             )
             continue
         source = item.get("source")
-        raw_path: Optional[str] = None
+        raw_path: str | None = None
         if isinstance(source, str):
             raw_path = source
         elif isinstance(source, dict):
@@ -811,7 +811,7 @@ def merge_skill_report(
     report: SkillReport,
     skill_dir: Path,
     plugin_root: Path,
-    issues: List[Issue],
+    issues: list[Issue],
 ) -> None:
     prefix = display_path(skill_dir, plugin_root)
     for issue in report.issues:
@@ -827,8 +827,8 @@ def merge_skill_report(
         )
 
 
-def collect_skill_dirs(skill_roots: Iterable[Path]) -> List[Path]:
-    discovered: Set[Path] = set()
+def collect_skill_dirs(skill_roots: Iterable[Path]) -> list[Path]:
+    discovered: set[Path] = set()
     for root in skill_roots:
         if not root.is_dir():
             continue
@@ -840,10 +840,8 @@ def collect_skill_dirs(skill_roots: Iterable[Path]) -> List[Path]:
 
 def validate_pi_package(
     plugin_root: Path,
-    issues: List[Issue],
-) -> Tuple[
-    Optional[Mapping[str, object]], Optional[str], Optional[str], Set[Path]
-]:
+    issues: list[Issue],
+) -> tuple[Mapping[str, object] | None, str | None, str | None, set[Path]]:
     manifest_path = plugin_root / "package.json"
     data = load_json(manifest_path, plugin_root, issues)
     if data is None:
@@ -874,7 +872,7 @@ def validate_pi_package(
         )
         return data, name, version, set()
 
-    skill_roots: Set[Path] = set()
+    skill_roots: set[Path] = set()
     for index, raw_path in enumerate(raw_skills):
         if not isinstance(raw_path, str):
             add_issue(
@@ -901,11 +899,11 @@ def validate_pi_package(
 
 
 def check_manifest_consistency(
-    issues: List[Issue],
+    issues: list[Issue],
     plugin_root: Path,
     prefix: str,
-    reference: Tuple[Optional[str], Optional[str], Set[Path]],
-    others: Sequence[Tuple[str, Tuple[Optional[str], Optional[str], Set[Path]]]],
+    reference: tuple[str | None, str | None, set[Path]],
+    others: Sequence[tuple[str, tuple[str | None, str | None, set[Path]]]],
 ) -> None:
     ref_name, ref_version, ref_skills = reference
     for label, (name, version, skills) in others:
@@ -940,8 +938,8 @@ def check_manifest_consistency(
 
 def validate_plugin(plugin_dir: Path, platform: str = "dual") -> Report:
     plugin_root = plugin_dir.expanduser().resolve()
-    issues: List[Issue] = []
-    skills_checked: List[str] = []
+    issues: list[Issue] = []
+    skills_checked: list[str] = []
 
     if platform not in {"dual", "claude", "codex", "zcode", "pi", "all"}:
         issues.append(
@@ -1030,7 +1028,7 @@ def validate_plugin(plugin_dir: Path, platform: str = "dual") -> Report:
             ),
         )
 
-    all_skill_roots: Set[Path] = (
+    all_skill_roots: set[Path] = (
         set(codex_result[3])
         | set(claude_result[3])
         | set(zcode_result[3])
@@ -1095,7 +1093,7 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def main(argv: Optional[Sequence[str]] = None) -> int:
+def main(argv: Sequence[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     report = validate_plugin(args.plugin_dir, args.platform)
 

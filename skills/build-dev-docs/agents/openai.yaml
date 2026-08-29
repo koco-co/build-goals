@@ -1,0 +1,7 @@
+interface:
+  display_name: "Build Dev Docs"
+  short_description: "建立、提取、维护大型项目文档并复核审查报告"
+  default_prompt: "使用 $build-dev-docs 按实际需要建立、提取、更新开发文档或复核审查报告；只创建有依据的文档，并仅在关键范围仍未确定时提问。"
+
+policy:
+  allow_implicit_invocation: false

@@ -25,7 +25,7 @@
 
 ## 可以修改的文件
 
-本 Skill 只能修改已确认位置的 `AGENTS.md` 与 `CLAUDE.md`。不得创建项目级 `docs/`、格式化器、lint、CI、测试 harness、安装脚本或示例工程。
+本 Skill 只能修改用户明确请求或已确认位置的 `AGENTS.md` 与 `CLAUDE.md`。不得创建项目级 `docs/`、格式化器、lint、CI、测试 harness、安装脚本或示例工程。
 
 若研究发现这些体系缺失，只把它们列为现状或后续建议；没有额外授权，不把建议变成本次修改。
 

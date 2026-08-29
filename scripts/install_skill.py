@@ -20,7 +20,6 @@ import subprocess
 import sys
 import tempfile
 from pathlib import Path
-from typing import Optional
 
 NAME_PATTERN = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
 PORTABLE_FRONTMATTER_FIELDS = {
@@ -31,7 +30,7 @@ PORTABLE_FRONTMATTER_FIELDS = {
     "metadata",
     "allowed-tools",
 }
-FULL_PACKAGE_ONLY_SKILLS = {"health-check"}
+FULL_PACKAGE_ONLY_SKILLS = {"audit-agent-setup"}
 
 
 class InstallError(RuntimeError):
@@ -72,8 +71,8 @@ def resolve_destination(
     skill_name: str,
     platform: str,
     scope: str,
-    project_dir: Optional[Path] = None,
-    home_dir: Optional[Path] = None,
+    project_dir: Path | None = None,
+    home_dir: Path | None = None,
 ) -> Path:
     if platform not in {"claude", "codex", "zcode", "pi"}:
         raise InstallError(f"不支持的平台：{platform}")
@@ -98,7 +97,7 @@ def run_validator(
     skill_dir: Path,
     profile: str,
     *,
-    plugin_root: Optional[Path] = None,
+    plugin_root: Path | None = None,
 ) -> None:
     if not validator.is_file():
         raise InstallError(f"找不到校验脚本：{validator}")
@@ -135,8 +134,8 @@ def install_skill(
     skill_name: str,
     platform: str,
     scope: str,
-    project_dir: Optional[Path] = None,
-    home_dir: Optional[Path] = None,
+    project_dir: Path | None = None,
+    home_dir: Path | None = None,
     force: bool = False,
     dry_run: bool = False,
 ) -> Path:
@@ -144,7 +143,7 @@ def install_skill(
         raise InstallError("Skill 名称只能包含小写字母、数字及分隔词组的单个连字符。")
     if skill_name in FULL_PACKAGE_ONLY_SKILLS:
         raise InstallError(
-            f"{skill_name} 只能随 build-goals 完整分发包使用，不能独立安装。"
+            f"{skill_name} 只能随 agent-build-kit 完整分发包使用，不能独立安装。"
         )
 
     repo_root = repo_root.expanduser().resolve()
@@ -177,7 +176,7 @@ def install_skill(
 
     run_validator(validator, source, "dual", plugin_root=repo_root)
 
-    temp_parent: Optional[Path] = None
+    temp_parent: Path | None = None
     if not dry_run:
         destination.parent.mkdir(parents=True, exist_ok=True)
         temp_parent = destination.parent
@@ -217,7 +216,7 @@ def install_skill(
         if dry_run:
             return destination
 
-        backup: Optional[Path] = None
+        backup: Path | None = None
         if destination.exists():
             backup = destination.with_name(f".{destination.name}.backup-{os.getpid()}")
             if backup.exists():

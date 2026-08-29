@@ -1,0 +1,29 @@
+{
+  "skill": "build-readme",
+  "cases": [
+    {
+      "id": "trigger-missing-readme",
+      "kind": "should_trigger",
+      "prompt": "根据这个仓库的真实功能创建 README.md。",
+      "expected": ["读取仓库事实", "直接实施明确请求", "验证 README"]
+    },
+    {
+      "id": "exclude-general-doc",
+      "kind": "should_not_trigger",
+      "prompt": "润色 docs/design.md 这一段架构说明。",
+      "expected": ["不是 README 工作", "不修改普通文档"]
+    },
+    {
+      "id": "behavior-standard-markdown",
+      "kind": "behavior",
+      "prompt": "把 README 改成简洁的标准 GitHub Markdown。",
+      "expected": ["不强制居中 HTML 或花体 Unicode", "只保留有信息价值的徽章和图表", "检查本地引用和资源安全"]
+    },
+    {
+      "id": "behavior-no-invented-facts",
+      "kind": "behavior",
+      "prompt": "补充安装、兼容性、测试状态和许可证说明。",
+      "expected": ["每项结论可追溯", "区分静态发现与实际验证", "不猜测许可证或支持状态"]
+    }
+  ]
+}

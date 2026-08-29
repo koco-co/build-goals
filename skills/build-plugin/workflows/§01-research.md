@@ -8,7 +8,7 @@
 
 对新建任务检查目标目录；对升级或迁移任务完整检查：
 
-- `.claude-plugin/plugin.json`、`.codex-plugin/plugin.json` 与存在的其他平台 Manifest（如 `.zcode-plugin/plugin.json`）；
+- `.claude-plugin/plugin.json`、`.codex-plugin/plugin.json`、`.zcode-plugin/plugin.json` 与 Pi 使用的根 `package.json`（按目标平台读取）；
 - `skills/`、`agents/`、`hooks/`、`.mcp.json`、`.app.json`、UI、脚本和测试；
 - Marketplace、安装脚本、CI、版本和发布配置；
 - 现有 CLI、公共模块和可复用校验器；
@@ -22,9 +22,10 @@
 
 - Claude Code：Manifest、组件目录、命名空间、权限、缓存、共享文件、安装和验证；
 - Codex：Manifest、Skills、MCP、Hooks、Marketplace、调用策略和安装方式。
-- ZCode：Manifest 探测顺序、组件路径校验、Skill Frontmatter 识别键、Marketplace 来源与客户端安装方式。
+- ZCode：Manifest 探测顺序、组件路径校验、Skill Frontmatter 识别键、Marketplace 来源与客户端安装方式；
+- Pi：`package.json` 的 `pi.skills`、Package 发现方式、Skill Frontmatter、Git/npm/本地安装、`pi list` 与交互会话验证。
 
-平台规范可能变化，实施前以当前官方文档和本地客户端行为为准。其他 Coding Agent 只记录为后续项。
+平台规范可能变化，实施前以当前官方文档和可用的本地客户端行为为准。其他 Coding Agent 只记录为后续项。
 
 ## Phase 4：整理结果
 

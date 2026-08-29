@@ -6,7 +6,6 @@ import tempfile
 import unittest
 from pathlib import Path
 
-
 REPO_ROOT = Path(__file__).resolve().parents[1]
 RETIRED_SKILLS = ("build-prd", "vibe-coding")
 
@@ -61,16 +60,21 @@ class RetiredSkillsTests(unittest.TestCase):
                             sys.executable,
                             str(REPO_ROOT / "scripts/install_skill.py"),
                             name,
-                            "--platform", platform,
-                            "--scope", "project",
-                            "--project-dir", temp,
+                            "--platform",
+                            platform,
+                            "--scope",
+                            "project",
+                            "--project-dir",
+                            temp,
                         ],
                         cwd=REPO_ROOT,
                         capture_output=True,
                         text=True,
                         check=False,
                     )
-                    self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+                    self.assertEqual(
+                        result.returncode, 1, result.stdout + result.stderr
+                    )
                     self.assertIn("找不到 Skill 源目录", result.stderr)
                     self.assertEqual(list(Path(temp).iterdir()), [])
 

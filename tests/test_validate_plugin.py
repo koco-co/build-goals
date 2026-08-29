@@ -119,9 +119,9 @@ class ValidatePluginTests(unittest.TestCase):
         self.assertIn("skills/build-plugin", result.stdout)
         self.assertIn("skills/build-readme", result.stdout)
         self.assertIn("skills/build-agents-md", result.stdout)
-        self.assertIn("skills/build-docs", result.stdout)
-        self.assertIn("skills/health-check", result.stdout)
-        self.assertIn("skills/shape-idea", result.stdout)
+        self.assertIn("skills/build-dev-docs", result.stdout)
+        self.assertIn("skills/audit-agent-setup", result.stdout)
+        self.assertIn("skills/clarify-idea", result.stdout)
         self.assertIn("skills/handoff", result.stdout)
 
     def test_build_plugin_templates_and_rules_are_standalone_safe(self) -> None:
@@ -165,9 +165,13 @@ class ValidatePluginTests(unittest.TestCase):
         implementation = (skill / "workflows" / "§05-implementation.md").read_text(
             encoding="utf-8"
         )
-        self.assertIn("<build-plugin-skill-dir>/scripts/sync_shared_files.py", implementation)
+        self.assertIn(
+            "<build-plugin-skill-dir>/scripts/sync_shared_files.py", implementation
+        )
         self.assertIn("--root <plugin-root> --write", implementation)
-        self.assertEqual(implementation.count("sync_shared_files.py --root <plugin-root>"), 2)
+        self.assertEqual(
+            implementation.count("sync_shared_files.py --root <plugin-root>"), 2
+        )
         self.assertNotIn("python3 skills/build-plugin/", implementation)
 
         design = (skill / "workflows" / "§03-design.md").read_text(encoding="utf-8")
@@ -549,8 +553,8 @@ class ValidatePluginTests(unittest.TestCase):
         for excluded in (
             "## 开始修改前",
             "## 完成后的发布确认",
-            "claude plugin marketplace update build-goals",
-            "codex plugin marketplace upgrade build-goals --json",
+            "claude plugin marketplace update agent-build-kit",
+            "codex plugin marketplace upgrade agent-build-kit --json",
             "所有 Skill 仅允许显式调用",
         ):
             with self.subTest(excluded=excluded):
@@ -596,9 +600,7 @@ class ValidatePluginTests(unittest.TestCase):
     def test_repository_release_versions_are_synchronized(self) -> None:
         manifests = [
             json.loads(
-                REPO_ROOT.joinpath(directory, "plugin.json").read_text(
-                    encoding="utf-8"
-                )
+                REPO_ROOT.joinpath(directory, "plugin.json").read_text(encoding="utf-8")
             )
             for directory in (
                 ".claude-plugin",
@@ -614,11 +616,38 @@ class ValidatePluginTests(unittest.TestCase):
         package = json.loads(
             REPO_ROOT.joinpath("package.json").read_text(encoding="utf-8")
         )
+        marketplace_plugin = marketplace["plugins"][0]
+        codex_marketplace = json.loads(
+            REPO_ROOT.joinpath(".agents", "plugins", "marketplace.json").read_text(
+                encoding="utf-8"
+            )
+        )
+
         versions = {manifest["version"] for manifest in manifests}
-        versions.update((marketplace["plugins"][0]["version"], package["version"]))
-        self.assertEqual(versions, {"2.4.0"})
-        names = {manifest["name"] for manifest in manifests}
-        self.assertEqual(names, {"build-goals"})
+        versions.update((marketplace_plugin["version"], package["version"]))
+        self.assertEqual(versions, {"3.0.0"})
+
+        identities = [*manifests, marketplace_plugin, package]
+        self.assertEqual({item["name"] for item in identities}, {"agent-build-kit"})
+        self.assertEqual({item["license"] for item in identities}, {"MIT"})
+        self.assertEqual(
+            {item["description"] for item in identities},
+            {
+                "Clarify ideas and build, audit, and maintain Agent Skills, "
+                "plugins, README, project instructions, and developer documentation."
+            },
+        )
+        self.assertEqual(
+            {manifest["homepage"] for manifest in manifests} | {package["homepage"]},
+            {"https://github.com/koco-co/agent-build-kit"},
+        )
+        self.assertEqual(
+            codex_marketplace["interface"]["displayName"], "Agent Build Kit"
+        )
+        self.assertEqual(
+            manifests[0]["displayName"],
+            "Agent Build Kit",
+        )
 
     def test_claude_marketplace_manifest_is_allowed(self) -> None:
         with tempfile.TemporaryDirectory() as temp:

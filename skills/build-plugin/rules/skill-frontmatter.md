@@ -36,7 +36,7 @@ Frontmatter 只承载目标平台会读取的元数据和运行策略。每个�
 
 - 允许模型调用时，优先在跨平台 `description` 中写清适用场景、排除条件和相邻 Skill 边界；
 - 仅限用户调用时，由平台配置限制调用，不在正文重复权限说明；
-- 调用策略变化属于行为变化，必须取得设计确认并验证应触发与不应触发场景；
+- 调用策略变化属于行为变化，必须来自明确需求或已确认设计，并验证应触发与不应触发场景；
 - 多平台 Skill 不依赖 Claude Code 的 `when_to_use` 承担唯一触发语义；ZCode 会把 `when_to_use` 与截断后的 `description` 一并交给模型；Pi 读取 `disable-model-invocation`，并忽略其他不识别的 Frontmatter 字段。
 
 ## 3. `compatibility`

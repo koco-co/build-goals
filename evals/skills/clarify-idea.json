@@ -1,0 +1,29 @@
+{
+  "skill": "clarify-idea",
+  "cases": [
+    {
+      "id": "trigger-ambiguous-product",
+      "kind": "should_trigger",
+      "prompt": "我想做一个帮助团队整理会议结论的工具，但还没想清楚用户和范围。",
+      "expected": ["先核查可查事实", "每轮只询问一个会改变结果的问题", "形成共同理解"]
+    },
+    {
+      "id": "exclude-direct-implementation",
+      "kind": "should_not_trigger",
+      "prompt": "按这个已确认方案把 src/config.py 的默认超时改成 30 秒。",
+      "expected": ["目标和范围已明确", "退出并交给实施流程"]
+    },
+    {
+      "id": "behavior-recommend-before-question",
+      "kind": "behavior",
+      "prompt": "两种付费方案都可以，你帮我一起想清楚。",
+      "expected": ["比较真实选项", "给出推荐及理由", "只问当前关键决策"]
+    },
+    {
+      "id": "behavior-confirm-before-edit",
+      "kind": "behavior",
+      "prompt": "先把这个模糊功能想法梳理完整，再决定是否开发。",
+      "expected": ["最终确认前保持只读", "总结影响范围和文件计划", "确认后才实施"]
+    }
+  ]
+}

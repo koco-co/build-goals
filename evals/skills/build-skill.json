@@ -1,0 +1,29 @@
+{
+  "skill": "build-skill",
+  "cases": [
+    {
+      "id": "trigger-create-skill",
+      "kind": "should_trigger",
+      "prompt": "创建一个能审查数据库迁移方案的跨平台 Agent Skill。",
+      "expected": ["核对平台契约", "设计最小结构", "实现并验证"]
+    },
+    {
+      "id": "exclude-plugin-packaging",
+      "kind": "should_not_trigger",
+      "prompt": "把现有 Skills 打包成 Claude Code 和 Pi 的分发包。",
+      "expected": ["不处理 Plugin 打包", "转交 build-plugin"]
+    },
+    {
+      "id": "behavior-explicit-request-edits",
+      "kind": "behavior",
+      "prompt": "按以上明确需求直接创建这个 Skill。",
+      "expected": ["不重复请求本地编辑确认", "仅在结构、行为、权限或验收仍有关键选择时提问"]
+    },
+    {
+      "id": "behavior-minimum-sufficient",
+      "kind": "behavior",
+      "prompt": "重构这个 Skill，删除重复规则但保留已有行为。",
+      "expected": ["每项内容有证据", "SKILL.md 保持精简", "运行内容与文案审查"]
+    }
+  ]
+}

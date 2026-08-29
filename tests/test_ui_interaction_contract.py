@@ -4,14 +4,15 @@ import json
 import unittest
 from pathlib import Path
 
-
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
 class UiInteractionContractTests(unittest.TestCase):
     def test_obsidian_learning_skill_is_completely_removed(self) -> None:
         self.assertFalse(REPO_ROOT.joinpath("skills", "obsidian-learn-topic").exists())
-        self.assertFalse(REPO_ROOT.joinpath("tests", "test_obsidian_learn_topic.py").exists())
+        self.assertFalse(
+            REPO_ROOT.joinpath("tests", "test_obsidian_learn_topic.py").exists()
+        )
 
         public_files = (
             REPO_ROOT / "README.md",
@@ -26,30 +27,32 @@ class UiInteractionContractTests(unittest.TestCase):
                 self.assertNotIn("technical-learning", text)
                 self.assertNotIn("technical learning", text.lower())
 
-    def test_shape_idea_keeps_its_own_ui_preview_resources(self) -> None:
-        shape = REPO_ROOT.joinpath("skills", "shape-idea", "SKILL.md").read_text(
+    def test_clarify_idea_keeps_its_own_ui_preview_resources(self) -> None:
+        clarify = REPO_ROOT.joinpath("skills", "clarify-idea", "SKILL.md").read_text(
             encoding="utf-8"
         )
         manifest = json.loads(
             REPO_ROOT.joinpath(".plugin-shared-files.json").read_text(encoding="utf-8")
         )
-        self.assertIn("rules/ui-interaction-preview.md", shape)
-        self.assertIn("只保留在对话", shape)
+        self.assertIn("rules/ui-interaction-preview.md", clarify)
+        self.assertIn("只保留在对话", clarify)
         sources = {item["source"] for item in manifest["mirrors"]}
         for relative in (
             "rules/ui-interaction-preview.md",
             "templates/ui-interaction-preview.template.md",
         ):
-            self.assertTrue(REPO_ROOT.joinpath("skills", "shape-idea", relative).is_file())
-            self.assertNotIn(f"skills/shape-idea/{relative}", sources)
+            self.assertTrue(
+                REPO_ROOT.joinpath("skills", "clarify-idea", relative).is_file()
+            )
+            self.assertNotIn(f"skills/clarify-idea/{relative}", sources)
 
     def test_rule_covers_visible_and_invisible_state_changes(self) -> None:
         rule = REPO_ROOT.joinpath(
-            "skills", "shape-idea", "rules", "ui-interaction-preview.md"
+            "skills", "clarify-idea", "rules", "ui-interaction-preview.md"
         ).read_text(encoding="utf-8")
         template = REPO_ROOT.joinpath(
             "skills",
-            "shape-idea",
+            "clarify-idea",
             "templates",
             "ui-interaction-preview.template.md",
         ).read_text(encoding="utf-8")

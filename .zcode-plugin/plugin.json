@@ -1,13 +1,13 @@
 {
-  "name": "build-goals",
-  "version": "2.4.0",
-  "description": "Clarify goals and build, review, and maintain Agent Skills, plugins, and project documentation.",
+  "name": "agent-build-kit",
+  "version": "3.0.0",
+  "description": "Clarify ideas and build, audit, and maintain Agent Skills, plugins, README, project instructions, and developer documentation.",
   "author": {
     "name": "koco-co",
     "url": "https://github.com/koco-co"
   },
-  "homepage": "https://github.com/koco-co/build-goals",
-  "repository": "https://github.com/koco-co/build-goals",
+  "homepage": "https://github.com/koco-co/agent-build-kit",
+  "repository": "https://github.com/koco-co/agent-build-kit",
   "keywords": [
     "agent-skills",
     "zcode",
@@ -18,5 +18,6 @@
     "readme-generation",
     "agents-md"
   ],
-  "skills": "./skills/"
+  "skills": "./skills/",
+  "license": "MIT"
 }

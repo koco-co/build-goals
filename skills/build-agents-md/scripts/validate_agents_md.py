@@ -14,9 +14,9 @@ import os
 import re
 import sys
 import urllib.parse
+from collections.abc import Sequence
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import List, Optional, Sequence
 
 IGNORED_DIRECTORIES = {
     ".git",
@@ -59,7 +59,7 @@ REMOTE_SCHEMES = {
     "ssh",
     "tel",
 }
-CLAUDE_IMPORT_CONTENT = b"@AGENTS.md"
+CLAUDE_IMPORT_CONTENTS = {b"@AGENTS.md", b"@AGENTS.md\n", b"@AGENTS.md\r\n"}
 
 
 @dataclass(frozen=True)
@@ -74,14 +74,14 @@ class Issue:
 class Report:
     project_root: str
     agents_count: int
-    issues: List[Issue]
+    issues: list[Issue]
 
     @property
-    def errors(self) -> List[Issue]:
+    def errors(self) -> list[Issue]:
         return [issue for issue in self.issues if issue.severity == "error"]
 
     @property
-    def warnings(self) -> List[Issue]:
+    def warnings(self) -> list[Issue]:
         return [issue for issue in self.issues if issue.severity == "warning"]
 
     def to_dict(self) -> dict:
@@ -104,7 +104,7 @@ def display_path(path: Path, root: Path) -> str:
 
 
 def add_issue(
-    issues: List[Issue],
+    issues: list[Issue],
     severity: str,
     code: str,
     path: Path,
@@ -121,8 +121,8 @@ def add_issue(
     )
 
 
-def discover_agents_files(root: Path) -> List[Path]:
-    discovered: List[Path] = []
+def discover_agents_files(root: Path) -> list[Path]:
+    discovered: list[Path] = []
     for current, directories, files in os.walk(root, followlinks=False):
         directories[:] = sorted(
             directory
@@ -135,7 +135,7 @@ def discover_agents_files(root: Path) -> List[Path]:
     return sorted(discovered, key=lambda path: (len(path.parts), str(path)))
 
 
-def read_text(path: Path, root: Path, issues: List[Issue]) -> Optional[str]:
+def read_text(path: Path, root: Path, issues: list[Issue]) -> str | None:
     try:
         return path.read_text(encoding="utf-8")
     except (OSError, UnicodeError) as exc:
@@ -166,7 +166,7 @@ def validate_local_links(
     agents: Path,
     text: str,
     root: Path,
-    issues: List[Issue],
+    issues: list[Issue],
 ) -> None:
     for match in MARKDOWN_LINK_RE.finditer(mask_code(text)):
         raw_destination = link_destination(match.group(1))
@@ -200,7 +200,7 @@ def validate_placeholders(
     agents: Path,
     text: str,
     root: Path,
-    issues: List[Issue],
+    issues: list[Issue],
 ) -> None:
     for pattern in PLACEHOLDER_PATTERNS:
         match = pattern.search(text)
@@ -221,7 +221,7 @@ def validate_claude_pair(
     *,
     root: Path,
     strict: bool,
-    issues: List[Issue],
+    issues: list[Issue],
 ) -> None:
     claude = agents.with_name("CLAUDE.md")
     if not claude.exists() and not claude.is_symlink():
@@ -259,13 +259,13 @@ def validate_claude_pair(
         )
         return
 
-    if content != CLAUDE_IMPORT_CONTENT:
+    if content not in CLAUDE_IMPORT_CONTENTS:
         add_issue(
             issues,
             "error",
             "CLAUDE_IMPORT_CONTENT",
             claude,
-            "CLAUDE.md 必须只包含 @AGENTS.md，不得包含换行或其他内容。",
+            "CLAUDE.md 必须只有一行 @AGENTS.md；允许标准文件尾换行。",
             root,
         )
 
@@ -276,7 +276,7 @@ def validate_project(
     strict: bool = False,
 ) -> Report:
     root = project_root.resolve()
-    issues: List[Issue] = []
+    issues: list[Issue] = []
 
     if not root.is_dir():
         add_issue(
@@ -369,7 +369,7 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def main(argv: Optional[Sequence[str]] = None) -> int:
+def main(argv: Sequence[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     report = validate_project(
         args.project_root,

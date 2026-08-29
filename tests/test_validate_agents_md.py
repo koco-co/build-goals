@@ -112,7 +112,7 @@ class ValidateAgentsMdTests(unittest.TestCase):
 
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
-    def test_claude_import_rejects_trailing_newline(self) -> None:
+    def test_claude_import_accepts_standard_trailing_newline(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
             project = Path(temp)
             self.write_instruction_pair(project)
@@ -120,8 +120,7 @@ class ValidateAgentsMdTests(unittest.TestCase):
 
             result = self.run_validator(project, "--strict")
 
-            self.assertEqual(result.returncode, 1)
-            self.assertIn("CLAUDE_IMPORT_CONTENT", result.stdout)
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
     def test_claude_import_rejects_extra_content(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
@@ -239,8 +238,10 @@ class BuildAgentsMdContractTests(unittest.TestCase):
         self.assertIn("CLAUDE.md", contract)
         self.assertIn("@AGENTS.md", contract)
         self.assertIn("来源已确认、运行未验证", contract)
-        self.assertIn("不得在用户确认预览前写入", contract)
+        self.assertIn("明确的初始化、重构或修复请求不重复确认本地编辑", contract)
+        self.assertIn("仅审查或预览时保持只读", contract)
         self.assertIn("不得创建项目级 `docs/`", contract)
+        self.assertIn("标准文件尾换行可有可无", contract)
 
         for awkward in (
             "完整替换预览",

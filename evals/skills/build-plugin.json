@@ -1,0 +1,29 @@
+{
+  "skill": "build-plugin",
+  "cases": [
+    {
+      "id": "trigger-four-platform-package",
+      "kind": "should_trigger",
+      "prompt": "把这些 Skills 打包为 Claude Code、Codex、ZCode Plugin 和 Pi Package。",
+      "expected": ["核对四个平台契约", "保持一份核心内容", "分别验证 Manifest 和安装路径"]
+    },
+    {
+      "id": "exclude-standalone-skill",
+      "kind": "should_not_trigger",
+      "prompt": "只创建一个项目级 Skill，不需要安装或分发。",
+      "expected": ["退出 Plugin 流程", "转交 build-skill"]
+    },
+    {
+      "id": "behavior-pi-research",
+      "kind": "behavior",
+      "prompt": "现有 Claude Plugin 需要增加 Pi 分发。",
+      "expected": ["研究 package.json 的 pi.skills", "验证 Git/npm/本地安装方式", "记录 pi list 与真实会话状态"]
+    },
+    {
+      "id": "behavior-delivery-permissions",
+      "kind": "behavior",
+      "prompt": "升级分发配置并完成本地验证。",
+      "expected": ["明确请求授权范围内本地编辑", "commit、push、发布和本地更新分别授权"]
+    }
+  ]
+}

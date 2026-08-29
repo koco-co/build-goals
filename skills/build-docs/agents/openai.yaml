@@ -1,7 +1,0 @@
-interface:
-  display_name: "Build Docs"
-  short_description: "建立、提取、维护大型项目文档并复核审查报告"
-  default_prompt: "使用 $build-docs，根据输入选择文档建立、提取、更新或审查报告复核分支，并遵循对应的确认与交付流程。"
-
-policy:
-  allow_implicit_invocation: false

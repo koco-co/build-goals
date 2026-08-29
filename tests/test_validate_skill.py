@@ -115,7 +115,9 @@ class ValidateSkillTests(unittest.TestCase):
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
             self.assertIn("PASS", result.stdout)
 
-    def test_pi_profile_accepts_supported_policy_and_ignored_source_fields(self) -> None:
+    def test_pi_profile_accepts_supported_policy_and_ignored_source_fields(
+        self,
+    ) -> None:
         with tempfile.TemporaryDirectory() as temp:
             skill_dir = self.write_skill(
                 Path(temp),
@@ -306,8 +308,8 @@ class ValidateSkillTests(unittest.TestCase):
             "build-readme",
             "build-skill",
             "handoff",
-            "health-check",
-            "shape-idea",
+            "audit-agent-setup",
+            "clarify-idea",
         }
 
         for skill_md in sorted(REPO_ROOT.glob("skills/*/SKILL.md")):
@@ -317,7 +319,8 @@ class ValidateSkillTests(unittest.TestCase):
                 encoding="utf-8"
             )
             with self.subTest(skill=name, policy="confirmed"):
-                if name == "build-docs":
+                self.assertIn("license: MIT", text.split("---", 2)[1])
+                if name == "build-dev-docs":
                     self.assertIn("disable-model-invocation: true", text)
                     self.assertIn("allow_implicit_invocation: false", adapter)
                 else:
@@ -446,13 +449,13 @@ class ValidateSkillTests(unittest.TestCase):
     def test_shipped_compatibility_describes_only_hard_requirements(self) -> None:
         expected = {
             "build-agents-md": "需要 Python 3.9+ 运行内置校验脚本。",
-            "build-docs": None,
+            "build-dev-docs": None,
             "build-plugin": "需要访问互联网；内置静态校验脚本需要 Python 3.9+。",
             "build-readme": "需要 Python 3.9+ 运行内置校验脚本。",
             "build-skill": "需要访问互联网；内置静态校验脚本需要 Python 3.9+。",
             "handoff": None,
-            "health-check": None,
-            "shape-idea": None,
+            "audit-agent-setup": None,
+            "clarify-idea": None,
         }
         prohibited = ("当前适配", "目前适配", "目前仅适配")
 
@@ -471,14 +474,14 @@ class ValidateSkillTests(unittest.TestCase):
 
     def test_behavior_changed_skill_versions_are_updated(self) -> None:
         expected = {
-            "build-agents-md": 'version: "3.0.3"',
-            "build-docs": 'version: "1.2.1"',
-            "build-plugin": 'version: "2.4.0"',
-            "build-readme": 'version: "2.2.2"',
-            "build-skill": 'version: "2.3.0"',
+            "build-agents-md": 'version: "4.0.0"',
+            "build-dev-docs": 'version: "3.0.0"',
+            "build-plugin": 'version: "3.0.0"',
+            "build-readme": 'version: "3.0.0"',
+            "build-skill": 'version: "3.0.0"',
             "handoff": 'version: "2.1.2"',
-            "health-check": 'version: "2.1.0"',
-            "shape-idea": 'version: "2.3.4"',
+            "audit-agent-setup": 'version: "3.0.0"',
+            "clarify-idea": 'version: "3.0.0"',
         }
 
         for name, version_line in expected.items():
@@ -488,15 +491,15 @@ class ValidateSkillTests(unittest.TestCase):
                 )
                 self.assertIn(version_line, text)
 
-    def test_shape_idea_publishes_an_explicit_implementation_gate(self) -> None:
-        shape = REPO_ROOT.joinpath("skills", "shape-idea", "SKILL.md").read_text(
+    def test_clarify_idea_publishes_an_explicit_implementation_gate(self) -> None:
+        clarify = REPO_ROOT.joinpath("skills", "clarify-idea", "SKILL.md").read_text(
             encoding="utf-8"
         )
         adapter = REPO_ROOT.joinpath(
-            "skills", "shape-idea", "agents", "openai.yaml"
+            "skills", "clarify-idea", "agents", "openai.yaml"
         ).read_text(encoding="utf-8")
         ui_rule = REPO_ROOT.joinpath(
-            "skills", "shape-idea", "rules", "ui-interaction-preview.md"
+            "skills", "clarify-idea", "rules", "ui-interaction-preview.md"
         ).read_text(encoding="utf-8")
 
         for required in (
@@ -512,20 +515,22 @@ class ValidateSkillTests(unittest.TestCase):
             "rules/ui-interaction-preview.md",
         ):
             with self.subTest(required=required):
-                self.assertIn(required, shape)
+                self.assertIn(required, clarify)
 
         self.assertIn("确认前不得改动项目内容", adapter)
         self.assertIn("确认是否开始实施", adapter)
         self.assertIn("共同理解得到最终确认前", ui_rule)
         self.assertIn("不得改动项目内容", ui_rule)
 
-    def test_shape_idea_combines_research_and_reports_scope_before_confirmation(self) -> None:
-        shape = REPO_ROOT.joinpath("skills", "shape-idea", "SKILL.md").read_text(
+    def test_clarify_idea_combines_research_and_reports_scope_before_confirmation(
+        self,
+    ) -> None:
+        clarify = REPO_ROOT.joinpath("skills", "clarify-idea", "SKILL.md").read_text(
             encoding="utf-8"
         )
         steps = {
             line.split(". ", 1)[0]: line.split(". ", 1)[1]
-            for line in shape.splitlines()
+            for line in clarify.splitlines()
             if line[:1].isdigit() and ". " in line
         }
 
@@ -614,9 +619,7 @@ class ValidateSkillTests(unittest.TestCase):
             ("build-readme", "workflows/§02-preview.md"): (
                 "templates/readme-preview.template.md",
             ),
-            ("build-readme", "workflows/§03-authoring.md"): (
-                "rules/github-style.md",
-            ),
+            ("build-readme", "workflows/§03-authoring.md"): ("rules/github-style.md",),
             ("build-readme", "workflows/§04-validation.md"): (
                 "checklists/semantic-acceptance.md",
             ),
@@ -652,6 +655,42 @@ class ValidateSkillTests(unittest.TestCase):
             self.assertIn("平台契约", text)
             self.assertIn("可复现缺陷", text)
             self.assertIn("明确安全要求", text)
+
+    def test_explicit_build_requests_do_not_require_redundant_edit_confirmation(
+        self,
+    ) -> None:
+        expected_phrases = {
+            "build-agents-md": "直接实施",
+            "build-plugin": "已授权对应分发文件的本地编辑",
+            "build-readme": "已授权对应 README 文件的本地编辑",
+            "build-skill": "已授权对应 Skill 文件的本地编辑",
+            "build-dev-docs": "已授权对应文档的本地编辑",
+        }
+        for name, phrase in expected_phrases.items():
+            with self.subTest(skill=name):
+                contract = "\n".join(
+                    path.read_text(encoding="utf-8")
+                    for path in REPO_ROOT.joinpath("skills", name).rglob("*.md")
+                )
+                self.assertIn(phrase, contract)
+                self.assertIn("未决", contract)
+                self.assertIn("确认", contract)
+
+    def test_build_plugin_research_covers_pi_as_a_first_class_platform(self) -> None:
+        root = REPO_ROOT / "skills" / "build-plugin"
+        research = root.joinpath("workflows", "§01-research.md").read_text(
+            encoding="utf-8"
+        )
+        clarification = root.joinpath("workflows", "§02-clarification.md").read_text(
+            encoding="utf-8"
+        )
+        design_review = root.joinpath(
+            "checklists", "plugin-design-review.md"
+        ).read_text(encoding="utf-8")
+        for phrase in ("`pi.skills`", "Git/npm/本地安装", "`pi list`", "交互会话验证"):
+            self.assertIn(phrase, research)
+        self.assertIn("Claude Code、Codex、ZCode、Pi", clarification)
+        self.assertIn("Pi 的根 `package.json`", design_review)
 
     def test_build_agents_md_defines_nested_orchestration_contract(self) -> None:
         skill_root = REPO_ROOT / "skills" / "build-agents-md"

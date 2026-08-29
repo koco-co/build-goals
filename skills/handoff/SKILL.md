@@ -1,6 +1,7 @@
 ---
 name: handoff
 description: 把当前会话整理为可复制的临时交接文档；需要切换会话、客户端或环境时使用，不用于普通总结。
+license: MIT
 argument-hint: "下一次会话将用于什么？"
 metadata:
   author: koco-co

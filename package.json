@@ -1,7 +1,7 @@
 {
-  "name": "build-goals",
-  "version": "2.4.0",
-  "description": "Clarify goals and build, review, and maintain Agent Skills, plugins, and project documentation.",
+  "name": "agent-build-kit",
+  "version": "3.0.0",
+  "description": "Clarify ideas and build, audit, and maintain Agent Skills, plugins, README, project instructions, and developer documentation.",
   "private": true,
   "keywords": [
     "pi-package",
@@ -14,14 +14,15 @@
     "readme-generation",
     "agents-md"
   ],
-  "homepage": "https://github.com/koco-co/build-goals",
+  "homepage": "https://github.com/koco-co/agent-build-kit",
   "repository": {
     "type": "git",
-    "url": "https://github.com/koco-co/build-goals.git"
+    "url": "https://github.com/koco-co/agent-build-kit.git"
   },
   "pi": {
     "skills": [
       "./skills"
     ]
-  }
+  },
+  "license": "MIT"
 }

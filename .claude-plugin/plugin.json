@@ -1,15 +1,15 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
-  "name": "build-goals",
-  "displayName": "Build Goals",
-  "version": "2.4.0",
-  "description": "Clarify goals and build, review, and maintain Agent Skills, plugins, and project documentation.",
+  "name": "agent-build-kit",
+  "displayName": "Agent Build Kit",
+  "version": "3.0.0",
+  "description": "Clarify ideas and build, audit, and maintain Agent Skills, plugins, README, project instructions, and developer documentation.",
   "author": {
     "name": "koco-co",
     "url": "https://github.com/koco-co"
   },
-  "homepage": "https://github.com/koco-co/build-goals",
-  "repository": "https://github.com/koco-co/build-goals",
+  "homepage": "https://github.com/koco-co/agent-build-kit",
+  "repository": "https://github.com/koco-co/agent-build-kit",
   "keywords": [
     "agent-skills",
     "claude-code",
@@ -20,5 +20,6 @@
     "readme-generation",
     "agents-md"
   ],
-  "skills": "./skills/"
+  "skills": "./skills/",
+  "license": "MIT"
 }

@@ -1,0 +1,29 @@
+{
+  "skill": "build-dev-docs",
+  "cases": [
+    {
+      "id": "trigger-cross-module-docs",
+      "kind": "should_trigger",
+      "prompt": "为这个多模块项目补齐架构、测试和环境搭建文档。",
+      "expected": ["按实际缺口选择文档", "沿用现有路径", "不强制完整文档套件"]
+    },
+    {
+      "id": "exclude-small-edit",
+      "kind": "should_not_trigger",
+      "prompt": "把 docs/api.md 里的一个错别字改掉。",
+      "expected": ["小问题或单篇润色不触发", "退出"]
+    },
+    {
+      "id": "behavior-adaptive-set",
+      "kind": "behavior",
+      "prompt": "提取这个已有项目真正缺少的开发文档。",
+      "expected": ["选择最小文档集合", "AGENT_BRIEF 和 CHANGELOG 仅在有依据时创建", "未选择职责不算失败"]
+    },
+    {
+      "id": "behavior-review-no-auto-commit",
+      "kind": "behavior",
+      "prompt": "复核这份文档审查报告，并修订成立的问题。",
+      "expected": ["逐项给出证据和取舍", "明确修订请求可编辑", "commit 和 push 另行授权"]
+    }
+  ]
+}

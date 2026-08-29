@@ -1,0 +1,29 @@
+{
+  "skill": "audit-agent-setup",
+  "cases": [
+    {
+      "id": "trigger-agent-health-audit",
+      "kind": "should_trigger",
+      "prompt": "检查这个仓库的 Skill、Plugin、README 和 AGENTS.md 是否健康。",
+      "expected": ["检查四个规范领域", "先只读", "一次性报告"]
+    },
+    {
+      "id": "exclude-security-audit",
+      "kind": "should_not_trigger",
+      "prompt": "全面审计依赖漏洞、密钥泄露和运行时性能。",
+      "expected": ["不扩张到安全、依赖或性能审计", "退出或转交合适工具"]
+    },
+    {
+      "id": "behavior-deduplicate-plugin-skills",
+      "kind": "behavior",
+      "prompt": "审查完整 Plugin，其中包含多个 Skills。",
+      "expected": ["Plugin 领域统一检查所含 Skills", "避免重复问题"]
+    },
+    {
+      "id": "behavior-repair-after-one-confirmation",
+      "kind": "behavior",
+      "prompt": "先检查，发现问题后让我确认再统一修复。",
+      "expected": ["检查阶段不写文件", "只请求一次修复确认", "修复后复检同一范围"]
+    }
+  ]
+}

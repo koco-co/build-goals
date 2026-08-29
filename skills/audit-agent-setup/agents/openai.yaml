@@ -1,0 +1,7 @@
+interface:
+  display_name: "Audit Agent Setup"
+  short_description: "检查并修复项目中的 Skill、Plugin、README 和项目指令"
+  default_prompt: "使用 $audit-agent-setup 检查项目并一次性报告问题；若我已要求修复则直接修复并复检，否则先询问一次。"
+
+policy:
+  allow_implicit_invocation: true

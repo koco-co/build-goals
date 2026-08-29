@@ -1,0 +1,29 @@
+{
+  "skill": "handoff",
+  "cases": [
+    {
+      "id": "trigger-session-transfer",
+      "kind": "should_trigger",
+      "prompt": "我要换到另一个会话，请把当前进度整理成可复制的交接文档。",
+      "expected": ["提取目标、决策、进度和阻塞", "生成下一会话可直接使用的提示词"]
+    },
+    {
+      "id": "exclude-ordinary-summary",
+      "kind": "should_not_trigger",
+      "prompt": "用三句话总结一下刚才的回答。",
+      "expected": ["普通总结不触发交接流程", "直接简要回答"]
+    },
+    {
+      "id": "behavior-no-unverified-completion",
+      "kind": "behavior",
+      "prompt": "交接当前尚未跑完测试的重构任务。",
+      "expected": ["区分已完成与进行中", "测试标为未验证", "保留下一步命令"]
+    },
+    {
+      "id": "behavior-copyable-prompt",
+      "kind": "behavior",
+      "prompt": "生成能让下一个 Agent 继续工作的交接。",
+      "expected": ["包含关键路径和约束", "提示词可独立复制", "不把对话摘要写入项目"]
+    }
+  ]
+}

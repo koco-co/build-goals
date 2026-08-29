@@ -12,34 +12,14 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 VALIDATOR = REPO_ROOT / "skills" / "build-readme" / "scripts" / "validate_readme.py"
 
 VALID_README = """
-<div align="center">
+# Build Flow
 
-# 𝓑𝓾𝓲𝓵𝓭 𝓕𝓵𝓸𝔀
+Build Flow turns repository facts into verifiable documentation.
 
-<p align="center">从想法到可验证交付 · 𝑭𝒓𝒐𝒎 𝑰𝒅𝒆𝒂 𝒕𝒐 𝑽𝒆𝒓𝒊𝒇𝒊𝒂𝒃𝒍𝒆 𝑫𝒆𝒍𝒊𝒗𝒆𝒓𝒚</p>
+## Quick start
 
-[![Python](https://img.shields.io/badge/Python-3.9%2B-3776AB)](https://python.org)
-[![License](https://img.shields.io/badge/License-MIT-green)](https://opensource.org/license/mit)
-
-</div>
-
-<a id="overview"></a>
-<h2 align="center">𝑶𝒗𝒆𝒓𝒗𝒊𝒆𝒘 · 简介</h2>
-
-<p><b>Build Flow</b> 用于把项目事实整理成可执行文档。</p>
-
-- 先读取仓库事实。
-- 再生成可验证的 <b>README</b>。
-
-<a id="workflow"></a>
-<h2 align="center">𝑾𝒐𝒓𝒌𝒇𝒍𝒐𝒘 · 流程</h2>
-
-```mermaid
-flowchart LR
-    A[Research] --> B[Preview]
-    B --> C[Confirm]
-    C --> D[Write]
-    D --> E[Validate]
+```bash
+python3 validate.py README.md
 ```
 """
 
@@ -61,289 +41,143 @@ class ValidateReadmeTests(unittest.TestCase):
             capture_output=True,
         )
 
-    def test_valid_readme_passes(self) -> None:
+    def assert_fails_with(self, text: str, code: str) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            result = self.run_validator(self.write_readme(Path(temp), text))
+            self.assertEqual(result.returncode, 1)
+            self.assertIn(code, result.stdout)
+
+    def test_standard_markdown_readme_passes(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
             result = self.run_validator(self.write_readme(Path(temp)))
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
             self.assertIn("PASS", result.stdout)
 
-    def test_shipped_example_passes(self) -> None:
-        example = (
-            REPO_ROOT / "skills" / "build-readme" / "examples" / "readme.example.md"
-        )
-        example_text = example.read_text(encoding="utf-8")
-        self.assertIn("# 𝓑𝓾𝓲𝓵𝓭 𝓕𝓵𝓸𝔀", example_text)
-        self.assertIn(
-            "𝑭𝒓𝒐𝒎 𝑹𝒆𝒑𝒐𝒔𝒊𝒕𝒐𝒓𝒚 𝑭𝒂𝒄𝒕𝒔 𝒕𝒐 " "𝑽𝒆𝒓𝒊𝒇𝒊𝒂𝒃𝒍𝒆 𝑫𝒐𝒄𝒖𝒎𝒆𝒏𝒕𝒂𝒕𝒊𝒐𝒏",
-            example_text,
-        )
-        for heading in (
-            "𝑶𝒗𝒆𝒓𝒗𝒊𝒆𝒘",
-            "𝑾𝒐𝒓𝒌𝒇𝒍𝒐𝒘",
-            "𝑸𝒖𝒊𝒄𝒌 𝑺𝒕𝒂𝒓𝒕",
-            "𝑬𝒗𝒊𝒅𝒆𝒏𝒄𝒆",
-        ):
-            self.assertIn(heading, example_text)
+    def test_plain_and_formatted_markdown_are_both_allowed(self) -> None:
+        text = VALID_README + "\n**Important:** use *standard* Markdown.\n"
         with tempfile.TemporaryDirectory() as temp:
-            result = self.run_validator(self.write_readme(Path(temp), example_text))
+            result = self.run_validator(self.write_readme(Path(temp), text))
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
-    def test_plain_title_fails(self) -> None:
+    def test_forced_centering_and_unicode_decoration_are_not_required(self) -> None:
+        self.assertNotIn("<div", VALID_README)
+        self.assertNotRegex(VALID_README, r"[𝓐-𝔃]")
         with tempfile.TemporaryDirectory() as temp:
-            path = self.write_readme(
-                Path(temp), VALID_README.replace("𝓑𝓾𝓲𝓵𝓭 𝓕𝓵𝓸𝔀", "Build Flow")
-            )
-            result = self.run_validator(path)
-            self.assertEqual(result.returncode, 1)
-            self.assertIn("TITLE_SCRIPT", result.stdout)
+            result = self.run_validator(self.write_readme(Path(temp)))
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
-    def test_wrong_script_title_fails(self) -> None:
+    def test_title_is_required_and_unique(self) -> None:
+        self.assert_fails_with("No heading.\n", "TITLE_REQUIRED")
+        self.assert_fails_with(VALID_README + "\n# Second title\n", "TITLE_COUNT")
+
+    def test_unlabeled_and_unclosed_code_fences_fail(self) -> None:
+        self.assert_fails_with(
+            VALID_README.replace("```bash", "```", 1), "FENCE_LANGUAGE_REQUIRED"
+        )
+        self.assert_fails_with(VALID_README.rsplit("```", 1)[0], "FENCE_UNCLOSED")
+
+    def test_placeholder_fails_but_todo_in_prose_or_code_is_allowed(self) -> None:
+        self.assert_fails_with(
+            VALID_README + "\nTBD: write this later\n", "UNRESOLVED_CONTENT"
+        )
+        text = (
+            VALID_README
+            + "\nThe validator rejects standalone TODO markers.\n\n```text\nTODO\n```\n"
+        )
         with tempfile.TemporaryDirectory() as temp:
-            path = self.write_readme(
-                Path(temp),
-                VALID_README.replace("𝓑𝓾𝓲𝓵𝓭 𝓕𝓵𝓸𝔀", "𝒷𝓊𝒾𝒻𝒹 𝒡𝓁𝑜𝓊"),
-            )
-            result = self.run_validator(path)
-            self.assertEqual(result.returncode, 1)
-            self.assertIn("TITLE_SCRIPT", result.stdout)
-
-    def test_markdown_bold_italic_tagline_fails(self) -> None:
-        with tempfile.TemporaryDirectory() as temp:
-            path = self.write_readme(
-                Path(temp),
-                VALID_README.replace(
-                    '<p align="center">从想法到可验证交付 · 𝑭𝒓𝒐𝒎 𝑰𝒅𝒆𝒂 𝒕𝒐 𝑽𝒆𝒓𝒊𝒇𝒊𝒂𝒃𝒍𝒆 𝑫𝒆𝒍𝒊𝒗𝒆𝒓𝒚</p>',
-                    "***从想法到可验证交付***",
-                ),
-            )
-            result = self.run_validator(path)
-            self.assertEqual(result.returncode, 1)
-            self.assertIn("TAGLINE_STYLE", result.stdout)
-
-    def test_wrong_tagline_math_style_fails(self) -> None:
-        with tempfile.TemporaryDirectory() as temp:
-            path = self.write_readme(
-                Path(temp),
-                VALID_README.replace(
-                    "𝑭𝒓𝒐𝒎 𝑰𝒅𝒆𝒂 𝒕𝒐 𝑽𝒆𝒓𝒊𝒇𝒊𝒂𝒃𝒍𝒆 𝑫𝒆𝒍𝒊𝒗𝒆𝒓𝒚",
-                    "𝐹𝓇𝑜𝓂 𝐼𝒹𝑒𝒶 𝓉𝑜 𝒱𝑒𝓇𝒾𝒻𝒾𝒶𝒷𝓁𝑒 𝒟𝑒𝓁𝒾𝓋𝑒𝓇𝓍",
-                ),
-            )
-            result = self.run_validator(path)
-            self.assertEqual(result.returncode, 1)
-            self.assertIn("TAGLINE_DECORATION", result.stdout)
-
-    def test_markdown_section_heading_fails(self) -> None:
-        with tempfile.TemporaryDirectory() as temp:
-            path = self.write_readme(
-                Path(temp),
-                VALID_README.replace(
-                    '<h2 align="center">𝑶𝒗𝒆𝒓𝒗𝒊𝒆𝒘 · 简介</h2>',
-                    "## 简介",
-                ),
-            )
-            result = self.run_validator(path)
-            self.assertEqual(result.returncode, 1)
-            self.assertIn("SECTION_HEADING_STYLE", result.stdout)
-
-    def test_wrong_heading_math_style_fails_in_strict_mode(self) -> None:
-        with tempfile.TemporaryDirectory() as temp:
-            path = self.write_readme(
-                Path(temp),
-                VALID_README.replace("𝑶𝒗𝒆𝒓𝒗𝒊𝒆𝒘", "𝒪𝓋𝑒𝓇𝓋𝒾𝑒𝓌"),
-            )
-            result = self.run_validator(path)
-            self.assertEqual(result.returncode, 1)
-            self.assertIn("SECTION_DECORATION", result.stdout)
-
-    def test_plain_english_body_paragraph_fails(self) -> None:
-        with tempfile.TemporaryDirectory() as temp:
-            path = self.write_readme(
-                Path(temp), VALID_README + "\n<p>This paragraph is not italic.</p>\n"
-            )
-            result = self.run_validator(path)
-            self.assertEqual(result.returncode, 1)
-            self.assertIn("ENGLISH_MARKUP", result.stdout)
-
-    def test_markdown_italic_fails(self) -> None:
-        with tempfile.TemporaryDirectory() as temp:
-            path = self.write_readme(
-                Path(temp), VALID_README + "\n<p>_Plain English_</p>\n"
-            )
-            result = self.run_validator(path)
-            self.assertEqual(result.returncode, 1)
-            self.assertIn("MARKDOWN_ITALIC_FORBIDDEN", result.stdout)
-
-    def test_html_italic_fails(self) -> None:
-        for tag in ("i", "em"):
-            with self.subTest(tag=tag), tempfile.TemporaryDirectory() as temp:
-                path = self.write_readme(
-                    Path(temp), VALID_README + f"\n<p><{tag}>中文</{tag}></p>\n"
-                )
-                result = self.run_validator(path)
-                self.assertEqual(result.returncode, 1)
-                self.assertIn("HTML_ITALIC_FORBIDDEN", result.stdout)
-
-    def test_chinese_bold_fails(self) -> None:
-        with tempfile.TemporaryDirectory() as temp:
-            path = self.write_readme(
-                Path(temp), VALID_README + "\n<p><b>中文说明</b></p>\n"
-            )
-            result = self.run_validator(path)
-            self.assertEqual(result.returncode, 1)
-            self.assertIn("CHINESE_BOLD_FORBIDDEN", result.stdout)
-
-    def test_all_bold_syntaxes_fail(self) -> None:
-        variants = ("__Bold text__", "<strong>Bold text</strong>", "<b>中文文本</b>")
-        for variant in variants:
-            with self.subTest(variant=variant), tempfile.TemporaryDirectory() as temp:
-                path = self.write_readme(Path(temp), VALID_README + f"\n{variant}\n")
-                result = self.run_validator(path)
-                self.assertEqual(result.returncode, 1)
-                self.assertRegex(result.stdout, r"(BODY_BOLD|CHINESE_BOLD_FORBIDDEN)")
-
-    def test_english_bold_markup_passes(self) -> None:
-        with tempfile.TemporaryDirectory() as temp:
-            path = self.write_readme(
-                Path(temp), VALID_README + "\n<p><b>English Label</b></p>\n"
-            )
-            result = self.run_validator(path)
+            result = self.run_validator(self.write_readme(Path(temp), text))
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
     def test_malformed_html_fails(self) -> None:
-        with tempfile.TemporaryDirectory() as temp:
-            path = self.write_readme(
-                Path(temp), VALID_README + "\n<p><i>Broken paragraph</p>\n"
-            )
-            result = self.run_validator(path)
-            self.assertEqual(result.returncode, 1)
-            self.assertIn("HTML_TAG_MISMATCH", result.stdout)
+        self.assert_fails_with(
+            VALID_README + "\n<details><summary>More</summary>\n", "HTML_TAG_MISMATCH"
+        )
 
-    def test_literal_span_artifact_fails(self) -> None:
-        with tempfile.TemporaryDirectory() as temp:
-            path = self.write_readme(Path(temp), VALID_README + "\n`span`\n")
-            result = self.run_validator(path)
-            self.assertEqual(result.returncode, 1)
-            self.assertIn("MARKUP_ARTIFACT", result.stdout)
-
-    def test_duplicate_anchor_fails(self) -> None:
-        with tempfile.TemporaryDirectory() as temp:
-            path = self.write_readme(
-                Path(temp), VALID_README + '\n<a id="overview"></a>\n'
-            )
-            result = self.run_validator(path)
-            self.assertEqual(result.returncode, 1)
-            self.assertIn("ANCHOR_DUPLICATE", result.stdout)
-
-    def test_heading_without_anchor_fails(self) -> None:
-        with tempfile.TemporaryDirectory() as temp:
-            path = self.write_readme(
-                Path(temp), VALID_README.replace('<a id="overview"></a>\n', "", 1)
-            )
-            result = self.run_validator(path)
-            self.assertEqual(result.returncode, 1)
-            self.assertIn("SECTION_ANCHOR_REQUIRED", result.stdout)
-
-    def test_unlabeled_code_fence_fails(self) -> None:
-        with tempfile.TemporaryDirectory() as temp:
-            path = self.write_readme(
-                Path(temp), VALID_README.replace("```mermaid", "```", 1)
-            )
-            result = self.run_validator(path)
-            self.assertEqual(result.returncode, 1)
-            self.assertIn("FENCE_LANGUAGE_REQUIRED", result.stdout)
-
-    def test_missing_local_image_fails(self) -> None:
-        with tempfile.TemporaryDirectory() as temp:
-            path = self.write_readme(
-                Path(temp), VALID_README + "\n![Architecture](assets/missing.svg)\n"
-            )
-            result = self.run_validator(path)
-            self.assertEqual(result.returncode, 1)
-            self.assertIn("LOCAL_REF_MISSING", result.stdout)
-
-    def test_invalid_svg_fails(self) -> None:
+    def test_existing_local_reference_passes_and_missing_reference_fails(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
-            asset = root / "assets" / "broken.svg"
-            asset.parent.mkdir()
-            asset.write_text("<svg><broken>", encoding="utf-8")
-            path = self.write_readme(
-                root, VALID_README + "\n![Architecture](assets/broken.svg)\n"
+            root.joinpath("docs.md").write_text("# Docs\n", encoding="utf-8")
+            result = self.run_validator(
+                self.write_readme(root, VALID_README + "\n[Docs](docs.md)\n")
             )
-            result = self.run_validator(path)
-            self.assertEqual(result.returncode, 1)
-            self.assertIn("SVG_INVALID", result.stdout)
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assert_fails_with(
+            VALID_README + "\n[Docs](missing.md)\n", "LOCAL_REF_MISSING"
+        )
 
-    def test_unsafe_svg_fails(self) -> None:
+    def test_local_reference_cannot_escape_project_root(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
-            asset = root / "assets" / "unsafe.svg"
-            asset.parent.mkdir()
-            asset.write_text(
-                '<svg xmlns="http://www.w3.org/2000/svg">'
-                "<script>alert(1)</script>"
-                '<image href="https://tracker.example/pixel"/>'
-                "</svg>",
-                encoding="utf-8",
-            )
-            path = self.write_readme(
-                root, VALID_README + "\n![Architecture](assets/unsafe.svg)\n"
-            )
-            result = self.run_validator(path)
-            self.assertEqual(result.returncode, 1)
-            self.assertIn("SVG_UNSAFE", result.stdout)
+            outside = root.parent / "outside-readme-test.md"
+            outside.write_text("# Outside\n", encoding="utf-8")
+            try:
+                result = self.run_validator(
+                    self.write_readme(
+                        root, VALID_README + "\n[Outside](../outside-readme-test.md)\n"
+                    )
+                )
+                self.assertEqual(result.returncode, 1)
+                self.assertIn("LOCAL_REF_OUTSIDE", result.stdout)
+            finally:
+                outside.unlink(missing_ok=True)
 
-    def test_unresolved_placeholder_fails(self) -> None:
-        with tempfile.TemporaryDirectory() as temp:
-            path = self.write_readme(Path(temp), VALID_README + "\n<p><i>TBD</i></p>\n")
-            result = self.run_validator(path)
-            self.assertEqual(result.returncode, 1)
-            self.assertIn("UNRESOLVED_CONTENT", result.stdout)
+    def test_image_requires_alt_text(self) -> None:
+        self.assert_fails_with(
+            VALID_README + "\n![](https://example.com/image.png)\n",
+            "IMAGE_ALT_REQUIRED",
+        )
 
-    def test_image_without_alt_text_fails(self) -> None:
-        with tempfile.TemporaryDirectory() as temp:
-            path = self.write_readme(
-                Path(temp),
-                VALID_README + "\n![](https://example.com/architecture.svg)\n",
-            )
-            result = self.run_validator(path)
-            self.assertEqual(result.returncode, 1)
-            self.assertIn("IMAGE_ALT_REQUIRED", result.stdout)
-
-    def test_remote_image_hotlink_fails(self) -> None:
+    def test_remote_images_are_allowed_with_alt_text(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
             path = self.write_readme(
                 Path(temp),
                 VALID_README + "\n![Screenshot](https://example.com/screenshot.png)\n",
             )
             result = self.run_validator(path)
-            self.assertEqual(result.returncode, 1)
-            self.assertIn("REMOTE_IMAGE_HOTLINK", result.stdout)
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
-    def test_body_bold_fails(self) -> None:
-        with tempfile.TemporaryDirectory() as temp:
-            path = self.write_readme(
-                Path(temp), VALID_README + "\n<p>**Do not use bold.**</p>\n"
-            )
-            result = self.run_validator(path)
-            self.assertEqual(result.returncode, 1)
-            self.assertIn("BODY_BOLD", result.stdout)
+    def test_invalid_and_unsafe_svg_fail(self) -> None:
+        for body, code in (
+            ("<svg><broken>", "SVG_INVALID"),
+            (
+                '<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>',
+                "SVG_UNSAFE",
+            ),
+        ):
+            with self.subTest(code=code), tempfile.TemporaryDirectory() as temp:
+                root = Path(temp)
+                asset = root / "asset.svg"
+                asset.write_text(body, encoding="utf-8")
+                result = self.run_validator(
+                    self.write_readme(root, VALID_README + "\n![Diagram](asset.svg)\n")
+                )
+                self.assertEqual(result.returncode, 1)
+                self.assertIn(code, result.stdout)
 
-    def test_strict_json_reports_warning_as_failure(self) -> None:
+    def test_invalid_mermaid_fails(self) -> None:
+        self.assert_fails_with(
+            VALID_README + "\n```mermaid\nnot a diagram\n```\n", "MERMAID_INVALID"
+        )
+
+    def test_json_report_has_stable_counts(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
-            path = self.write_readme(
-                Path(temp), VALID_README.replace("𝑶𝒗𝒆𝒓𝒗𝒊𝒆𝒘", "Overview")
+            result = self.run_validator(
+                self.write_readme(Path(temp), "No heading.\n"), "--json"
             )
-            result = self.run_validator(path, "--json")
             report = json.loads(result.stdout)
             self.assertEqual(result.returncode, 1)
-            self.assertEqual(report["error_count"], 0)
-            self.assertEqual(report["warning_count"], 1)
+            self.assertGreater(report["error_count"], 0)
             self.assertEqual(report["status"], "fail")
 
     def test_repository_readme_passes(self) -> None:
         result = self.run_validator(REPO_ROOT / "README.md")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+    def test_shipped_example_passes(self) -> None:
+        example = (
+            REPO_ROOT / "skills" / "build-readme" / "examples" / "readme.example.md"
+        )
+        result = self.run_validator(example)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
 
 

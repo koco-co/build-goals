@@ -12,9 +12,10 @@ import argparse
 import json
 import os
 import re
+from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Dict, Iterable, List, Mapping, Optional, Sequence, Tuple, Union
+from typing import Union
 
 STANDARD_KEYS = {
     "name",
@@ -57,7 +58,7 @@ LOCAL_REFERENCE_RE = re.compile(
 MARKDOWN_LINK_RE = re.compile(r"\[[^\]]*\]\(([^)]+)\)")
 WORKFLOW_RE = re.compile(r"^§(\d{2})-[^/]+\.md$")
 AGENT_PROMPT_RE = re.compile(r"^[a-z0-9]+(?:-[a-z0-9]+)*\.agent\.md$")
-Scalar = Union[str, Dict[str, str]]
+Scalar = Union[str, dict[str, str]]
 
 
 @dataclass(frozen=True)
@@ -72,21 +73,21 @@ class Issue:
 class Report:
     skill_dir: str
     profile: str
-    issues: List[Issue]
+    issues: list[Issue]
 
     @property
-    def errors(self) -> List[Issue]:
+    def errors(self) -> list[Issue]:
         return [issue for issue in self.issues if issue.severity == "error"]
 
     @property
-    def warnings(self) -> List[Issue]:
+    def warnings(self) -> list[Issue]:
         return [issue for issue in self.issues if issue.severity == "warning"]
 
     @property
-    def infos(self) -> List[Issue]:
+    def infos(self) -> list[Issue]:
         return [issue for issue in self.issues if issue.severity == "info"]
 
-    def to_dict(self) -> Dict[str, object]:
+    def to_dict(self) -> dict[str, object]:
         return {
             "skill_dir": self.skill_dir,
             "profile": self.profile,
@@ -105,7 +106,7 @@ def unquote(value: str) -> str:
     return value
 
 
-def parse_frontmatter(text: str) -> Tuple[Mapping[str, Scalar], int, Optional[str]]:
+def parse_frontmatter(text: str) -> tuple[Mapping[str, Scalar], int, str | None]:
     """Parse top-level scalars, nested maps, and block scalars without PyYAML."""
     lines = text.splitlines()
     if not lines or lines[0].strip() != "---":
@@ -118,8 +119,8 @@ def parse_frontmatter(text: str) -> Tuple[Mapping[str, Scalar], int, Optional[st
     except StopIteration:
         return {}, 0, "缺少结束 Frontmatter 分隔符。"
 
-    data: Dict[str, Scalar] = {}
-    current_parent: Optional[str] = None
+    data: dict[str, Scalar] = {}
+    current_parent: str | None = None
     index = 1
     while index < closing:
         raw = lines[index]
@@ -135,7 +136,7 @@ def parse_frontmatter(text: str) -> Tuple[Mapping[str, Scalar], int, Optional[st
             current_parent = None
 
             if value in {"|", ">", "|-", ">-", "|+", ">+"}:
-                block_lines: List[str] = []
+                block_lines: list[str] = []
                 index += 1
                 while index < closing and (
                     not lines[index].strip() or lines[index].startswith((" ", "\t"))
@@ -197,7 +198,7 @@ def display_path(path: Path, root: Path) -> str:
 
 
 def add_issue(
-    issues: List[Issue],
+    issues: list[Issue],
     severity: str,
     code: str,
     path: Path,
@@ -213,7 +214,7 @@ def validate_frontmatter(
     profile: str,
     skill_dir: Path,
     skill_md: Path,
-    issues: List[Issue],
+    issues: list[Issue],
 ) -> None:
     allowed = set(STANDARD_KEYS)
     if profile in {"claude", "dual", "zcode", "pi"}:
@@ -235,7 +236,12 @@ def validate_frontmatter(
     name = data.get("name")
     if not isinstance(name, str) or not name.strip():
         add_issue(
-            issues, "error", "NAME_REQUIRED", skill_md, "name 必须是非空字符串。", skill_dir
+            issues,
+            "error",
+            "NAME_REQUIRED",
+            skill_md,
+            "name 必须是非空字符串。",
+            skill_dir,
         )
     else:
         if len(name) > 64 or not NAME_RE.fullmatch(name):
@@ -322,7 +328,7 @@ def validate_frontmatter(
 
 
 def validate_headings(
-    text: str, skill_dir: Path, skill_md: Path, issues: List[Issue]
+    text: str, skill_dir: Path, skill_md: Path, issues: list[Issue]
 ) -> None:
     """Treat the six-key skeleton as a recommendation, not a contract.
 
@@ -332,7 +338,7 @@ def validate_headings(
     the default skeleton is reported as informational guidance that never
     fails strict validation.
     """
-    positions: Dict[str, int] = {}
+    positions: dict[str, int] = {}
     for heading in RECOMMENDED_HEADINGS:
         matches = [
             match.start()
@@ -352,12 +358,14 @@ def validate_headings(
 
     present = [heading for heading in RECOMMENDED_HEADINGS if heading in positions]
     complete = len(present) == len(RECOMMENDED_HEADINGS)
-    ordered = positions and [
+    ordered = positions and [positions[heading] for heading in present] == sorted(
         positions[heading] for heading in present
-    ] == sorted(positions[heading] for heading in present)
+    )
     if not (complete and ordered):
         missing = "、".join(
-            heading.lstrip("# ") for heading in RECOMMENDED_HEADINGS if heading not in positions
+            heading.lstrip("# ")
+            for heading in RECOMMENDED_HEADINGS
+            if heading not in positions
         )
         detail = f"未采用的推荐章节：{missing}" if missing else "顺序与推荐不同"
         add_issue(
@@ -394,7 +402,7 @@ def validate_references(
     skill_dir: Path,
     skill_md: Path,
     plugin_root: Path,
-    issues: List[Issue],
+    issues: list[Issue],
 ) -> None:
     lexical_root = skill_dir.absolute()
     resolved_plugin_root = plugin_root.resolve()
@@ -452,7 +460,7 @@ def validate_references(
 
 
 def validate_workflows(
-    skill_dir: Path, skill_md_text: str, issues: List[Issue]
+    skill_dir: Path, skill_md_text: str, issues: list[Issue]
 ) -> None:
     workflow_dir = skill_dir / "workflows"
     if not workflow_dir.exists():
@@ -468,7 +476,7 @@ def validate_workflows(
         )
         return
 
-    numbered: List[Tuple[int, Path]] = []
+    numbered: list[tuple[int, Path]] = []
     for path in sorted(workflow_dir.iterdir(), key=lambda item: item.name):
         if not path.is_file():
             continue
@@ -509,7 +517,7 @@ def validate_workflows(
 
 
 def validate_symlink(
-    path: Path, skill_dir: Path, plugin_root: Path, issues: List[Issue]
+    path: Path, skill_dir: Path, plugin_root: Path, issues: list[Issue]
 ) -> None:
     try:
         target = os.readlink(path)
@@ -573,7 +581,7 @@ def validate_symlink(
 def validate_directory_conventions(
     skill_dir: Path,
     plugin_root: Path,
-    issues: List[Issue],
+    issues: list[Issue],
 ) -> None:
     template_dir = skill_dir / "templates"
     if template_dir.is_dir():
@@ -646,7 +654,7 @@ def validate_directory_conventions(
                 )
 
 
-def read_openai_policy(adapter: Path) -> Optional[str]:
+def read_openai_policy(adapter: Path) -> str | None:
     if not adapter.exists():
         return None
     try:
@@ -664,7 +672,7 @@ def validate_openai_adapter(
     skill_dir: Path,
     profile: str,
     frontmatter: Mapping[str, Scalar],
-    issues: List[Issue],
+    issues: list[Issue],
 ) -> None:
     adapter = skill_dir / "agents" / "openai.yaml"
     if not adapter.exists():
@@ -730,10 +738,10 @@ def validate_openai_adapter(
 def validate_skill(
     skill_dir: Path,
     profile: str = "portable",
-    plugin_root: Optional[Path] = None,
+    plugin_root: Path | None = None,
 ) -> Report:
     skill_dir = skill_dir.expanduser().resolve()
-    issues: List[Issue] = []
+    issues: list[Issue] = []
 
     if not skill_dir.is_dir():
         issues.append(
@@ -848,7 +856,7 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def main(argv: Optional[Sequence[str]] = None) -> int:
+def main(argv: Sequence[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     report = validate_skill(args.skill_dir, args.profile, args.plugin_root)
 

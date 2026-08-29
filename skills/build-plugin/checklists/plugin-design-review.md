@@ -32,7 +32,8 @@
 - [ ] Claude Code Manifest 路径与组件位置正确。
 - [ ] Codex Manifest 与 Marketplace 路径正确。
 - [ ] ZCode Manifest 路径正确。
-- [ ] 三份 Manifest 的名称、版本和共享组件一致。
+- [ ] Pi 的根 `package.json` 包含有效 `pi.skills`，安装与验证方式明确。
+- [ ] 三份 Plugin Manifest 与 Pi Package 的名称、版本和共享组件一致。
 - [ ] 已证实存在平台差异时，无法等价实现的能力已明确处理。
 
 ## 验收
