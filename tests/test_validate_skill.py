@@ -481,7 +481,7 @@ class ValidateSkillTests(unittest.TestCase):
             "build-skill": 'version: "3.0.0"',
             "handoff": 'version: "2.1.2"',
             "audit-agent-setup": 'version: "3.0.0"',
-            "clarify-idea": 'version: "3.0.0"',
+            "clarify-idea": 'version: "3.1.0"',
         }
 
         for name, version_line in expected.items():
@@ -503,7 +503,7 @@ class ValidateSkillTests(unittest.TestCase):
         ).read_text(encoding="utf-8")
 
         for required in (
-            "目标已明确或用户直接要求实施时退出",
+            "只有目标、范围、需求合理性和关键取舍均已明确",
             "每轮只提出一个需要用户决定、且会影响结果的问题",
             "等待用户回答",
             "共同理解得到最终确认前",
@@ -558,6 +558,39 @@ class ValidateSkillTests(unittest.TestCase):
             with self.subTest(summary=required):
                 self.assertIn(required, summary)
         self.assertIn("请用户确认是否开始实施", confirmation)
+
+    def test_clarify_idea_challenges_incomplete_or_unreasonable_scope(self) -> None:
+        clarify = REPO_ROOT.joinpath("skills", "clarify-idea", "SKILL.md").read_text(
+            encoding="utf-8"
+        )
+        adapter = REPO_ROOT.joinpath(
+            "skills", "clarify-idea", "agents", "openai.yaml"
+        ).read_text(encoding="utf-8")
+
+        frontmatter = clarify.split("---", 2)[1]
+        body = clarify.split("---", 2)[2]
+
+        for required in (
+            "目标、范围、需求合理性和关键取舍均已明确",
+            "未发现会改变结果的重要遗漏或不合理需求",
+        ):
+            with self.subTest(frontmatter_exit=required):
+                self.assertIn(required, frontmatter)
+            with self.subTest(body_exit=required):
+                self.assertIn(required, body)
+
+        for required in (
+            "开放范围描述",
+            "其他可能影响结果的重要问题",
+            "现有需求是否完整、合理",
+            "说明依据、影响和推荐调整",
+            "用户确认后才更新共同理解和改动范围",
+            "确认纳入的其他重要问题和需求调整",
+        ):
+            with self.subTest(required=required):
+                self.assertIn(required, clarify)
+
+        self.assertIn("主动识别遗漏和不合理需求", adapter)
 
     def test_skill_template_keeps_implicit_invocation_boundaries(self) -> None:
         template = REPO_ROOT.joinpath(
