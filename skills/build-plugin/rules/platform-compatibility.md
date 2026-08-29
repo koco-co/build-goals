@@ -4,7 +4,7 @@
 
 ## 当前范围
 
-当前通用构建流程支持 Claude Code、Codex 与 ZCode。其他 Agent 平台只有在发现方式、Manifest、调用策略、安装和验证契约均已查明后才能加入；不能只创建空 Manifest 并宣称兼容。
+当前通用构建流程支持 Claude Code、Codex、ZCode 与 Pi。其他 Agent 平台只有在发现方式、Manifest、调用策略、安装和验证契约均已查明后才能加入；不能只创建空 Manifest 并宣称兼容。
 
 ## 平台入口
 
@@ -13,6 +13,7 @@
 | Claude Code | `.claude-plugin/plugin.json` | `.claude-plugin/marketplace.json` | Claude Code 专用 Frontmatter |
 | Codex | `.codex-plugin/plugin.json` | `.agents/plugins/marketplace.json` | `agents/openai.yaml` |
 | ZCode | `.zcode-plugin/plugin.json`（优先探测） | 复用 `.claude-plugin/marketplace.json` | 无独立适配文件 |
+| Pi | `package.json` 的 `pi` 对象 | Git 或 npm Package | Skill Frontmatter |
 
 组件仍位于 Plugin 根目录。Manifest 中的组件路径使用以 `./` 开头、相对 Plugin 根目录解析的路径，不把 Skills、Hooks 或资源塞进 Manifest 目录。
 
@@ -25,7 +26,13 @@
 - ZCode 优先读取 `.zcode-plugin/plugin.json`，再回退到 `.claude-plugin/` 和 `.codex-plugin/`；ZCode 市场按探测顺序读取 `.claude-plugin/marketplace.json` 或根目录 `marketplace.json`。
 - ZCode 只识别 `name`、`description`、`when_to_use`、`license` 和 `metadata` 等 Skill Frontmatter 键，未识别的键在加载时被忽略，不阻塞加载。
 - ZCode 独立副本保留完整 Frontmatter 并移除 `agents/`。
+- Pi Package 通过 `pi.skills` 指向共用 Skill 根目录；Pi 读取 `disable-model-invocation` 并忽略其他不识别的 Frontmatter 字段。
+- Pi 独立副本保留完整 Frontmatter 并移除 `agents/`。
 - 平台缺少等价能力时明确记录降级或退出条件，不伪造兼容行为。
+
+## Pi Package
+
+Pi Package 的 `package.json` 至少声明名称、版本、非空描述和 `pi.skills`。通过 Git 分发时使用 `pi install git:<host>/<owner>/<repo>`，通过本地路径验收时使用 `pi install <absolute-path>`；安装后用 `pi list` 核对，并在交互会话中确认 Skill 发现与调用。`pi-package` keyword 用于包检索，不替代 `pi` Manifest。
 
 ## 共享文件与链接
 
@@ -35,4 +42,4 @@
 
 ## 验证结果
 
-交付报告分别记录共用源静态检查、各平台 Manifest 检查、真实安装或加载结果，以及没有运行的平台和原因。
+交付报告分别记录共用源静态检查、各平台 Plugin Manifest 与 Pi Package 检查、真实安装或加载结果，以及没有运行的平台和原因。

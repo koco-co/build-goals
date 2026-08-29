@@ -4,13 +4,13 @@
 
 ## 1. 多平台规范源
 
-本仓库当前直接作为 Claude Code、Codex 与 ZCode Plugin 使用，因此 `skills/*/SKILL.md` 是各平台共用的规范源：
+本仓库当前直接作为 Claude Code、Codex 与 ZCode Plugin 及 Pi Package 使用，因此 `skills/*/SKILL.md` 是各平台共用的规范源：
 
 - 通用字段遵循 Agent Skills 规范；
 - Claude Code 的调用权限字段保留在共用源中；
 - Codex 的调用策略保留在 `agents/openai.yaml`；
 - 核心工作流、模板、示例、规则、脚本和清单只维护一份；
-- 平台 Manifest 分别放在根目录 `.claude-plugin/`、`.codex-plugin/` 与 `.zcode-plugin/`。
+- Plugin Manifest 分别放在根目录 `.claude-plugin/`、`.codex-plugin/` 与 `.zcode-plugin/`，Pi Package 配置放在根目录 `package.json`。
 
 独立安装器会生成平台专用副本，字段分类遵循 `rules/frontmatter.md`：
 
@@ -18,7 +18,8 @@
 多平台 Skill 源
 ├── Claude Code：保留通用字段和 Claude Code 字段，移除 agents/
 ├── Codex：只保留通用 Agent Skills 字段，保留 agents/openai.yaml
-└── ZCode：保留全部字段（未识别的键被忽略），移除 agents/
+├── ZCode：保留全部字段（未识别的键被忽略），移除 agents/
+└── Pi：保留全部字段（未识别的键被忽略），移除 agents/
 ```
 
 ## 2. Claude Code
@@ -112,7 +113,19 @@ name, description, license, compatibility, metadata, allowed-tools
 
 Claude Code 专属字段及其嵌套 YAML 内容必须完整移除；不能只删除字段首行而遗留子项。
 
-## 4. 共享文件与软链接
+## 4. Pi
+
+Pi Package 在根目录 `package.json` 的 `pi.skills` 中声明 Skill 目录；没有 Manifest 时也会从约定目录 `skills/` 自动发现。完整包通过以下命令安装：
+
+```bash
+pi install git:github.com/<owner>/<repo>
+```
+
+用户通过 `/skill:<skill-name>` 调用。Pi 读取 Agent Skills 通用 Frontmatter 和 `disable-model-invocation`；后者为 `true` 时不向模型公布 Skill，只允许用户显式调用。Pi 会忽略其他不识别的 Frontmatter 字段，因此完整 Package 可以直接加载共用源。用户级独立副本安装到 `~/.pi/agent/skills/<skill-name>/`，项目级副本安装到 `.pi/skills/<skill-name>/`；两者都保留共用 Frontmatter 并移除 Codex 的 `agents/`。
+
+安装后使用 `pi list` 核对 Package，并在交互会话启动信息或 `/reload` 后确认 Skills 被发现；再分别验证显式调用、应自动触发和不应自动触发的场景。
+
+## 5. 共享文件与软链接
 
 已在 Codex 的实际 Plugin 安装缓存中观察到嵌套软链接被省略，因此多平台 Plugin 的跨 Skill 运行依赖不应依赖软链接。优先使用同一路径直接共用；确需保留 Skill 内本地入口时，使用清单声明、脚本同步和逐字节校验的普通镜像。
 
@@ -129,7 +142,7 @@ Claude Code 专属字段及其嵌套 YAML 内容必须完整移除；不能只�
 
 项目根目录 `.agents/scripts/` 是项目公共能力位置，不是 Agent Skills 规范保证会随单个 Skill 安装的目录。多个项目级 Skills 可以在项目或整体安装包明确携带该目录时调用其中脚本；独立 Skill 安装、复制或发布无法证明共享目录存在时，必须保留 Skill 自有 `scripts/`，不得留下失效的项目根目录调用命令。Claude Code、Codex 或其他平台能读取项目文件，不等于其 Skill 或 Plugin 安装流程会自动携带该目录，交付验证必须分别证明。
 
-## 5. 其他平台
+## 6. 其他平台
 
 当前不声明其他 Coding Agent 的兼容性。新增平台前确认：
 
@@ -142,7 +155,7 @@ Claude Code 专属字段及其嵌套 YAML 内容必须完整移除；不能只�
 
 只有真实差异才新增适配。无法提供等价行为时，明确记录降级，不伪造兼容性。
 
-## 6. 验证状态
+## 7. 验证状态
 
 交付报告分别标明：
 
@@ -150,4 +163,5 @@ Claude Code 专属字段及其嵌套 YAML 内容必须完整移除；不能只�
 - Claude Code Manifest 与真实加载结果；
 - Codex Manifest、Marketplace 与真实安装结果；
 - ZCode Manifest 与真实加载结果；
+- Pi Package、Skill 发现与真实调用结果；
 - 未运行平台及其具体限制。

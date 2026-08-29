@@ -1,7 +1,7 @@
 interface:
   display_name: "Build Plugin"
-  short_description: "创建、升级或迁移 Claude Code/Codex/ZCode Plugin"
-  default_prompt: "使用 $build-plugin 创建、升级或迁移可安装、可验证的 Claude Code/Codex/ZCode Plugin。"
+  short_description: "构建 Claude Code/Codex/ZCode Plugin 或 Pi Package"
+  default_prompt: "使用 $build-plugin 创建、升级或迁移可安装、可验证的 Claude Code/Codex/ZCode Plugin 或 Pi Package。"
 
 policy:
   allow_implicit_invocation: true

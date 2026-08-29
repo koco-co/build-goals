@@ -115,6 +115,16 @@ class ValidateSkillTests(unittest.TestCase):
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
             self.assertIn("PASS", result.stdout)
 
+    def test_pi_profile_accepts_supported_policy_and_ignored_source_fields(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            skill_dir = self.write_skill(
+                Path(temp),
+                "pi-skill",
+                'disable-model-invocation: true\nargument-hint: "target"\n',
+            )
+            result = self.run_validator(skill_dir, profile="pi")
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
     def test_broken_reference_fails(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
             skill_dir = self.write_skill(Path(temp), "broken-skill")
@@ -463,11 +473,11 @@ class ValidateSkillTests(unittest.TestCase):
         expected = {
             "build-agents-md": 'version: "3.0.3"',
             "build-docs": 'version: "1.2.1"',
-            "build-plugin": 'version: "2.3.3"',
+            "build-plugin": 'version: "2.4.0"',
             "build-readme": 'version: "2.2.2"',
-            "build-skill": 'version: "2.2.3"',
+            "build-skill": 'version: "2.3.0"',
             "handoff": 'version: "2.1.2"',
-            "health-check": 'version: "2.0.1"',
+            "health-check": 'version: "2.1.0"',
             "shape-idea": 'version: "2.3.4"',
         }
 

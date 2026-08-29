@@ -15,7 +15,7 @@ Frontmatter 只承载目标平台会读取的元数据和运行策略。每个�
 | 确有程序或仓库约定需要读取元数据        | `metadata`                       | 注册表、安装器或仓库约定会读取时添加                                      |
 | 需要临时预授权工具        | `allowed-tools`                  | 目标平台支持且完成权限评估后添加；不等同于限制其他工具                    |
 | 需要临时移除工具          | `disallowed-tools`               | Claude Code 专属；Skill 活跃期间必须禁止特定工具时添加                    |
-| 仅限用户调用              | `disable-model-invocation: true` | Claude Code 专属；副作用或执行时机必须由用户控制                          |
+| 仅限用户调用              | `disable-model-invocation: true` | Claude Code 与 Pi 支持；副作用或执行时机必须由用户控制                    |
 | 仅限模型调用              | `user-invocable: false`          | Claude Code 专属；只提供背景知识且不适合作为命令                          |
 | 需要补充模型触发语境      | `when_to_use`                    | Claude Code 专属；仅在 `description` 无法简洁表达时使用                   |
 | 自动调用受文件路径限制    | `paths`                          | Claude Code 专属；只在匹配指定 Glob 的文件时激活                          |
@@ -37,7 +37,7 @@ Frontmatter 只承载目标平台会读取的元数据和运行策略。每个�
 - 允许模型调用时，优先在跨平台 `description` 中写清适用场景、排除条件和相邻 Skill 边界；
 - 仅限用户调用时，由平台配置限制调用，不在正文重复权限说明；
 - 调用策略变化属于行为变化，必须取得设计确认并验证应触发与不应触发场景；
-- 多平台 Skill 不依赖 Claude Code 的 `when_to_use` 承担唯一触发语义；ZCode 会把 `when_to_use` 与截断后的 `description` 一并交给模型，但不识别其余 Claude Code 专用字段。
+- 多平台 Skill 不依赖 Claude Code 的 `when_to_use` 承担唯一触发语义；ZCode 会把 `when_to_use` 与截断后的 `description` 一并交给模型；Pi 读取 `disable-model-invocation`，并忽略其他不识别的 Frontmatter 字段。
 
 ## 3. `compatibility`
 
@@ -76,6 +76,7 @@ compatibility: 需要 Git、Docker 和互联网访问。
 Claude Code 副本：保留通用字段和 Claude Code 字段，移除 agents/
 Codex 副本：只保留通用 Agent Skills 字段，保留 agents/openai.yaml
 ZCode 副本：保留全部字段（未识别的键被忽略），移除 agents/
+Pi 副本：保留全部字段（未识别的键被忽略），移除 agents/
 ```
 
 不得把未知字段直接假定为跨平台字段。平台规范变化后，先更新字段分类、安装转换和测试，再在 Skill 中使用新字段。

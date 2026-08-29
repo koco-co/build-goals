@@ -14,7 +14,7 @@
 
 ## 4. 平台与插件形态
 
-- 平台：Claude Code / Codex / ZCode / 组合
+- 平台：Claude Code / Codex / ZCode / Pi / 组合
 - 形态：Skills-only / MCP-only / 混合型 / 多平台封装 / 仓库迁移
 - 安装与分发：
 
@@ -45,9 +45,9 @@
 
 ## 9. 平台差异
 
-| 能力 | Claude Code | Codex | ZCode | 共用方式 |
-| ---- | ----------- | ----- | ----- | -------- |
-|      |             |       |       |          |
+| 能力 | Claude Code | Codex | ZCode | Pi | 共用方式 |
+| ---- | ----------- | ----- | ----- | -- | -------- |
+|      |             |       |       |    |          |
 
 ## 10. 权限与数据流
 

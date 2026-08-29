@@ -5,7 +5,7 @@
 运行：
 
 ```bash
-python3 scripts/validate_plugin.py <plugin-root> --platform <all|dual|claude|codex|zcode> --strict
+python3 scripts/validate_plugin.py <plugin-root> --platform <all|dual|claude|codex|zcode|pi> --strict
 ```
 
 该脚本已覆盖 Manifest、多平台身份与版本一致性（`all` 模式核对全部已分发平台）、Skill 质量与 Frontmatter、共享镜像（存在、非软链接、与规范源一致且不越界）、必要链接、空文件、失效引用及 Claude Marketplace；本清单只处理脚本无法判断的内容与场景项。
@@ -34,6 +34,15 @@ ZCode：
 - 验证 `.zcode-plugin/plugin.json`；
 - 在 ZCode 客户端 **Settings → Plugin Management** 安装并确认 Skills 出现在 Skills 列表；
 - 用对话中的自然语言请求验证目标 Skill 触发。
+
+Pi：
+
+```bash
+pi install <package-path-or-source>
+pi list
+```
+
+启动交互会话确认 Skills 被发现，使用 `/skill:<name>` 验证用户调用，并按设计验证模型调用策略；本地路径安装、Git 安装和 npm 安装只验证目标实际采用的分发方式。
 
 ## Phase 3：场景验收
 

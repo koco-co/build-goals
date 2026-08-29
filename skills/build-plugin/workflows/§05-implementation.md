@@ -46,10 +46,16 @@ ZCode：
 .zcode-plugin/plugin.json
 ```
 
-组件仍位于 Plugin 根目录。Manifest 路径使用 `./` 开头的相对路径，不把 Skills、Hooks 或资源塞进 Manifest 目录。
+Pi：
+
+```text
+package.json
+```
+
+组件仍位于分发包根目录。Plugin Manifest 与 `pi` Manifest 的路径使用 `./` 开头的相对路径，不把 Skills、Hooks 或资源塞进平台配置目录。
 
 ## Phase 5：同步文档和版本
 
-更新 README、版本、安装命令、调用方式、变更说明和验证命令。各平台 Manifest 的身份与版本保持一致，除非设计明确说明例外。
+更新 README、版本、安装命令、调用方式、变更说明和验证命令。各平台 Plugin Manifest 与 Pi Package 的身份和版本保持一致，除非设计明确说明例外。
 
 完成条件：设计中的全部组件已经实现，路径和版本一致，没有未授权副作用。

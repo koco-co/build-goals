@@ -51,7 +51,7 @@ class RetiredSkillsTests(unittest.TestCase):
 
     def test_retired_skills_cannot_be_installed_on_any_platform(self) -> None:
         for name in RETIRED_SKILLS:
-            for platform in ("claude", "codex", "zcode"):
+            for platform in ("claude", "codex", "zcode", "pi"):
                 with (
                     self.subTest(skill=name, platform=platform),
                     tempfile.TemporaryDirectory() as temp,

@@ -3,7 +3,7 @@ name: health-check
 description: 检查项目的 Skill、Plugin、README、AGENTS.md/CLAUDE.md；用户要求项目规范健康检查时使用，不用于代码质量、安全、依赖、测试、CI 或性能审计。
 metadata:
   author: koco-co
-  version: "2.0.1"
+  version: "2.1.0"
 ---
 
 # Outcome
@@ -13,7 +13,7 @@ metadata:
 ## Routing
 
 - 单独调用本 Skill 时，检查四个规范领域：Agent Skill、Plugin、README、AGENTS.md/CLAUDE.md。
-- 本 Skill 只随完整 `build-goals` Plugin 分发；代码质量、安全、依赖、测试覆盖率、CI 和性能审计不属于本 Skill。
+- 本 Skill 只随完整 `build-goals` 分发包提供；代码质量、安全、依赖、测试覆盖率、CI 和性能审计不属于本 Skill。
 
 ## Steps
 

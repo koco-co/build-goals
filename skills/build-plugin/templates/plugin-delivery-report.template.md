@@ -35,6 +35,8 @@
 
 ### ZCode
 
+### Pi
+
 ## 5. Skill 子任务
 
 | Skill | Frontmatter 决策 | 内容审查 | 文案审查 | 内容回归 | 独立 Reviewer | 场景验收 |

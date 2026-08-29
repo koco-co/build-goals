@@ -1,6 +1,6 @@
 {
   "name": "build-goals",
-  "version": "2.3.2",
+  "version": "2.4.0",
   "description": "Clarify goals and build, review, and maintain Agent Skills, plugins, and project documentation.",
   "author": {
     "name": "koco-co",
@@ -13,6 +13,7 @@
     "codex",
     "claude-code",
     "zcode",
+    "pi-agent",
     "plugin-development",
     "readme-generation",
     "agents-md"

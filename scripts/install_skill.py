@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Install a source Skill into Claude Code, Codex, or ZCode.
+"""Install a source Skill into Claude Code, Codex, ZCode, or Pi.
 
-The repository is distributed as a Plugin for Claude Code, Codex, and ZCode.
+The repository is distributed as a Plugin or package for these platforms.
 This installer creates a standalone copy for the selected platform:
 - Claude Code preserves the source frontmatter and removes Codex UI metadata.
 - Codex removes Claude-only frontmatter and keeps agents/openai.yaml.
-- ZCode preserves the source frontmatter (unrecognized keys are ignored) and
-  removes Codex UI metadata.
+- ZCode and Pi preserve the source frontmatter (unrecognized keys are ignored)
+  and remove Codex UI metadata.
 Repository-internal symlinks are dereferenced in the installed copy.
 """
 
@@ -31,7 +31,7 @@ PORTABLE_FRONTMATTER_FIELDS = {
     "metadata",
     "allowed-tools",
 }
-PLUGIN_ONLY_SKILLS = {"health-check"}
+FULL_PACKAGE_ONLY_SKILLS = {"health-check"}
 
 
 class InstallError(RuntimeError):
@@ -75,12 +75,17 @@ def resolve_destination(
     project_dir: Optional[Path] = None,
     home_dir: Optional[Path] = None,
 ) -> Path:
-    if platform not in {"claude", "codex", "zcode"}:
+    if platform not in {"claude", "codex", "zcode", "pi"}:
         raise InstallError(f"不支持的平台：{platform}")
     if scope not in {"user", "project"}:
         raise InstallError(f"不支持的安装范围：{scope}")
 
-    platform_roots = {"claude": ".claude", "codex": ".agents", "zcode": ".zcode"}
+    platform_roots = {
+        "claude": ".claude",
+        "codex": ".agents",
+        "zcode": ".zcode",
+        "pi": ".pi/agent" if scope == "user" else ".pi",
+    }
     if scope == "user":
         base = (home_dir or Path.home()).expanduser().resolve()
     else:
@@ -137,9 +142,9 @@ def install_skill(
 ) -> Path:
     if not NAME_PATTERN.fullmatch(skill_name):
         raise InstallError("Skill 名称只能包含小写字母、数字及分隔词组的单个连字符。")
-    if skill_name in PLUGIN_ONLY_SKILLS:
+    if skill_name in FULL_PACKAGE_ONLY_SKILLS:
         raise InstallError(
-            f"{skill_name} 只能随 build-goals Plugin 使用，不能独立安装。"
+            f"{skill_name} 只能随 build-goals 完整分发包使用，不能独立安装。"
         )
 
     repo_root = repo_root.expanduser().resolve()
@@ -200,8 +205,8 @@ def install_skill(
             )
             profile = "codex"
         else:
-            # Claude Code keeps the full frontmatter; ZCode ignores the
-            # Claude-only keys at load time. Both drop Codex metadata.
+            # Claude Code keeps the full frontmatter; ZCode and Pi ignore
+            # unsupported keys at load time. All three drop Codex metadata.
             agents = stage / "agents"
             if agents.exists():
                 shutil.rmtree(agents)
@@ -234,11 +239,11 @@ def install_skill(
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="为 Claude Code、Codex 或 ZCode 安装独立的 Skill 副本。"
+        description="为 Claude Code、Codex、ZCode 或 Pi 安装独立的 Skill 副本。"
     )
     parser.add_argument("skill", help="skills/ 下的 Skill 目录名")
     parser.add_argument(
-        "--platform", choices=("claude", "codex", "zcode"), required=True
+        "--platform", choices=("claude", "codex", "zcode", "pi"), required=True
     )
     parser.add_argument("--scope", choices=("user", "project"), default="user")
     parser.add_argument(

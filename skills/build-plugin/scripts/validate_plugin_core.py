@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Dependency-free validator for Claude Code, Codex, and ZCode plugin packages."""
+"""Dependency-free validator for Claude Code, Codex, ZCode, and Pi packages."""
 
 from __future__ import annotations
 
@@ -838,6 +838,68 @@ def collect_skill_dirs(skill_roots: Iterable[Path]) -> List[Path]:
     return sorted(discovered, key=lambda item: str(item))
 
 
+def validate_pi_package(
+    plugin_root: Path,
+    issues: List[Issue],
+) -> Tuple[
+    Optional[Mapping[str, object]], Optional[str], Optional[str], Set[Path]
+]:
+    manifest_path = plugin_root / "package.json"
+    data = load_json(manifest_path, plugin_root, issues)
+    if data is None:
+        return None, None, None, set()
+
+    name, version = validate_identity(data, manifest_path, plugin_root, issues)
+    pi_manifest = data.get("pi")
+    if not isinstance(pi_manifest, dict):
+        add_issue(
+            issues,
+            "error",
+            "PI_MANIFEST",
+            manifest_path,
+            "package.json 必须包含 pi 对象。",
+            plugin_root,
+        )
+        return data, name, version, set()
+
+    raw_skills = pi_manifest.get("skills")
+    if not isinstance(raw_skills, list) or not raw_skills:
+        add_issue(
+            issues,
+            "error",
+            "PI_SKILLS",
+            manifest_path,
+            "pi.skills 必须是非空路径数组。",
+            plugin_root,
+        )
+        return data, name, version, set()
+
+    skill_roots: Set[Path] = set()
+    for index, raw_path in enumerate(raw_skills):
+        if not isinstance(raw_path, str):
+            add_issue(
+                issues,
+                "error",
+                "PI_SKILLS_PATH",
+                manifest_path,
+                f"pi.skills[{index}] 必须是字符串。",
+                plugin_root,
+            )
+            continue
+        resolved = validate_component_path(
+            raw_path=raw_path,
+            field=f"pi.skills[{index}]",
+            manifest_path=manifest_path,
+            plugin_root=plugin_root,
+            issues=issues,
+            expect="dir",
+        )
+        if resolved is not None:
+            skill_roots.add(resolved.resolve())
+
+    return data, name, version, skill_roots
+
+
 def check_manifest_consistency(
     issues: List[Issue],
     plugin_root: Path,
@@ -881,7 +943,7 @@ def validate_plugin(plugin_dir: Path, platform: str = "dual") -> Report:
     issues: List[Issue] = []
     skills_checked: List[str] = []
 
-    if platform not in {"dual", "claude", "codex", "zcode", "all"}:
+    if platform not in {"dual", "claude", "codex", "zcode", "pi", "all"}:
         issues.append(
             Issue("error", "PLATFORM", str(plugin_root), f"未知平台：{platform}")
         )
@@ -904,6 +966,7 @@ def validate_plugin(plugin_dir: Path, platform: str = "dual") -> Report:
     codex_result = (None, None, None, set())
     claude_result = (None, None, None, set())
     zcode_result = (None, None, None, set())
+    pi_result = (None, None, None, set())
 
     if platform in {"codex", "dual", "all"}:
         codex_dir = plugin_root / ".codex-plugin"
@@ -940,6 +1003,9 @@ def validate_plugin(plugin_dir: Path, platform: str = "dual") -> Report:
             issues=issues,
         )
 
+    if platform in {"pi", "all"}:
+        pi_result = validate_pi_package(plugin_root, issues)
+
     if platform == "dual":
         _c_data, c_name, c_version, c_skills = codex_result
         _a_data, a_name, a_version, a_skills = claude_result
@@ -960,11 +1026,15 @@ def validate_plugin(plugin_dir: Path, platform: str = "dual") -> Report:
             (
                 ("Codex Manifest", codex_result[1:]),
                 ("ZCode Manifest", zcode_result[1:]),
+                ("Pi Package", pi_result[1:]),
             ),
         )
 
-    all_skill_roots: Set[Path] = set(codex_result[3]) | set(claude_result[3]) | set(
-        zcode_result[3]
+    all_skill_roots: Set[Path] = (
+        set(codex_result[3])
+        | set(claude_result[3])
+        | set(zcode_result[3])
+        | set(pi_result[3])
     )
     skill_dirs = collect_skill_dirs(all_skill_roots)
     if not skill_dirs:
@@ -1011,14 +1081,14 @@ def print_human(report: Report) -> None:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="校验 Claude Code、Codex、ZCode 或全平台 Plugin 的结构与 Skills。"
+        description="校验 Claude Code、Codex、ZCode、Pi 或全平台包的结构与 Skills。"
     )
     parser.add_argument("plugin_dir", type=Path, help="Plugin 根目录")
     parser.add_argument(
         "--platform",
-        choices=("dual", "claude", "codex", "zcode", "all"),
+        choices=("dual", "claude", "codex", "zcode", "pi", "all"),
         default="dual",
-        help="all 同时检查三个平台 Manifest 及版本一致性",
+        help="all 同时检查三个 Plugin Manifest、Pi Package 及版本一致性",
     )
     parser.add_argument("--strict", action="store_true", help="将 warning 视为失败")
     parser.add_argument("--json", action="store_true", help="输出 JSON")

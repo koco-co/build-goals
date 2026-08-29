@@ -7,6 +7,7 @@
 [![Claude Code](https://img.shields.io/badge/Claude_Code-Plugin-D97757?logo=anthropic&logoColor=white&cacheSeconds=3600)](https://code.claude.com/docs/en/plugins)
 [![Codex](https://img.shields.io/badge/Codex-Supported-000000?style=flat-square&logo=openai&logoColor=white&cacheSeconds=3600)](https://developers.openai.com/plugins/)
 [![ZCode](https://img.shields.io/badge/ZCode-Plugin-7B5CFF?cacheSeconds=3600)](https://z.ai)
+[![Pi](https://img.shields.io/badge/Pi-Package-7C3AED?cacheSeconds=3600)](https://pi.dev)
 [![Agent Skills](https://img.shields.io/badge/Agent_Skills-Compatible-2563EB?cacheSeconds=3600)](https://github.com/agentskills/agentskills)
 [![Validate Plugin](https://github.com/koco-co/build-goals/actions/workflows/validate-skills.yml/badge.svg)](https://github.com/koco-co/build-goals/actions/workflows/validate-skills.yml)
 [![Python](https://img.shields.io/badge/Python-3.9%2B-3776AB?logo=python&logoColor=white&cacheSeconds=3600)](https://www.python.org/)
@@ -18,9 +19,9 @@
 
 <h2 align="center">𝑶𝒗𝒆𝒓𝒗𝒊𝒆𝒘 · 简介</h2>
 
-<p><code>build-goals</code> 用于澄清目标、构建 <b>Agent Skill</b> 与 <b>Plugin</b>、维护项目文档和检查项目规范，不负责组织软件项目的完整开发流程。你可以在 <b>Claude Code</b>、<b>Codex</b> 或 <b>ZCode</b> 中安装完整 <b>Plugin</b>，也可以单独安装不依赖其他 <b>Skill</b> 的能力。</p>
+<p><code>build-goals</code> 用于澄清目标、构建 <b>Agent Skill</b> 与 <b>Plugin</b>、维护项目文档和检查项目规范，不负责组织软件项目的完整开发流程。你可以在 <b>Claude Code</b>、<b>Codex</b> 或 <b>ZCode</b> 中安装完整 <b>Plugin</b>，在 <b>Pi</b> 中安装完整 <b>Package</b>，也可以单独安装不依赖其他 <b>Skill</b> 的能力。</p>
 
-- 当前直接适配 <b>Claude Code</b>、<b>Codex</b> 与 <b>ZCode</b>。
+- 当前直接适配 <b>Claude Code</b>、<b>Codex</b>、<b>ZCode</b> 与 <b>Pi</b>。
 - 本仓库不再提供 <b>DeepSeek Harness</b> 专用包；<b>DSH</b> 使用其自身的 <b>Codex</b> 兼容能力，本仓库不单独验证该路径。
 - 其他 <b>Coding Agent</b> 的兼容性尚未确认；新增支持前会先核对平台能力与使用规范。
 
@@ -53,7 +54,7 @@
 
 <p><code>build-docs</code> 新建的文档统一放在 <code>docs/spec/</code>，按 <code>product/</code>、<code>architecture/</code>、<code>engineering/</code> 和 <code>status/</code> 分组；下一位助手从 <code>docs/spec/AGENT_BRIEF.md</code> 了解当前状态并继续工作。完整路径见 <a href="skills/build-docs/rules/documents.md">文档职责表</a>。已有文档沿用原路径，目录迁移另行确认。</p>
 
-<p><code>build-docs</code> 在 <b>Claude Code</b> 和 <b>Codex</b> 中仅限用户主动调用；<b>ZCode</b> 允许模型按上述适用范围调用。<a href="https://zcode.z.ai/en/docs/skill">ZCode 的 Skill 列表同时面向用户和模型</a>，不提供等价的仅用户调用开关。配置与安装校验不代表真实客户端行为已验证。</p>
+<p><code>build-docs</code> 在 <b>Claude Code</b>、<b>Codex</b> 和 <b>Pi</b> 中仅限用户主动调用；<b>ZCode</b> 允许模型按上述适用范围调用。<a href="https://zcode.z.ai/en/docs/skill">ZCode 的 Skill 列表同时面向用户和模型</a>，不提供等价的仅用户调用开关。配置与安装校验不代表真实客户端行为已验证。</p>
 
 <a id="workflow"></a>
 
@@ -86,7 +87,7 @@ flowchart LR
 - 优先使用可靠工具：已有 <b>CLI</b> → 脚本 → 模板 → 示例 → 规则 → 提示词。
 - 按需读取：主 <code>SKILL.md</code> 只保留适用范围和主流程，详细规则需要时再读取。
 - 验证可复现：静态检查、内容审查、文案审查与真实平台测试分别记录。
-- 平台差异隔离：<b>Claude Code</b>、<b>Codex</b> 与 <b>ZCode</b> 的 <b>Manifest</b>、调用策略和平台扩展分别配置。
+- 平台差异隔离：<b>Claude Code</b>、<b>Codex</b> 与 <b>ZCode</b> 的 <b>Manifest</b>、<b>Pi Package</b>、调用策略和平台扩展分别配置。
 
 <a id="structure"></a>
 
@@ -96,6 +97,7 @@ flowchart LR
 build-goals/
 ├── AGENTS.md
 ├── CLAUDE.md
+├── package.json
 ├── .plugin-shared-files.json
 ├── .agents/
 │   └── plugins/
@@ -156,13 +158,30 @@ codex plugin add build-goals@build-goals
 
 <p>在 <b>ZCode</b> 客户端中打开 <b>Settings → Plugin Management → Discover</b>，通过 <code>+</code> 按钮添加 <b>GitHub</b> 仓库 <code>koco-co/build-goals</code> 并安装 <b>Plugin</b>，或选择本地仓库目录。<b>ZCode</b> 沿用 <code>.claude-plugin/marketplace.json</code> 解析 <b>Marketplace</b>，并优先读取 <code>.zcode-plugin/plugin.json</code> 作为 <b>Plugin Manifest</b>。</p>
 
-<p>安装完整 <b>Plugin</b> 后，可在 <b>Claude Code</b> 中调用 <code>/build-goals:health-check</code>，在 <b>Codex</b> 中调用 <code>$build-goals:health-check</code>，在 <b>ZCode</b> 输入框的 <code>/</code> 菜单 <b>Skills</b> 分组中选择对应能力。请求符合项目规范检查的适用范围时，模型也可以直接调用。</p>
+<a id="pi"></a>
+
+<h3 align="center">𝑷𝒊 · 安装 𝑷𝒂𝒄𝒌𝒂𝒈𝒆</h3>
+
+```bash
+pi install git:github.com/koco-co/build-goals
+pi list
+```
+
+<p>安装完整包后，可在 <b>Claude Code</b> 中调用 <code>/build-goals:health-check</code>，在 <b>Codex</b> 中调用 <code>$build-goals:health-check</code>，在 <b>ZCode</b> 输入框的 <code>/</code> 菜单 <b>Skills</b> 分组中选择对应能力，在 <b>Pi</b> 中调用 <code>/skill:health-check</code>。请求符合项目规范检查的适用范围时，模型也可以直接调用。</p>
 
 <a id="standalone-skills"></a>
 
 <h2 align="center">𝑺𝒕𝒂𝒏𝒅𝒂𝒍𝒐𝒏𝒆 𝑺𝒌𝒊𝒍𝒍𝒔 · 独立安装</h2>
 
-<p>建议安装完整 <b>Plugin</b>。如果只需要一个不依赖其他 <b>Skill</b> 的能力，也可以使用独立安装脚本；<code>health-check</code> 需要其他 <b>Skill</b> 配合，只随完整 <b>Plugin</b> 分发，不能独立安装。</p>
+<p>建议安装完整分发包。如果只需要一个不依赖其他 <b>Skill</b> 的能力，也可以使用独立安装脚本；<code>health-check</code> 需要其他 <b>Skill</b> 配合，只随完整分发包提供，不能独立安装。</p>
+
+<p><b>Pi</b>：</p>
+
+```bash
+python3 scripts/install_skill.py build-skill \
+  --platform pi \
+  --scope user
+```
 
 <p><b>ZCode</b>：</p>
 
@@ -194,7 +213,7 @@ python3 scripts/install_skill.py build-skill \
 
 <h2 align="center">𝑽𝒂𝒍𝒊𝒅𝒂𝒕𝒊𝒐𝒏 · 验证</h2>
 
-<p>验证整个多平台 <b>Plugin</b>（三份 <b>Manifest</b> 及版本一致性）：</p>
+<p>验证整个多平台分发包（三份 <b>Plugin Manifest</b>、<b>Pi Package</b> 及版本一致性）：</p>
 
 ```bash
 python3 skills/build-plugin/scripts/sync_shared_files.py --root .
@@ -259,6 +278,7 @@ python3 -m unittest discover -s tests -p 'test_*.py' -v
 | <b>Claude Code</b>       | `.claude-plugin/plugin.json`            | 已接入 <b>CI</b> | 需在本地 <b>Claude Code</b> 完成                  |
 | <b>Codex</b>             | `.codex-plugin/plugin.json`             | 已接入 <b>CI</b> | 需在支持 <b>Plugin</b> 的 <b>Codex</b> 客户端完成 |
 | <b>ZCode</b>             | `.zcode-plugin/plugin.json`（优先探测） | 已接入 <b>CI</b> | 需在本地 <b>ZCode</b> 客户端完成                  |
+| <b>Pi</b>                | `package.json`                          | 已接入 <b>CI</b> | 已在 <b>Pi 0.84.4</b> 完成本地路径安装与 Skill 发现 |
 | 其他 <b>Coding Agent</b> | 暂无                                    | 暂无             | 暂无                                              |
 
 <a id="license"></a>

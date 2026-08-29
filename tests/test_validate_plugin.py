@@ -96,6 +96,20 @@ class ValidatePluginTests(unittest.TestCase):
                 json.dumps(common, ensure_ascii=False, indent=2) + "\n",
                 encoding="utf-8",
             )
+        plugin.joinpath("package.json").write_text(
+            json.dumps(
+                {
+                    **common,
+                    "private": True,
+                    "keywords": ["pi-package"],
+                    "pi": {"skills": ["./skills"]},
+                },
+                ensure_ascii=False,
+                indent=2,
+            )
+            + "\n",
+            encoding="utf-8",
+        )
         return plugin
 
     def test_repository_plugin_passes(self) -> None:
@@ -116,6 +130,7 @@ class ValidatePluginTests(unittest.TestCase):
             "claude-plugin.template.json",
             "codex-plugin.template.json",
             "zcode-plugin.template.json",
+            "pi-package.template.json",
         ):
             with self.subTest(template=name):
                 manifest = json.loads(
@@ -596,9 +611,12 @@ class ValidatePluginTests(unittest.TestCase):
                 encoding="utf-8"
             )
         )
+        package = json.loads(
+            REPO_ROOT.joinpath("package.json").read_text(encoding="utf-8")
+        )
         versions = {manifest["version"] for manifest in manifests}
-        versions.add(marketplace["plugins"][0]["version"])
-        self.assertEqual(versions, {"2.3.2"})
+        versions.update((marketplace["plugins"][0]["version"], package["version"]))
+        self.assertEqual(versions, {"2.4.0"})
         names = {manifest["name"] for manifest in manifests}
         self.assertEqual(names, {"build-goals"})
 
@@ -640,6 +658,35 @@ class ValidatePluginTests(unittest.TestCase):
             plugin = self.write_fixture(Path(temp))
             result = self.run_validator(plugin, platform="all")
             self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+
+    def test_pi_package_validation_passes(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            plugin = self.write_fixture(Path(temp))
+            result = self.run_validator(plugin, platform="pi")
+            self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+            self.assertIn("skills/fixture-skill", result.stdout)
+
+    def test_pi_platform_requires_package_manifest(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            plugin = self.write_fixture(Path(temp))
+            plugin.joinpath("package.json").unlink()
+            result = self.run_validator(plugin, platform="pi")
+            self.assertEqual(result.returncode, 1)
+            self.assertIn("MANIFEST_REQUIRED", result.stdout)
+
+    def test_all_version_mismatch_detects_pi_package_drift(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            plugin = self.write_fixture(Path(temp))
+            package = plugin / "package.json"
+            data = json.loads(package.read_text(encoding="utf-8"))
+            data["version"] = "9.9.9"
+            package.write_text(
+                json.dumps(data, ensure_ascii=False, indent=2) + "\n",
+                encoding="utf-8",
+            )
+            result = self.run_validator(plugin, platform="all")
+            self.assertEqual(result.returncode, 1)
+            self.assertIn("ALL_VERSION_MISMATCH", result.stdout)
 
     def test_zcode_platform_requires_manifest(self) -> None:
         with tempfile.TemporaryDirectory() as temp:

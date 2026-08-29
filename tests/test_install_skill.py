@@ -251,6 +251,7 @@ class InstallSkillTests(unittest.TestCase):
             ("claude", ".claude"),
             ("codex", ".agents"),
             ("zcode", ".zcode"),
+            ("pi", ".pi/agent"),
         ):
             with self.subTest(platform=platform), tempfile.TemporaryDirectory() as temp:
                 home = Path(temp)
@@ -276,6 +277,7 @@ class InstallSkillTests(unittest.TestCase):
             ("claude", ".claude"),
             ("codex", ".agents"),
             ("zcode", ".zcode"),
+            ("pi", ".pi/agent"),
         ):
             with self.subTest(platform=platform), tempfile.TemporaryDirectory() as temp:
                 home = Path(temp)
@@ -311,6 +313,7 @@ class InstallSkillTests(unittest.TestCase):
                 ("claude", ".claude"),
                 ("codex", ".agents"),
                 ("zcode", ".zcode"),
+                ("pi", ".pi/agent"),
             ):
                 with (
                     self.subTest(skill=skill_name, platform=platform),
@@ -360,9 +363,9 @@ class InstallSkillTests(unittest.TestCase):
             self.assertIn("argument-hint:", skill_md)
             self.assertFalse(destination.joinpath("agents").exists())
 
-    def test_plugin_only_skills_reject_standalone_installation(self) -> None:
+    def test_full_package_only_skills_reject_standalone_installation(self) -> None:
         for skill_name in ("health-check",):
-            for platform in ("claude", "codex", "zcode"):
+            for platform in ("claude", "codex", "zcode", "pi"):
                 with (
                     self.subTest(skill=skill_name, platform=platform),
                     tempfile.TemporaryDirectory() as temp,
@@ -370,7 +373,7 @@ class InstallSkillTests(unittest.TestCase):
                     result = self.run_installer(Path(temp), platform, skill_name)
                     self.assertEqual(result.returncode, 1)
                     self.assertIn(
-                        f"{skill_name} 只能随 build-goals Plugin 使用",
+                        f"{skill_name} 只能随 build-goals 完整分发包使用",
                         result.stderr,
                     )
 
@@ -379,6 +382,22 @@ class InstallSkillTests(unittest.TestCase):
             result = self.run_installer(Path(temp), "dsh")
             self.assertEqual(result.returncode, 2)
             self.assertIn("invalid choice: 'dsh'", result.stderr)
+
+    def test_pi_project_install_uses_project_skill_directory(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            project = Path(temp)
+            destination = install_skill(
+                repo_root=REPO_ROOT,
+                skill_name="build-skill",
+                platform="pi",
+                scope="project",
+                project_dir=project,
+            )
+            self.assertEqual(
+                destination,
+                project.resolve() / ".pi" / "skills" / "build-skill",
+            )
+            self.assertTrue(destination.joinpath("SKILL.md").is_file())
 
     def test_dry_run_does_not_create_target_directories(self) -> None:
         with tempfile.TemporaryDirectory() as temp:

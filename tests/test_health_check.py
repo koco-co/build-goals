@@ -9,7 +9,7 @@ SKILL_ROOT = REPO_ROOT / "skills" / "health-check"
 
 
 class HealthCheckContractTests(unittest.TestCase):
-    def test_skill_has_the_confirmed_plugin_only_structure(self) -> None:
+    def test_skill_has_the_confirmed_full_package_structure(self) -> None:
         expected = {
             "SKILL.md",
             "agents/openai.yaml",

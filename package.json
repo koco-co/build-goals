@@ -2,21 +2,26 @@
   "name": "build-goals",
   "version": "2.4.0",
   "description": "Clarify goals and build, review, and maintain Agent Skills, plugins, and project documentation.",
-  "author": {
-    "name": "koco-co",
-    "url": "https://github.com/koco-co"
-  },
-  "homepage": "https://github.com/koco-co/build-goals",
-  "repository": "https://github.com/koco-co/build-goals",
+  "private": true,
   "keywords": [
+    "pi-package",
     "agent-skills",
-    "zcode",
-    "codex",
     "claude-code",
+    "codex",
+    "zcode",
     "pi-agent",
     "plugin-development",
     "readme-generation",
     "agents-md"
   ],
-  "skills": "./skills/"
+  "homepage": "https://github.com/koco-co/build-goals",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/koco-co/build-goals.git"
+  },
+  "pi": {
+    "skills": [
+      "./skills"
+    ]
+  }
 }
